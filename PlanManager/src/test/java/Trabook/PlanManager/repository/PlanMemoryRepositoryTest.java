@@ -12,11 +12,17 @@ class PlanMemoryRepositoryTest {
 
     PlanRepository planRepository = new PlanMemoryRepository();
 
-    //@AfterEach
-    //void afterEach() { planRepository.clearStore(); }
+    @AfterEach
+    void afterEach() { planRepository.clearStore(); }
 
     @Test
     void save() {
+        Plan plan1 = new Plan("asd","userA","asd","asd",true,0,0,"plan1");
+
+        Plan savedPlan1 = planRepository.save(plan1);
+
+        Assertions.assertThat(plan1).isEqualTo(savedPlan1);
+
     }
 
     @Test
@@ -40,6 +46,19 @@ class PlanMemoryRepositoryTest {
 
     }
 
+    @Test
+    void planDelete(){
+        //given
+        Plan plan1 = new Plan("asd","userA","asd","asd",true,0,0,"plan1");
+        Plan plan2 = new Plan("bbb","userB","asd","asd",true,0,0,"plan1");
 
+        planRepository.save(plan1);
+        planRepository.save(plan2);
+        //when
+        planRepository.deletePlan(plan1);
+        //then
+        Assertions.assertThat(planRepository.findByUserAndName(plan2.getUserId(),plan2.getPlanName())).isTrue();
+        Assertions.assertThat(planRepository.findByUserAndName(plan1.getUserId(), plan1.getPlanName())).isFalse();
+    }
 
 }

@@ -8,7 +8,7 @@ public class Plan {
     private String planId;
     private String userId;
     private String cityId;
-    private String scheduleId;
+    //private String scheduleId;
     private boolean isPublic;
     private int likes;
     private int scraps;
@@ -20,11 +20,11 @@ public class Plan {
 
     }
 
-    public Plan(String planId, String userId, String cityId, String scheduleId, boolean isPublic, int likes, int scraps, String name) {
+    public Plan(String planId, String userId, String cityId, boolean isPublic, int likes, int scraps, String name) {
         this.planId = planId;
         this.userId = userId;
         this.cityId = cityId;
-        this.scheduleId = scheduleId;
+        //this.scheduleId = scheduleId;
         this.isPublic = isPublic;
         this.likes = likes;
         this.scraps = scraps;
