@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const token = require('../util/token')
+const token = require('../util/token');
 
 // Access Token (AT), Refresh Token (RT) 확인해서 route 보호
 // 정상적으로 확인된 유저를 req.user에 저장

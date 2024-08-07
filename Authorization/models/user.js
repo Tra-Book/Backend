@@ -28,7 +28,7 @@ class User {
     updateProfile(username, status_message, hashedPassword) {
         this.username = username;
         this.status_message = status_message;
-        this.password = hashedPassword
+        this.password = hashedPassword;
         return this.save();
     }
 

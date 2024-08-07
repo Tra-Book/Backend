@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs')
-const { OAuth2Client } = require('google-auth-library')
+const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 
-const User = require('../models/user')
-const generateToken = require('../util/token')
+const User = require('../models/user');
+const generateToken = require('../util/token');
 
 
 exports.postLogin = (req, res, next) => {
@@ -28,7 +28,7 @@ exports.postLogin = (req, res, next) => {
                         .json({ user_id: user.user_id, username: user.username });
                 }
                 return res.status(401).json({ message: 'Incorrect password' });
-            })
+            });
     }).catch((err) => {
         return res.status(500).json({ message: 'Server error' });
     });
@@ -78,7 +78,7 @@ exports.postSignup = (req, res, next) => {
 exports.postGoogleLogin = async (req, res) => {
     const client = new OAuth2Client();
     const CLIENT_ID = '';
-    const email = req.body.email
+    const email = req.body.email;
     const token = req.body.access_token;
 
     // verify token and email
@@ -87,7 +87,7 @@ exports.postGoogleLogin = async (req, res) => {
             .verifyIdToken({
                 idToken: token,
                 audience: CLIENT_ID,
-            })
+            });
 
         const payload = ticket.getPayload();
         const tokenEmail = payload['email'];
@@ -134,7 +134,7 @@ exports.postGoogleLogin = async (req, res) => {
                             .header('Authorization', accessToken)
                             // TODO: user_id
                             .json({ user_id: result.user_id, username: username });
-                    })
+                    });
             })
                 .catch((err) => {
                     console.log(err);
@@ -158,12 +158,12 @@ exports.postGoogleLogin = async (req, res) => {
     }).catch((err) => {
         return res.status(500).json({ message: 'Server error' });
     });
-}
+};
 
 
 exports.postKakaoAuth = async (req, res, next) => {
-    const email = req.body.email
-    const token = req.body.access_token
+    const email = req.body.email;
+    const token = req.body.access_token;
 
     // verify token and email
     try {
@@ -215,7 +215,7 @@ exports.postKakaoAuth = async (req, res, next) => {
                             .header('Authorization', accessToken)
                             // TODO
                             .json({ user_id: result.user_id, username: username });
-                    })
+                    });
             })
                 .catch((err) => {
                     console.log(err);
@@ -237,11 +237,11 @@ exports.postKakaoAuth = async (req, res, next) => {
     }).catch((err) => {
         return res.status(500).json({ message: 'Server error' });
     });
-}
+};
 
 exports.postNaverLogin = async (req, res, next) => {
     const email = req.body.email;
-    const token = req.body.access_token
+    const token = req.body.access_token;
 
     try {
         const info = await axios.get('https://openapi.naver.com/v1/nid/me', {
@@ -292,8 +292,6 @@ exports.postNaverLogin = async (req, res, next) => {
                         // TODO
                         .json({ user_id: result.user_id, username: username });
                 });
-            }).catch((err) => {
-                return res.status(500).json({ message: 'Server error' });
             });
         } else {
             // login
@@ -327,12 +325,12 @@ exports.postUpdateProfile = (req, res, next) => {
                 hashedPassword = hashedPassword,
             ).then(() => {
                 return res.status(200).json({ message: 'Success' });
-            })
-        })
+            });
+        });
     }).catch((err) => {
         return res.status(500).json({ message: 'Server error' });
-    })
-}
+    });
+};
 
 exports.deleteUserData = (req, res, next) => {
     req.user
