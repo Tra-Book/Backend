@@ -29,10 +29,8 @@ exports.postLogin = (req, res, next) => {
                 }
                 return res.status(401).json({ message: 'Incorrect password' });
             })
-            .catch((err) => {
-                console.log(err);
-                return res.status(500).json({ message: 'Server error' });
-            });
+    }).catch((err) => {
+        return res.status(500).json({ message: 'Server error' });
     });
 };
 
@@ -134,20 +132,15 @@ exports.postGoogleLogin = async (req, res) => {
                                 httpOnly: true,
                             })
                             .header('Authorization', accessToken)
-                            .json({ 'user_id': user_id, username: username });
+                            // TODO: user_id
+                            .json({ user_id: result.user_id, username: username });
                     })
-                    .catch((err) => {
-                        console.log(err);
-                        return res
-                            .status(500)
-                            .json({ message: 'Server error' });
-                    });
             })
                 .catch((err) => {
                     console.log(err);
                     return res
                         .status(500)
-                        .json({ message: 'Internal server error' });
+                        .json({ message: 'Server error' });
                 });
         } else {
             // login
@@ -160,8 +153,10 @@ exports.postGoogleLogin = async (req, res) => {
                     httpOnly: true,
                 })
                 .header('Authorization', accessToken)
-                .json({ username: user.username });
+                .json({ user_id: user.user_id, username: user.username });
         }
+    }).catch((err) => {
+        return res.status(500).json({ message: 'Server error' });
     });
 }
 
@@ -218,12 +213,9 @@ exports.postKakaoAuth = async (req, res, next) => {
                                 httpOnly: true,
                             })
                             .header('Authorization', accessToken)
-                            .json({ email: email });
+                            // TODO
+                            .json({ user_id: result.user_id, username: username });
                     })
-                    .catch((err) => {
-                        console.log(err);
-                        return res.status(500).json({ message: 'Server error' });
-                    });
             })
                 .catch((err) => {
                     console.log(err);
@@ -240,8 +232,10 @@ exports.postKakaoAuth = async (req, res, next) => {
                     httpOnly: true,
                 })
                 .header('Authorization', accessToken)
-                .json({ username: user.username });
+                .json({ user_id: user.user_id, username: user.username });
         }
+    }).catch((err) => {
+        return res.status(500).json({ message: 'Server error' });
     });
 }
 
@@ -285,20 +279,21 @@ exports.postNaverLogin = async (req, res, next) => {
                     email: email,
                     password: hashedPassword,
                 });
-                newUser
-                    .save()
-                    .then((result) => {
-                        const accessToken = generateToken.genAccessToken(email);
-                        const refreshToken = generateToken.genRefreshToken();
-                        return res
-                            .status(201)
-                            .cookie('refreshToken', refreshToken, {
-                                expires: new Date(Date.now() + 259200000),
-                                httpOnly: true,
-                            })
-                            .header('Authorization', accessToken)
-                            .json({ username: username });
-                    });
+                newUser.save().then((result) => {
+                    const accessToken = generateToken.genAccessToken(email);
+                    const refreshToken = generateToken.genRefreshToken();
+                    return res
+                        .status(201)
+                        .cookie('refreshToken', refreshToken, {
+                            expires: new Date(Date.now() + 259200000),
+                            httpOnly: true,
+                        })
+                        .header('Authorization', accessToken)
+                        // TODO
+                        .json({ user_id: result.user_id, username: username });
+                });
+            }).catch((err) => {
+                return res.status(500).json({ message: 'Server error' });
             });
         } else {
             // login
@@ -311,9 +306,11 @@ exports.postNaverLogin = async (req, res, next) => {
                     httpOnly: true,
                 })
                 .header('Authorization', accessToken)
-                .json({ username: user.username });
+                .json({ user_id: user.user_id, username: user.username });
         }
-    })
+    }).catch((err) => {
+        return res.status(500).json({ message: 'Server error' });
+    });
 };
 
 exports.postUpdateProfile = (req, res, next) => {
@@ -330,9 +327,20 @@ exports.postUpdateProfile = (req, res, next) => {
                 hashedPassword = hashedPassword,
             ).then(() => {
                 return res.status(200).json({ message: 'Success' });
-            }).catch((err) => {
-                return res.status(500).json({ message: 'Server error' });
             })
         })
-    });
+    }).catch((err) => {
+        return res.status(500).json({ message: 'Server error' });
+    })
 }
+
+exports.deleteUserData = (req, res, next) => {
+    req.user
+        .deleteUser()
+        .then((result) => {
+            return res.status(200).json({ message: 'Success signout' });
+        })
+        .catch((err) => {
+            return res.status(500).json({ message: 'Server error' });
+        });
+};

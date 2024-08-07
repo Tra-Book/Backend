@@ -41,21 +41,6 @@ class User {
         const db = getDb();
         return db.collection('users').findOne({ email: userEmail });
     }
-
-    static getUserByToken(userToken) {
-        const db = getDb();
-        const token = userToken.resetToken;
-        return db
-            .collection('users')
-            .findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
-            .then((user) => {
-                return user;
-            })
-            .catch((err) => {
-                console.log(err);
-                throw new Error(err);
-            });
-    }
 }
 
 module.exports = User;
