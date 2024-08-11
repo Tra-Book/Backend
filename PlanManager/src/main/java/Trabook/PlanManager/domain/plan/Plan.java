@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Getter @Setter
 public class Plan {
-    private String planId;
-    private String userId;
-    private String cityId;
+    private long planId;
+    private long userId;
+    private long cityId;
     //private String scheduleId;
     private boolean isPublic;
     private int likes;
@@ -20,7 +20,7 @@ public class Plan {
 
     }
 
-    public Plan(String planId, String userId, String cityId, boolean isPublic, int likes, int scraps, String name) {
+    public Plan(long planId, long userId, long cityId, boolean isPublic, int likes, int scraps, String name) {
         this.planId = planId;
         this.userId = userId;
         this.cityId = cityId;

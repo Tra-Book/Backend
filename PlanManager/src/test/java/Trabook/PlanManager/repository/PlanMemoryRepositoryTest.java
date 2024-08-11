@@ -1,12 +1,11 @@
 package Trabook.PlanManager.repository;
 
 import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.repository.plan.PlanMemoryRepository;
+import Trabook.PlanManager.repository.plan.PlanRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class PlanMemoryRepositoryTest {
 

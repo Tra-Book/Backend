@@ -1,4 +1,4 @@
-package Trabook.PlanManager.repository;
+package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.Schedule;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+/*
 public class PlanMemoryRepository implements PlanRepository{
 
     private static final Map<String,List<Plan>> store = new ConcurrentHashMap<>(); //그냥 hashmap쓰면 안됨
@@ -24,6 +24,11 @@ public class PlanMemoryRepository implements PlanRepository{
             store.get(userId).add(plan);
         }
         return plan;
+    }
+
+    @Override
+    public Plan findById(String planId) {
+        return null;
     }
 
     @Override
@@ -58,8 +63,23 @@ public class PlanMemoryRepository implements PlanRepository{
     }
 
     @Override
+    public int scrapPlan(String userId, String planId) {
+        return 0;
+    }
+
+    @Override
     public List<Plan> findUserPlanList(String userId) {
         return store.get(userId);
+    }
+
+    @Override
+    public List<Plan> findUserLikePlanList(String userId) {
+        return List.of();
+    }
+
+    @Override
+    public List<Plan> findUserScrapPlanList(String userId) {
+        return List.of();
     }
 
     public void clearStore() {
@@ -67,3 +87,4 @@ public class PlanMemoryRepository implements PlanRepository{
     }
 
 }
+*/
