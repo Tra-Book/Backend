@@ -32,14 +32,6 @@ public class PlanService {
         return "delete complete";
     }
 
-    public List<Plan> getUserPlanList(long userId) {
-        return planRepository.findUserPlanList(userId);
-    }
-
-    public List<Plan> getUserLikePlanList(long userId) {
-        return planRepository.findUserLikePlanList(userId);
-    }
-
     public String likePlan(long userId,long planId) {
         if(planRepository.findById(planId).isPresent()) {
             planRepository.likePlan(userId,planId);
@@ -56,6 +48,14 @@ public class PlanService {
             return "scrap complete";
         } else
             return "no plan exists";
+    }
+
+    public List<Plan> getUserPlanList(long userId) {
+        return planRepository.findUserPlanList(userId);
+    }
+
+    public List<Plan> getUserLikePlanList(long userId) {
+        return planRepository.findUserLikePlanList(userId);
     }
 
     public List<Plan> getUserScrapPlanList(long userId){
