@@ -2,6 +2,7 @@ package Trabook.PlanManager.service;
 
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.Schedule;
+import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.repository.plan.PlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,32 @@ public class PlanService {
         }
     }
 
-    public String deletePlan(Plan plan) {
-        return "delete complete";
+    public String deletePlan(long planId) {
+        if(planRepository.deletePlan(planId) == 1)
+            return "delete complete";
+        else {
+            return "error";
+        }
+    }
+
+    public String deleteLike(long userId,long planId){
+        if(planRepository.deleteLike(userId,planId) == 1)
+            return "delete complete";
+        else
+            return "error";
+    }
+    public String deleteScrap(long userId, long planId) {
+        if(planRepository.deleteScrap(userId,planId) == 1)
+            return "delete complete";
+        else
+            return "error";
+    }
+
+    public String deleteComment(long commentId) {
+        if(planRepository.deleteComment(commentId) == 1)
+            return "delete complete";
+        else
+            return "error";
     }
 
     public String likePlan(long userId,long planId) {
@@ -65,10 +90,18 @@ public class PlanService {
     public List<Plan> getPlanListByCityId(long cityId) {
         return planRepository.findPlanListByCityId(cityId);
     }
+/*
+    public List<Plan> getPlanSearch(PlanSearchDTO planSearchDTO){
+        return planRepository.planSearch(planSearchDTO.getKeyword(),planSearchDTO.getFilters(),planSearchDTO.getSorts());
+    }
+*/
+
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기
     public Optional<Plan> validateDuplicatePlanName(Plan plan){
 
-        return planRepository.findPlanByUserAndName(plan.getUserId(),plan.getPlanName());
+        return planRepository.findPlanByUserAndName(plan.getUserId(),plan.getPlanTitle());
 
     }
+
+
 }

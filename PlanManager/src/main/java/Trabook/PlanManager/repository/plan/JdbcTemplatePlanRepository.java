@@ -1,6 +1,7 @@
 package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.domain.plan.Schedule;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -55,10 +56,29 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
-    public Optional<Plan> deletePlan(long planId) {
-        List<Plan> result = jdbcTemplate.query("delete from Plan where planId=?", planRowMapper(), planId);
-        return result.stream().findAny();
+    public int deletePlan(long planId) {
+        String sql = "DELETE FROM Plan WHERE planId = ? ";
+        return jdbcTemplate.update(sql, planId);
     }
+
+    @Override
+    public int deleteLike(long userId, long planId) {
+        String sql = "DELETE FROM Likes WHERE userId = ? AND planId = ?";
+        return jdbcTemplate.update(sql,userId,planId);
+    }
+
+    @Override
+    public int deleteScrap(long userId, long planId) {
+        String sql = "DELETE FROM Scraps WHERE userId = ? AND planId = ?";
+        return jdbcTemplate.update(sql,userId,planId);
+    }
+
+    @Override
+    public int deleteComment(long commentId) {
+        String sql = "DELETE FROM Comments WHERE commentId = ?";
+        return jdbcTemplate.update(sql,commentId);
+    }
+
     /*
     @Override
     public List<Plan> findPlanList() {
@@ -83,7 +103,15 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public List<Plan> findPlanListByCityId(long cityId) {
         return jdbcTemplate.query("SELECT * FROM Plans WHERE cityId =? ",planRowMapper(),cityId);
     }
-
+/*
+    @Override
+    public List<Plan> planSearch(String keyword, PlanSearchDTO.Filters filters,String sorts) {
+        String region = filters.getRegion();
+        int memberCount = filters.getMemberCount();
+        int duration = filters.getDuration();
+        return jdbcTemplate.query("SELECT * FROM Plans WHERE planTitle like '%?% ",planRowMapper(),keyword);
+    }
+*/
     @Override
     public void likePlan(long userId,long planId) {
         String sql = "INSERT INTO Likes(userId,planId)" +
@@ -117,7 +145,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             @Override
             public Plan mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Plan plan = new Plan();
-                plan.setPlanName(rs.getString("planName"));
+                plan.setPlanTitle(rs.getString("planName"));
                 plan.setUserId(rs.getLong("userId"));
                 plan.setPlanId(rs.getLong("planId"));
                 plan.setCityId(rs.getLong("cityId"));

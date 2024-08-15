@@ -1,6 +1,7 @@
 package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.domain.plan.Schedule;
 
 import java.util.List;
@@ -11,19 +12,23 @@ public interface PlanRepository {
     Plan save(Plan plan, List<Schedule>scheduleList);
     Optional<Plan> findById(long planId);
 
-
-
     Optional<Plan> findPlanByUserAndName(long userId, String planName);
 
-    Optional<Plan> deletePlan(long planId);
 
-    //List<Plan> findPlanList();
+
     List<Plan> findUserPlanList(long userId);
     List<Plan> findUserLikePlanList(long userId);
     List<Plan> findUserScrapPlanList(long userId);
     List<Plan> findPlanListByCityId(long cityId);
-    void likePlan(long userId,long planId);
+    //List<Plan> planSearch(String keyword, PlanSearchDTO.Filters filter, String sort);
+
+    void likePlan(long userId, long planId);
     void scrapPlan(long userId,long planId);
+
+    int deletePlan(long planId);
+    int deleteLike(long userId, long planId);
+    int deleteScrap(long userId, long planId);
+    int deleteComment(long commentId);
 
     void clearStore();
 }

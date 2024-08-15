@@ -11,4 +11,10 @@ public interface DestinationRepository {
     Optional<Place> findByPlaceId(String placeId);
 
     List<Place> findPlaceListByCity(String cityId);
+
+    void addPlaceLike(long userId, long placeId);
+    void addPlaceScrap(long userId, long scrapId);
+
+    void deletePlaceLike(long userId, long placeId);
+    void deletePlaceScrap(long userId, long placeId);
 }

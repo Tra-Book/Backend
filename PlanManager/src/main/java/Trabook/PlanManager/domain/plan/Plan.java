@@ -13,14 +13,14 @@ public class Plan {
     private int likes;
     private int scraps;
     //private type date;
-    private String planName;
+    private String planTitle;
 
 
     public Plan() {
 
     }
 
-    public Plan(long planId, long userId, long cityId, boolean isPublic, int likes, int scraps, String name) {
+    public Plan(long planId, long userId, long cityId, boolean isPublic, int likes, int scraps, String planTitle) {
         this.planId = planId;
         this.userId = userId;
         this.cityId = cityId;
@@ -28,6 +28,6 @@ public class Plan {
         this.isPublic = isPublic;
         this.likes = likes;
         this.scraps = scraps;
-        this.planName = name;
+        this.planTitle = planTitle;
     }
 }

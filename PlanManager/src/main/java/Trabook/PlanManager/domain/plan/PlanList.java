@@ -7,4 +7,7 @@ import lombok.Setter;
 public class PlanList {
     private long userId;
     private String type;
+
+    public PlanList() {}
+
 }

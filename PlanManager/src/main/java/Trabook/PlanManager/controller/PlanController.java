@@ -52,12 +52,8 @@ public class PlanController {
       log.info("planBody = {}",plan);
       return planService.createPlan(plan, scheduleList);
     }
-    @ResponseBody
-    @PostMapping("/delete")
-    public String deletePlan(@RequestBody Plan planId) {
-        log.info("delete plan = {}", planId);
-        return planService.deletePlan(planId);
-    }
+
+
 
     @ResponseBody
     @PostMapping("/list")
@@ -86,7 +82,7 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/like")
-    public String likePlan(@RequestBody long userId, long planId) {
+    public String likePlan(@RequestParam("userId") long userId,@RequestParam("planId") long planId) {
         return planService.likePlan(userId,planId);
     }
 
@@ -94,14 +90,38 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/scrap")
-    public String scrapPlan(@RequestBody long userId, long planId) {
+    public String scrapPlan(@RequestParam("userId") long userId,@RequestParam("planId") long planId) {
         return planService.scrapPlan(userId,planId);
     }
 
     @ResponseBody
     @GetMapping("/???")
-    public List<Plan> getPlanListByCityId(@RequestBody long planId) {
-        return planService.getPlanListByCityId(planId);
+    public List<Plan> getPlanListByCityId(@RequestParam("cityId") long cityId) {
+        return planService.getPlanListByCityId(cityId);
     }
 
+    @ResponseBody
+    @DeleteMapping("/")
+    public String deletePlan(@RequestParam("planId") long planId) {
+        return planService.deletePlan(planId);
+    }
+    @ResponseBody
+    @DeleteMapping("/like")
+    public String deleteLike(@RequestParam("userId") long userId, @RequestParam("planId") long planId){
+        return planService.deleteLike(userId,planId);
+
+    }
+
+    @ResponseBody
+    @DeleteMapping("/scrap")
+    public String deleteScrap(@RequestParam("userId") long userId, @RequestParam("planId") long planId) {
+        return planService.deleteScrap(userId,planId);
+
+    }
+
+    @ResponseBody
+    @DeleteMapping("/comment")
+    public String deleteComment(@RequestParam("commentId") long commentId) {
+        return planService.deleteComment(commentId);
+    }
 }

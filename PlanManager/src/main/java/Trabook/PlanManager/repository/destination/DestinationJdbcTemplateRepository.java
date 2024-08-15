@@ -31,6 +31,42 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         return jdbcTemplate.query("SELECT * FROM Place WHERE cityId = ?",memberRowMapper(),cityId);
     }
 
+    @Override
+    public void addPlaceLike(long userId, long placeId) {
+        String sql = "INSERT INTO LikePlace(userId,placeId)" +
+                "values(:userId, :placeId)";
+        jdbcTemplate.update(sql,userId,placeId);
+        String sql2 = "UPDATE Place SET likes = likes + 1 WHERE placeId = ?";
+
+        jdbcTemplate.update(sql2, placeId);
+    }
+
+    @Override
+    public void addPlaceScrap(long userId, long placeId) {
+        String sql = "INSERT INTO ScrapPlan(userId,placeId)" +
+                "values(:userId, :placeId)";
+        jdbcTemplate.update(sql,userId,placeId);
+        String sql2 = "UPDATE Place SET likes = likes + 1 WHERE placeId = ?";
+
+        jdbcTemplate.update(sql2, placeId);
+    }
+
+    @Override
+    public void deletePlaceLike(long userId, long placeId) {
+        String sql = "DELETE FROM ScrapPlace WHERE userId = ? AND placeId = ?";
+        String sql2 = "UPDATE Place SET likes = likes - 1 WHERE placeId = ?";
+        jdbcTemplate.update(sql,userId,placeId);
+        jdbcTemplate.update(sql2,userId,placeId);
+    }
+
+    @Override
+    public void deletePlaceScrap(long userId, long placeId) {
+        String sql = "DELETE FROM Scraps WHERE userId = ? AND planId = ?";
+        String sql2 = "UPDATE Place SET scraps = scraps - 1 WHERE placeId = ?";
+        jdbcTemplate.update(sql,userId,placeId);
+        jdbcTemplate.update(sql2,userId,placeId);
+    }
+
     private RowMapper<Place> memberRowMapper() {
         return new RowMapper<Place>() {
             @Override
