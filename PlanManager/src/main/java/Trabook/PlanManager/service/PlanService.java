@@ -2,14 +2,15 @@ package Trabook.PlanManager.service;
 
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.Schedule;
-import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class PlanService {
 
@@ -21,6 +22,7 @@ public class PlanService {
     }
 
     public String createPlan(Plan newPlan, List<Schedule> scheduleList) {
+        log.info("service logic plan = {}",newPlan);
         if(validateDuplicatePlanName(newPlan).isPresent()){
             return "planName already exists";
         } else {
@@ -29,6 +31,9 @@ public class PlanService {
         }
     }
 
+    public Optional<Plan> getPlan(long planId) {
+        return planRepository.findById(planId);
+    }
     public String deletePlan(long planId) {
         if(planRepository.deletePlan(planId) == 1)
             return "delete complete";
@@ -99,7 +104,7 @@ public class PlanService {
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기
     public Optional<Plan> validateDuplicatePlanName(Plan plan){
 
-        return planRepository.findPlanByUserAndName(plan.getUserId(),plan.getPlanTitle());
+        return planRepository.findPlanByUserAndName(plan.getUserId(),plan.getTitle());
 
     }
 

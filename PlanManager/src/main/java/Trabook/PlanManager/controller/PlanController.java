@@ -1,7 +1,8 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.PlanList;
+import Trabook.PlanManager.domain.plan.PlanListRequestDTO;
+import Trabook.PlanManager.domain.plan.PlanRequestDTO;
 import Trabook.PlanManager.domain.plan.Schedule;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
@@ -48,41 +50,49 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/create")
-    public String createPlan(@RequestBody Plan plan , List<Schedule> scheduleList) {
-      log.info("planBody = {}",plan);
-      return planService.createPlan(plan, scheduleList);
+    public String createPlan(@RequestBody PlanRequestDTO planRequestDTO) {
+       // System.out.println("ok");
+        //log.info("{}",planRequestDTO);
+      return planService.createPlan(planRequestDTO.getPlan(), planRequestDTO.getScheduleList());
+    }
+
+    @ResponseBody
+    @GetMapping("/")
+    public Optional<Plan> getPlanByPlanId(@RequestParam("planId") long planId) {
+        return planService.getPlan(planId);
     }
 
 
-
     @ResponseBody
-    @PostMapping("/list")
-    public List<Plan> getUserPlanList(@RequestBody PlanList planList) {
-        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planList.getType());
-        List<Plan> userPlanList = planListService.getPlanList(planList.getUserId());
-        log.info("{}'s plans = {}",planList.getUserId(), userPlanList);
+    @GetMapping("/list")
+    public List<Plan> getUserPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
+        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
+        List<Plan> userPlanList = planListService.getPlanList(planListRequestDTO.getUserId());
+        log.info("{}'s plans = {}", planListRequestDTO.getUserId(), userPlanList);
 
         return userPlanList;
     }
 
     @ResponseBody
     @GetMapping("/like")
-    public  List<Plan> getUserLikePlanList(@RequestBody PlanList planList) {
-        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planList.getType());
-        return planListService.getPlanList(planList.getUserId());
+    public  List<Plan> getUserLikePlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
+        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
+        //System.out.println(planListService);
+        return planListService.getPlanList(planListRequestDTO.getUserId());
         //return planService.getUserLikePlanList(userId);
     }
 
     @ResponseBody
     @GetMapping("/scrap")
-    public List<Plan> getUserScrapPlanList(@RequestBody PlanList planList) {
-        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planList.getType());
-        return planListService.getPlanList(planList.getUserId());
+    public List<Plan> getUserScrapPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
+        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
+        return planListService.getPlanList(planListRequestDTO.getUserId());
     }
 
     @ResponseBody
     @PostMapping("/like")
     public String likePlan(@RequestParam("userId") long userId,@RequestParam("planId") long planId) {
+
         return planService.likePlan(userId,planId);
     }
 
@@ -94,22 +104,17 @@ public class PlanController {
         return planService.scrapPlan(userId,planId);
     }
 
-    @ResponseBody
-    @GetMapping("/???")
-    public List<Plan> getPlanListByCityId(@RequestParam("cityId") long cityId) {
-        return planService.getPlanListByCityId(cityId);
-    }
 
     @ResponseBody
     @DeleteMapping("/")
     public String deletePlan(@RequestParam("planId") long planId) {
         return planService.deletePlan(planId);
     }
+
     @ResponseBody
     @DeleteMapping("/like")
     public String deleteLike(@RequestParam("userId") long userId, @RequestParam("planId") long planId){
         return planService.deleteLike(userId,planId);
-
     }
 
     @ResponseBody

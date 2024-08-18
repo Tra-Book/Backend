@@ -1,13 +1,13 @@
 package Trabook.PlanManager.domain.plan;
 
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter @Setter
-public class PlanList {
+
+@Getter
+public class PlanListRequestDTO {
     private long userId;
     private String type;
 
-    public PlanList() {}
+    public PlanListRequestDTO() {}
 
 }

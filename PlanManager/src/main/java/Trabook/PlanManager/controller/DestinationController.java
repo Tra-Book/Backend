@@ -36,19 +36,20 @@ public class DestinationController {
     public String deletePlanReaction(@RequestBody DestinationReactionDto destinationReactionDto) {
         return destinationService.deletePlaceReaction(destinationReactionDto);
     }
-
+/*
     @ResponseBody
     @GetMapping("/")
     public List<Place> getPlaceByCity(@RequestBody String cityId) {
         return destinationService.getPlaceListByCity(cityId);
     }
+*/
 
-
+    /*
 
     @ResponseBody
     @GetMapping("/places")
     public List<Place> getPlaces(@RequestBody ) {
 
     }
-
+*/
 }

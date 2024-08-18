@@ -1,11 +1,11 @@
 package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.domain.plan.Schedule;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -26,14 +26,16 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public Plan save(Plan plan, List<Schedule> scheduleList) {
-        String sql = "INSERT INTO Plan(planId,userId,cityId,isPublic,likes,scraps,name)" +
-                "values(:planId,:userId,:cityId, :isPublic, :likes, :scraps, :name)";
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
 
+        String sql = "INSERT INTO Plan(userId,cityId,likes,scraps,dateCreated,title,content)" +
+                "values(:userId,:cityId, :likes, :scraps, :dateCreated, :title, :content)";
+        System.out.println(plan.toString());
         SqlParameterSource param = new BeanPropertySqlParameterSource(plan);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         //db에서 자동으로 1 증가한 값을 pk로 설정해주고 이값을 keyholder에 보관
-        jdbcTemplate.update(sql, param, keyHolder);
+        namedParameterJdbcTemplate.update(sql, param, keyHolder);
         long key = keyHolder.getKey().longValue();
         plan.setPlanId(key);
 
@@ -51,7 +53,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public Optional<Plan> findPlanByUserAndName(long userId, String planName) {
 
-        List<Plan> result = jdbcTemplate.query("SELECT * FROM Plan WHERE userId = ? AND planName = ?", planRowMapper(), userId, planName);
+        List<Plan> result = jdbcTemplate.query("SELECT * FROM Plan WHERE userId = ? AND title = ?", planRowMapper(), userId, planName);
         return result.stream().findAny();
     }
 
@@ -63,13 +65,13 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public int deleteLike(long userId, long planId) {
-        String sql = "DELETE FROM Likes WHERE userId = ? AND planId = ?";
+        String sql = "DELETE FROM LikedPlan WHERE userId = ? AND planId = ?";
         return jdbcTemplate.update(sql,userId,planId);
     }
 
     @Override
     public int deleteScrap(long userId, long planId) {
-        String sql = "DELETE FROM Scraps WHERE userId = ? AND planId = ?";
+        String sql = "DELETE FROM ScrappedPlan WHERE userId = ? AND planId = ?";
         return jdbcTemplate.update(sql,userId,planId);
     }
 
@@ -87,16 +89,27 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     */
     @Override
     public List<Plan> findUserPlanList(long userId) {
-        return jdbcTemplate.query("(select * from Plan where userId = ?",planRowMapper(),userId);
+        String sql = "SELECT * " +
+                "FROM Plan " +
+                "WHERE userId = ?";
+        return jdbcTemplate.query(sql,planRowMapper(),userId);
     }
     @Override
     public List<Plan> findUserLikePlanList(long userId) {
-        return jdbcTemplate.query("(SELECT * FROM Likes where userId = ?",planRowMapper(),userId);
+        String sql = "SELECT * " +
+                "FROM Plan " +
+                "JOIN LikedPlan on Plan.planId = LikedPlan.planId " +
+                "WHERE LikedPlan.userId = ? ";
+        return jdbcTemplate.query(sql,planRowMapper(),userId);
     }
 
     @Override
     public List<Plan> findUserScrapPlanList(long userId) {
-        return jdbcTemplate.query("SELECT * FROM Scraps WHERE userId = ? ",planRowMapper(),userId);
+        String sql = "SELECT * " +
+                "FROM Plan " +
+                "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
+                "WHERE ScrappedPlan.userId = ? ";
+        return jdbcTemplate.query(sql,planRowMapper(),userId);
     }
 
     @Override
@@ -114,8 +127,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 */
     @Override
     public void likePlan(long userId,long planId) {
-        String sql = "INSERT INTO Likes(userId,planId)" +
-                "values(:userId, :planId)";
+        String sql = "INSERT INTO LikedPlan(userId,planId) " +
+                "values(?,?)";
         jdbcTemplate.update(sql,userId,planId);
         String sql2 = "UPDATE Plan SET likes = likes + 1 WHERE planId = ?";
 
@@ -125,8 +138,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public void scrapPlan(long userId, long planId) {
-        String sql1 = "INSERT INTO Scraps(userId,planId)" +
-                "values(:userId, planId)";
+        String sql1 = "INSERT INTO ScrappedPlan(userId,planId)" +
+                "values(?, ?)";
 
         jdbcTemplate.update(sql1,userId,planId);
 
@@ -145,13 +158,15 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             @Override
             public Plan mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Plan plan = new Plan();
-                plan.setPlanTitle(rs.getString("planName"));
+                plan.setTitle(rs.getString("title"));
                 plan.setUserId(rs.getLong("userId"));
                 plan.setPlanId(rs.getLong("planId"));
                 plan.setCityId(rs.getLong("cityId"));
                 plan.setLikes(rs.getInt("likes"));
                 plan.setScraps(rs.getInt("scraps"));
                 plan.setPublic(rs.getBoolean("isPublic"));
+                plan.setDateCreated(rs.getString("dateCreated"));
+                plan.setContent(rs.getString("content"));
                 return plan;
             }
 
