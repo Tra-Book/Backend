@@ -23,7 +23,7 @@ const authenticate = async (req, res, next) => {
             }
         );
 
-        const user = await User.getUserByEmail(accessDecoded.payload.email);
+        const user = await User.getUserByUserId(accessDecoded.payload.userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -63,7 +63,7 @@ const authenticate = async (req, res, next) => {
                         }
 
                         // AT expired && RT valid -> AT 재발급
-                        const newAccessToken = token.genAccessToken(accessDecoded.payload.email);
+                        const newAccessToken = token.genAccessToken(accessDecoded.payload.userId);
                         return res
                             .status(403)
                             .cookie('refreshToken', refreshToken, {

@@ -36,7 +36,7 @@ exports.postLogin = (req, res, next) => {
                         return sendErrorResponse(res, 401, 'Incorrect password');
                     }
 
-                    const accessToken = generateToken.genAccessToken(user.email);
+                    const accessToken = generateToken.genAccessToken(user.userId);
                     const refreshToken = generateToken.genRefreshToken();
                     return generateAuthResponse(res, 200, accessToken, refreshToken, { user_id: user.user_id, username: user.username });
                 });
@@ -58,10 +58,10 @@ exports.postSignup = (req, res, next) => {
                     const newUser = new User({ username, email, password: hashedPassword });
                     return newUser.save();
                 })
-                .then(() => {
-                    const accessToken = generateToken.genAccessToken(email);
+                .then((userId) => {
+                    const accessToken = generateToken.genAccessToken(userId);
                     const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 201, accessToken, refreshToken, { email, username });
+                    return generateAuthResponse(res, 201, accessToken, refreshToken, { userId, username });
                 });
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
@@ -105,14 +105,14 @@ const handleSocialLogin = (req, res, tokenVerifier, tokenName) => {
                                 const newUser = new User({ username, email, password: hashedPassword });
                                 return newUser.save()
                                     .then((result) => {
-                                        const accessToken = generateToken.genAccessToken(email);
+                                        const accessToken = generateToken.genAccessToken(user.userId);
                                         const refreshToken = generateToken.genRefreshToken();
                                         return generateAuthResponse(res, 201, accessToken, refreshToken, { user_id: result.user_id, username });
                                     });
                             });
                     }
 
-                    const accessToken = generateToken.genAccessToken(user.email);
+                    const accessToken = generateToken.genAccessToken(user.userId);
                     const refreshToken = generateToken.genRefreshToken();
                     return generateAuthResponse(res, 200, accessToken, refreshToken, { user_id: user.user_id, username: user.username });
                 });

@@ -31,6 +31,10 @@ class User {
     static getUserByEmail(userEmail) {
         //
     }
+
+    static getUserByUserId(userId) {
+        //
+    }
 }
 
 module.exports = User;
