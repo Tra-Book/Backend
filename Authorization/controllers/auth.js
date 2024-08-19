@@ -4,7 +4,7 @@ const axios = require('axios');
 const generator = require('generate-password');
 
 const User = require('../models/user');
-const generateToken = require('../util/token');
+const generateToken = require('../utils/token');
 
 const sendErrorResponse = (res, statusCode, message) => {
     return res.status(statusCode).json({ message });
