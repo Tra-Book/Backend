@@ -55,7 +55,7 @@ exports.postSignup = (req, res, next) => {
 
             return bcrypt.hash(password, 12)
                 .then((hashedPassword) => {
-                    const newUser = new User({ username, email, password: hashedPassword });
+                    const newUser = new User({ username, email, password: hashedPassword, statusMessage: null, gender: null });
                     return newUser.save();
                 })
                 .then((userId) => {
@@ -68,12 +68,12 @@ exports.postSignup = (req, res, next) => {
 };
 
 exports.postUpdateProfile = (req, res, next) => {
-    const { username, email, status_message, new_password } = req.body;
+    const { username, email, statusMessage, newPsssword } = req.body;
 
     User.getUserByEmail(email)
         .then((user) => {
-            return bcrypt.hash(new_password, 12)
-                .then((hashedPassword) => user.updateProfile({ username, status_message, password: hashedPassword }))
+            return bcrypt.hash(newPsssword, 12)
+                .then((hashedPassword) => user.updateProfile({ username, statusMessage, password: hashedPassword }))
                 .then(() => res.status(200).json({ message: 'Success' }));
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
@@ -102,12 +102,12 @@ const handleSocialLogin = (req, res, tokenVerifier, tokenName) => {
 
                         return bcrypt.hash(password, 12)
                             .then((hashedPassword) => {
-                                const newUser = new User({ username, email, password: hashedPassword });
+                                const newUser = new User({ username, email, password: hashedPassword, statusMessage: null, gender: null });
                                 return newUser.save()
-                                    .then((result) => {
-                                        const accessToken = generateToken.genAccessToken(user.userId);
+                                    .then((userId) => {
+                                        const accessToken = generateToken.genAccessToken(userId);
                                         const refreshToken = generateToken.genRefreshToken();
-                                        return generateAuthResponse(res, 201, accessToken, refreshToken, { userId: result.userId, username });
+                                        return generateAuthResponse(res, 201, accessToken, refreshToken, { userId: userId, username: username });
                                     });
                             });
                     }

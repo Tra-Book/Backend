@@ -16,7 +16,6 @@ class User {
         this.gender = gender;
     }
 
-    // return 값으로 unique 한 userId 받아와야 함
     async save() {
         try {
             const query = `
