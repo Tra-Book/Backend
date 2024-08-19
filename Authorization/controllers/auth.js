@@ -55,7 +55,7 @@ exports.postSignup = (req, res, next) => {
 
             return bcrypt.hash(password, 12)
                 .then((hashedPassword) => {
-                    const newUser = new User({ username, email, password: hashedPassword, statusMessage: null, gender: null });
+                    const newUser = new User({ username, email, password: hashedPassword, statusMessage: null });
                     return newUser.save();
                 })
                 .then((userId) => {
@@ -102,7 +102,7 @@ const handleSocialLogin = (req, res, tokenVerifier, tokenName) => {
 
                         return bcrypt.hash(password, 12)
                             .then((hashedPassword) => {
-                                const newUser = new User({ username, email, password: hashedPassword, statusMessage: null, gender: null });
+                                const newUser = new User({ username, email, password: hashedPassword, statusMessage: null });
                                 return newUser.save()
                                     .then((userId) => {
                                         const accessToken = generateToken.genAccessToken(userId);

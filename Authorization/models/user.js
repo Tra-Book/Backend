@@ -7,19 +7,18 @@ class User {
         email,
         password,
         statusMessage,
-        gender,
     }) {
+        this.userId = userId
         this.username = username;
         this.email = email;
         this.password = password;
         this.statusMessage = statusMessage;
-        this.gender = gender;
     }
 
     async save() {
         try {
             const query = `
-                INSERT INTO user (username, email, password, statusMessage, gender)
+                INSERT INTO user (username, email, password, statusMessage)
                 VALUES (?, ?, ?, ?)
             `;
             const [result] = await db.query(query, [this.username, this.email, this.password, this.statusMessage, this.gender]);
@@ -62,7 +61,7 @@ class User {
     static async getUserByEmail(userEmail) {
         try {
             const query = `
-                SELECT userId, username, email, password, statusMessage, gender
+                SELECT userId, username, email, password, statusMessage
                 FROM user 
                 WHERE email = ?
             `;
@@ -78,7 +77,6 @@ class User {
                 email: rows[0].email,
                 password: rows[0].password,
                 statusMessage: rows[0].statusMessage,
-                gender: rows[0].gender,
             });
             return user;
         } catch (err) {
@@ -90,7 +88,7 @@ class User {
     static async getUserByUserId(userId) {
         try {
             const query = `
-                SELECT userId, username, email, password, statusMessage, gender
+                SELECT userId, username, email, password, statusMessage
                 FROM user 
                 WHERE userId = ?
             `;
@@ -105,7 +103,6 @@ class User {
                 email: rows[0].email,
                 password: rows[0].password,
                 statusMessage: rows[0].statusMessage,
-                gender: rows[0].gender,
             });
             return user;
         } catch (err) {
