@@ -72,6 +72,7 @@ class User {
             if (rows.length === 0) {
                 return null;
             }
+
             const user = new User({
                 userId: rows[0].userId,
                 username: rows[0].username,
@@ -90,14 +91,15 @@ class User {
     static async getUserByUserId(userId) {
         try {
             const query = `
-                SELECT userId, username, email, password, statusMessage 
+                SELECT userId, username, email, password, statusMessage, gender
                 FROM user 
                 WHERE userId = ?
             `;
+            const [rows] = await db.query(query, [userId]);
+
             if (rows.length === 0) {
                 return null;
             }
-
             const user = new User({
                 userId: rows[0].userId,
                 username: rows[0].username,
