@@ -1,26 +1,25 @@
-const { stat } = require("fs");
 
 class User {
     constructor({
-        user_id,
+        userId,
         username,
         email,
         password,
-        status_message,
+        statusMessage,
     }) {
-        this.user_id;
+        this.userId;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.status_message = status_message;
+        this.statusMessage = statusMessage;
     }
 
-    // return 값으로 unique 한 user_id 받아와야 함
+    // return 값으로 unique 한 userId 받아와야 함
     save() {
         //
     }
 
-    updateProfile(username, status_message, hashedPassword) {
+    updateProfile(username, statusMessage, hashedPassword) {
         //
     }
 

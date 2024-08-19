@@ -38,7 +38,7 @@ exports.postLogin = (req, res, next) => {
 
                     const accessToken = generateToken.genAccessToken(user.userId);
                     const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 200, accessToken, refreshToken, { user_id: user.user_id, username: user.username });
+                    return generateAuthResponse(res, 200, accessToken, refreshToken, { userId: user.userId, username: user.username });
                 });
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
@@ -107,14 +107,14 @@ const handleSocialLogin = (req, res, tokenVerifier, tokenName) => {
                                     .then((result) => {
                                         const accessToken = generateToken.genAccessToken(user.userId);
                                         const refreshToken = generateToken.genRefreshToken();
-                                        return generateAuthResponse(res, 201, accessToken, refreshToken, { user_id: result.user_id, username });
+                                        return generateAuthResponse(res, 201, accessToken, refreshToken, { userId: result.userId, username });
                                     });
                             });
                     }
 
                     const accessToken = generateToken.genAccessToken(user.userId);
                     const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 200, accessToken, refreshToken, { user_id: user.user_id, username: user.username });
+                    return generateAuthResponse(res, 200, accessToken, refreshToken, { userId: user.userId, username: user.username });
                 });
         })
         .catch((err) => {
