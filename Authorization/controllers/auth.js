@@ -28,21 +28,19 @@ const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
         user: 'oriquack0423@gmail.com',
-        pass: 'your-email-password'
-    }
+        pass: 'password!Q@W#E',
+    },
 });
 
-function sendVerificationEmail(email, token) {
-    const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
-
+function sendVerificationEmail(email, verificationCode) {
     const mailOptions = {
-        from: 'no-reply@yourdomain.com',
+        from: 'no-reply@trabook.com',
         to: email,
         subject: 'Email Verification',
-        text: `Please verify your email by clicking on this link: ${verificationLink}`,
+        text: `Your verfication code is ${verificationCode}`,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
+    return transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.log('Error sending email:', error);
         } else {
@@ -60,16 +58,18 @@ exports.postLogin = (req, res, next) => {
                 return sendErrorResponse(res, 404, 'User not found');
             }
 
-            return bcrypt.compare(password, user.password)
-                .then((doMatch) => {
-                    if (!doMatch) {
-                        return sendErrorResponse(res, 401, 'Incorrect password');
-                    }
+            return bcrypt.compare(password, user.password).then((doMatch) => {
+                if (!doMatch) {
+                    return sendErrorResponse(res, 401, 'Incorrect password');
+                }
 
-                    const accessToken = generateToken.genAccessToken(user.userId);
-                    const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 200, accessToken, refreshToken, { userId: user.userId, username: user.username });
+                const accessToken = generateToken.genAccessToken(user.userId);
+                const refreshToken = generateToken.genRefreshToken();
+                return generateAuthResponse(res, 200, accessToken, refreshToken, {
+                    userId: user.userId,
+                    username: user.username,
                 });
+            });
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
 };
@@ -83,47 +83,56 @@ exports.postSignup = (req, res, next) => {
                 return sendErrorResponse(res, 400, 'User already exists');
             }
 
-            return bcrypt.hash(password, 12)
+            return bcrypt
+                .hash(password, 12)
                 .then((hashedPassword) => {
-                    const newUser = new User({ username, email, password: hashedPassword, statusMessage: null });
+                    const newUser = new User({
+                        username,
+                        email,
+                        password: hashedPassword,
+                        statusMessage: null,
+                    });
                     return newUser.save();
                 })
                 .then((userId) => {
-                    const verificationToken = uuidv4();
-                    redisClient.setex(verificationToken, 900, email);
-                    sendVerificationEmail(email, verificationToken);
-
                     const accessToken = generateToken.genAccessToken(userId);
                     const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 201, accessToken, refreshToken, { userId, username });
+                    return generateAuthResponse(res, 201, accessToken, refreshToken, {
+                        userId,
+                        username,
+                    });
                 });
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
 };
 
-exports.postVerifyEmail = (req, res) => {
-    const { token } = req.query;
+exports.postSendVerificationCode = async (req, res) => {
+    const { email } = req.body;
+    const verificationCode = uuidv4();
+    await redisClient.set(email, verificationCode, { EX: 900 });
 
-    if (!token) {
-        return res.status(400).json({ message: 'Token is required' });
+    try {
+        sendVerificationEmail(email, verificationCode);
+        return res.status(200).json({ message: 'Verification code sent' });
+    } catch (err) {
+        return res.status(500).json({ message: 'Failed to send email' });
+    }
+};
+
+exports.postVerifyCode = async (req, res) => {
+    const { email, code } = req.body;
+    const storedCode = await redisClient.get(email);
+
+    if (!storedCode) {
+        return res.status(400).json({ message: 'Invalid code' });
     }
 
-    return redisClient.get(token, (err, email) => {
-        if (err) {
-            return sendErrorResponse(res, 500, 'Server error');
-        }
-
-        if (!email) {
-            return sendErrorResponse(res, 400, 'Invalid or expired token');
-        }
-
-        // TODO: verify update 
-        console.log(`Email verified: ${email}`);
-
-        redisClient.del(token);
-
-        return res.status(200).json({ message: 'Email verified' });
-    });
+    if (storedCode === code) {
+        await redisClient.del(email);
+        return res.status(200).json({ message: 'Valid code' });
+    } else {
+        return res.status(400).json({ message: 'Invalid code' });
+    }
 };
 
 exports.postUpdateProfile = (req, res, next) => {
@@ -131,15 +140,19 @@ exports.postUpdateProfile = (req, res, next) => {
 
     User.getUserByEmail(email)
         .then((user) => {
-            return bcrypt.hash(newPsssword, 12)
-                .then((hashedPassword) => user.updateProfile({ username, statusMessage, password: hashedPassword }))
+            return bcrypt
+                .hash(newPsssword, 12)
+                .then((hashedPassword) =>
+                    user.updateProfile({ username, statusMessage, password: hashedPassword })
+                )
                 .then(() => res.status(200).json({ message: 'Success' }));
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
 };
 
 exports.deleteUserData = (req, res, next) => {
-    req.user.deleteUser()
+    req.user
+        .deleteUser()
         .then(() => res.status(200).json({ message: 'Success signout' }))
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
 };
@@ -153,28 +166,41 @@ const handleSocialLogin = (req, res, tokenVerifier, tokenName) => {
                 return sendErrorResponse(res, 400, 'Bad request');
             }
 
-            return User.getUserByEmail(email)
-                .then((user) => {
-                    if (!user) {
-                        const username = '여행자' + generator.generate({ length: 8, numbers: true });
-                        const password = generator.generate({ length: 14, numbers: true, symbols: true, strict: true });
+            return User.getUserByEmail(email).then((user) => {
+                if (!user) {
+                    const username = '여행자' + generator.generate({ length: 8, numbers: true });
+                    const password = generator.generate({
+                        length: 14,
+                        numbers: true,
+                        symbols: true,
+                        strict: true,
+                    });
 
-                        return bcrypt.hash(password, 12)
-                            .then((hashedPassword) => {
-                                const newUser = new User({ username, email, password: hashedPassword, statusMessage: null });
-                                return newUser.save()
-                                    .then((userId) => {
-                                        const accessToken = generateToken.genAccessToken(userId);
-                                        const refreshToken = generateToken.genRefreshToken();
-                                        return generateAuthResponse(res, 201, accessToken, refreshToken, { userId: userId, username: username });
-                                    });
+                    return bcrypt.hash(password, 12).then((hashedPassword) => {
+                        const newUser = new User({
+                            username,
+                            email,
+                            password: hashedPassword,
+                            statusMessage: null,
+                        });
+                        return newUser.save().then((userId) => {
+                            const accessToken = generateToken.genAccessToken(userId);
+                            const refreshToken = generateToken.genRefreshToken();
+                            return generateAuthResponse(res, 201, accessToken, refreshToken, {
+                                userId: userId,
+                                username: username,
                             });
-                    }
+                        });
+                    });
+                }
 
-                    const accessToken = generateToken.genAccessToken(user.userId);
-                    const refreshToken = generateToken.genRefreshToken();
-                    return generateAuthResponse(res, 200, accessToken, refreshToken, { userId: user.userId, username: user.username });
+                const accessToken = generateToken.genAccessToken(user.userId);
+                const refreshToken = generateToken.genRefreshToken();
+                return generateAuthResponse(res, 200, accessToken, refreshToken, {
+                    userId: user.userId,
+                    username: user.username,
                 });
+            });
         })
         .catch((err) => {
             console.log(err);
@@ -187,7 +213,8 @@ exports.postGoogleLogin = (req, res) => {
     const client = new OAuth2Client(CLIENT_ID);
 
     const verifyGoogleToken = (token) => {
-        return client.verifyIdToken({ idToken: token, audience: CLIENT_ID })
+        return client
+            .verifyIdToken({ idToken: token, audience: CLIENT_ID })
             .then((ticket) => ticket.getPayload().email);
     };
 
@@ -196,9 +223,11 @@ exports.postGoogleLogin = (req, res) => {
 
 exports.postKakaoAuth = (req, res, next) => {
     const verifyKakaoToken = (token) => {
-        return axios.get('https://kapi.kakao.com/v2/user/me', {
-            headers: { Authorization: `Bearer ${token}` },
-        }).then((response) => response.data.kakao_account.email);
+        return axios
+            .get('https://kapi.kakao.com/v2/user/me', {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => response.data.kakao_account.email);
     };
 
     handleSocialLogin(req, res, verifyKakaoToken, 'Kakao');
@@ -206,11 +235,12 @@ exports.postKakaoAuth = (req, res, next) => {
 
 exports.postNaverLogin = (req, res, next) => {
     const verifyNaverToken = (token) => {
-        return axios.get('https://openapi.naver.com/v1/nid/me', {
-            headers: { Authorization: `Bearer ${token}` },
-        }).then((response) => response.data.response.email);
+        return axios
+            .get('https://openapi.naver.com/v1/nid/me', {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => response.data.response.email);
     };
 
     handleSocialLogin(req, res, verifyNaverToken, 'Naver');
 };
-

@@ -21,7 +21,7 @@ class User {
                 INSERT INTO user (username, email, password, statusMessage)
                 VALUES (?, ?, ?, ?)
             `;
-            const [result] = await db.query(query, [this.username, this.email, this.password, this.statusMessage, this.gender]);
+            const [result] = await db.query(query, [this.username, this.email, this.password, this.statusMessage]);
             const userId = result.insertId;
             this.userId = userId;
             return userId;
