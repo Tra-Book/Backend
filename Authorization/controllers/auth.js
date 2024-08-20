@@ -101,7 +101,7 @@ exports.postSignup = (req, res, next) => {
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
 };
 
-exports.verifyEmail = (req, res) => {
+exports.postVerifyEmail = (req, res) => {
     const { token } = req.query;
 
     if (!token) {
