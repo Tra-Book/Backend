@@ -1,5 +1,6 @@
 package Trabook.PlanManager.repository.plan;
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.Schedule;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -77,7 +78,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public int deleteComment(long commentId) {
-        String sql = "DELETE FROM Comments WHERE commentId = ?";
+        String sql = "DELETE FROM PlanComment WHERE commentId = ?";
         return jdbcTemplate.update(sql,commentId);
     }
 
@@ -147,6 +148,19 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
         jdbcTemplate.update(sql2,planId);
 
+    }
+
+    @Override
+    public void addComment(Comment comment) {
+        String sql = "INSERT INTO PlanComment( userId,planId,content,ref,refOrder,time)" +
+                "values(?,?,?,?,?,?)";
+        jdbcTemplate.update(sql,
+                comment.getUserId(),
+                comment.getPlanId(),
+                comment.getContent(),
+                comment.getRef(),
+                comment.getRefOrder(),
+                comment.getTime());
     }
 
     @Override

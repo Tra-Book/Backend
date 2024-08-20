@@ -1,5 +1,6 @@
 package Trabook.PlanManager.service;
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.Schedule;
 import Trabook.PlanManager.repository.plan.PlanRepository;
@@ -31,6 +32,13 @@ public class PlanService {
         }
     }
 
+    public String addComment(Comment comment) {
+        if(planRepository.findById(comment.getPlanId()).isPresent()){
+            planRepository.addComment(comment);
+            return "added comment";
+        } else
+            return "no plan exists";
+    }
     public Optional<Plan> getPlan(long planId) {
         return planRepository.findById(planId);
     }

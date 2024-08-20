@@ -1,5 +1,6 @@
 package Trabook.PlanManager.repository.plan;
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.PlanSearchDTO;
 import Trabook.PlanManager.domain.plan.Schedule;
@@ -24,6 +25,7 @@ public interface PlanRepository {
 
     void likePlan(long userId, long planId);
     void scrapPlan(long userId,long planId);
+    void addComment(Comment comment);
 
     int deletePlan(long planId);
     int deleteLike(long userId, long planId);

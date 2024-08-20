@@ -1,5 +1,6 @@
 package Trabook.PlanManager.controller;
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.PlanListRequestDTO;
 import Trabook.PlanManager.domain.plan.PlanRequestDTO;
@@ -104,6 +105,11 @@ public class PlanController {
         return planService.scrapPlan(userId,planId);
     }
 
+    @ResponseBody
+    @PostMapping("/comment")
+    public String addComment(@RequestBody Comment comment) {
+        return planService.addComment(comment);
+    }
 
     @ResponseBody
     @DeleteMapping("/")

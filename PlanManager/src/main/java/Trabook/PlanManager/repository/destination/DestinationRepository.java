@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DestinationRepository {
-    Optional<Place> findByPlaceId(String placeId);
+    Optional<Place> findByPlaceId(long placeId);
 
-    List<Place> findPlaceListByCity(String cityId);
+    List<Place> findPlaceListByCity(long cityId);
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);

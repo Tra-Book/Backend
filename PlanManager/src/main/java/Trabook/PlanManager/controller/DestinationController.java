@@ -22,7 +22,7 @@ public class DestinationController {
 
     @ResponseBody
     @GetMapping("/")
-    public Optional<Place> getPlaceByPlaceId(@RequestParam("placeId") String placeId ){
+    public Optional<Place> getPlaceByPlaceId(@RequestParam("placeId") long placeId ){
         return destinationService.getPlaceByPlaceId(placeId);
     }
 

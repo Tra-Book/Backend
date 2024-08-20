@@ -17,7 +17,7 @@ public class DestinationService {
         this.destinationRepository = destinationRepository;
     }
 
-    public List<Place> getPlaceListByCity(String cityId) {
+    public List<Place> getPlaceListByCity(long cityId) {
         return destinationRepository.findPlaceListByCity(cityId);
     }
 
@@ -56,10 +56,10 @@ public class DestinationService {
             return "type invalid";
     }
 
-    public Optional<Place> getPlaceByPlaceId(String placeId){
+    public Optional<Place> getPlaceByPlaceId(long placeId){
         return destinationRepository.findByPlaceId(placeId);
     }
-    public Optional<Place> getPlace(String placeId) {
+    public Optional<Place> getPlace(long placeId) {
         return destinationRepository.findByPlaceId(placeId);
     }
 }

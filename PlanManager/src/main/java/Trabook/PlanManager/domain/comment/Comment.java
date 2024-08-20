@@ -8,12 +8,12 @@ import java.util.Date;
 
 @Getter @Setter
 public class Comment {
-    private String commentId;
-    private String userId;
-    private String planId;
+    private long commentId;
+    private long userId;
+    private long planId;
     private String content;
-    private int group;
-    private int orderInGroup;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date postDate;
+    private int ref;
+    private int refOrder;
+    //@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private String time;
 }
