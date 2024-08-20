@@ -2,9 +2,12 @@ const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const generator = require('generate-password');
+const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 
 const User = require('../models/user');
 const generateToken = require('../utils/token');
+const redisClient = require('../utils/redis');
 
 const sendErrorResponse = (res, statusCode, message) => {
     return res.status(statusCode).json({ message });
@@ -20,6 +23,33 @@ const generateAuthResponse = (res, statusCode, accessToken, refreshToken, user) 
         .header('Authorization', accessToken)
         .json(user);
 };
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'oriquack0423@gmail.com',
+        pass: 'your-email-password'
+    }
+});
+
+function sendVerificationEmail(email, token) {
+    const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
+
+    const mailOptions = {
+        from: 'no-reply@yourdomain.com',
+        to: email,
+        subject: 'Email Verification',
+        text: `Please verify your email by clicking on this link: ${verificationLink}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log('Error sending email:', error);
+        } else {
+            console.log('Email sent:', info.response);
+        }
+    });
+}
 
 exports.postLogin = (req, res, next) => {
     const { email, password } = req.body;
@@ -59,12 +89,41 @@ exports.postSignup = (req, res, next) => {
                     return newUser.save();
                 })
                 .then((userId) => {
+                    const verificationToken = uuidv4();
+                    redisClient.setex(verificationToken, 900, email);
+                    sendVerificationEmail(email, verificationToken);
+
                     const accessToken = generateToken.genAccessToken(userId);
                     const refreshToken = generateToken.genRefreshToken();
                     return generateAuthResponse(res, 201, accessToken, refreshToken, { userId, username });
                 });
         })
         .catch(() => sendErrorResponse(res, 500, 'Server error'));
+};
+
+exports.verifyEmail = (req, res) => {
+    const { token } = req.query;
+
+    if (!token) {
+        return res.status(400).json({ message: 'Token is required' });
+    }
+
+    redisClient.get(token, (err, email) => {
+        if (err) {
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+
+        if (!email) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // TODO: verify update 
+        console.log(`Email verified: ${email}`);
+
+        redisClient.del(token);
+
+        res.status(200).json({ message: 'Email verified' });
+    });
 };
 
 exports.postUpdateProfile = (req, res, next) => {
