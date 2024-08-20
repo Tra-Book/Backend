@@ -45,7 +45,7 @@ describe('Auth Controller', () => {
             req.body = { email: 'test@example.com', password: 'password' };
             User.getUserByEmail.mockResolvedValue(null);
 
-            await postLogin(req, res, next);
+            postLogin(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
@@ -57,7 +57,7 @@ describe('Auth Controller', () => {
             User.getUserByEmail.mockResolvedValue(user);
             bcrypt.compare.mockResolvedValue(false);
 
-            await postLogin(req, res, next);
+            postLogin(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ message: 'Incorrect password' });
@@ -71,7 +71,7 @@ describe('Auth Controller', () => {
             generateToken.genAccessToken.mockReturnValue('accessToken');
             generateToken.genRefreshToken.mockReturnValue('refreshToken');
 
-            await postLogin(req, res, next);
+            postLogin(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.cookie).toHaveBeenCalledWith('refreshToken', 'refreshToken', expect.any(Object));
@@ -85,7 +85,7 @@ describe('Auth Controller', () => {
             req.body = { email: 'test@example.com', password: 'password', username: 'testuser' };
             User.getUserByEmail.mockResolvedValue(true);
 
-            await postSignup(req, res, next);
+            postSignup(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ message: 'User already exists' });
@@ -101,7 +101,7 @@ describe('Auth Controller', () => {
             generateToken.genRefreshToken.mockReturnValue('refreshToken');
             redisClient.setex.mockResolvedValue(null);
 
-            await postSignup(req, res, next);
+            postSignup(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.cookie).toHaveBeenCalledWith('refreshToken', 'refreshToken', expect.any(Object));
@@ -114,7 +114,7 @@ describe('Auth Controller', () => {
         it('should return 400 if token is missing', async () => {
             req.query = {};
 
-            await postVerifyEmail(req, res);
+            postVerifyEmail(req, res);
 
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ message: 'Token is required' });
@@ -124,7 +124,7 @@ describe('Auth Controller', () => {
             req.query = { token: 'invalidToken' };
             redisClient.get.mockImplementation((_, cb) => cb(null, null));
 
-            await postVerifyEmail(req, res);
+            postVerifyEmail(req, res);
 
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ message: 'Invalid or expired token' });
@@ -134,7 +134,7 @@ describe('Auth Controller', () => {
             req.query = { token: 'validToken' };
             redisClient.get.mockImplementation((_, cb) => cb(null, 'test@example.com'));
 
-            await postVerifyEmail(req, res);
+            postVerifyEmail(req, res);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ message: 'Email verified' });
@@ -148,7 +148,7 @@ describe('Auth Controller', () => {
             User.getUserByEmail.mockResolvedValue(user);
             bcrypt.hash.mockResolvedValue('hashedPassword');
 
-            await postUpdateProfile(req, res, next);
+            postUpdateProfile(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ message: 'Success' });
@@ -159,7 +159,7 @@ describe('Auth Controller', () => {
         it('should return 200 if user data is deleted successfully', async () => {
             req.user.deleteUser = jest.fn().mockResolvedValue(true);
 
-            await deleteUserData(req, res, next);
+            deleteUserData(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ message: 'Success signout' });
@@ -181,7 +181,7 @@ describe('Auth Controller', () => {
                 generateToken.genAccessToken.mockReturnValue('accessToken');
                 generateToken.genRefreshToken.mockReturnValue('refreshToken');
 
-                await postGoogleLogin(req, res);
+                postGoogleLogin(req, res);
 
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.cookie).toHaveBeenCalledWith('refreshToken', 'refreshToken', expect.any(Object));
@@ -199,7 +199,7 @@ describe('Auth Controller', () => {
                 generateToken.genAccessToken.mockReturnValue('accessToken');
                 generateToken.genRefreshToken.mockReturnValue('refreshToken');
 
-                await postKakaoAuth(req, res);
+                postKakaoAuth(req, res);
 
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.cookie).toHaveBeenCalledWith('refreshToken', 'refreshToken', expect.any(Object));
@@ -217,7 +217,7 @@ describe('Auth Controller', () => {
                 generateToken.genAccessToken.mockReturnValue('accessToken');
                 generateToken.genRefreshToken.mockReturnValue('refreshToken');
 
-                await postNaverLogin(req, res);
+                postNaverLogin(req, res);
 
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.cookie).toHaveBeenCalledWith('refreshToken', 'refreshToken', expect.any(Object));
