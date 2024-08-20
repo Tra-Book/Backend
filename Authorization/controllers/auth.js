@@ -108,13 +108,13 @@ exports.verifyEmail = (req, res) => {
         return res.status(400).json({ message: 'Token is required' });
     }
 
-    redisClient.get(token, (err, email) => {
+    return redisClient.get(token, (err, email) => {
         if (err) {
-            return res.status(500).json({ message: 'Internal server error' });
+            return sendErrorResponse(res, 500, 'Server error');
         }
 
         if (!email) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+            return sendErrorResponse(res, 400, 'Invalid or expired token');
         }
 
         // TODO: verify update 
@@ -122,7 +122,7 @@ exports.verifyEmail = (req, res) => {
 
         redisClient.del(token);
 
-        res.status(200).json({ message: 'Email verified' });
+        return res.status(200).json({ message: 'Email verified' });
     });
 };
 
