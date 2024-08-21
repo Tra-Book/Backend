@@ -4,7 +4,7 @@ const axios = require('axios');
 const generator = require('generate-password');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
+require('dotenv').config();
 
 const User = require('../models/user');
 const generateToken = require('../utils/token');
@@ -25,25 +25,35 @@ const generateAuthResponse = (res, statusCode, accessToken, refreshToken, user) 
         .json(user);
 };
 
-const transporter = nodemailer.createTransport(
-    sendgridTransport({
-        auth: {
-            api_key: process.env.EMAIL_KEY,
-        },
-    })
-);
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+    },
+});
 
 const sendVerificationEmail = async (email, verificationCode) => {
     const mailOptions = {
-        from: 'yongjuni30@gmail.com',
+        from: '"Trabook" <trabook24@gmail.com>',
         to: email,
-        subject: 'Email Verification',
+        subject: '이메일 인증 코드',
         html: `
-        <p>You requested verification code in Trabook.</p>
-        <p>Your verification code is:</p>
-        <p>${verificationCode}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 10px; background-color: #f9f9f9;">
+            <h2 style="text-align: center; color: #4CAF50;">이메일 인증</h2>
+            <p>안녕하세요,</p>
+            <p><strong>Trabook</strong> 계정의 이메일 인증을 요청하셨습니다.</p>
+            <p>아래 인증 코드를 입력하셔서 이메일 주소를 확인해주세요:</p>
+            <br>
+            <p style="font-size: 24px; font-weight: bold; text-align: center; color: #333;">${verificationCode}</p>
+            <br>
+            <p>만약 이 요청을 본인이 하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.</p>
+            <p>감사합니다.<br><br>Trabook 팀 드림</p>
+            <hr style="border: 0; border-top: 1px solid #e1e1e1; margin: 20px 0;">
+            <p style="font-size: 12px; color: #888; text-align: center;">이 이메일에 회신하지 마세요. 도움이 필요하시면 trabook24@gmail.com으로 연락주시기 바랍니다.</p>
+        </div>
         `,
-        text: 'Trabook'
+        text: `안녕하세요,\n\nTrabook 계정의 이메일 인증을 요청하셨습니다.\n\n인증 코드는: ${verificationCode}\n\n만약 이 요청을 본인이 하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.\n\n감사합니다.\nTrabook 팀 드림`,
     };
 
     try {
@@ -111,7 +121,9 @@ exports.postSignup = async (req, res, next) => {
 
 exports.postSendVerificationCode = async (req, res) => {
     const { email } = req.body;
-    const verificationCode = uuidv4();
+    const verificationCode = Math.floor(Math.random() * 100000000)
+        .toString()
+        .padStart(8, '0');
 
     try {
         await redisClient.set(email, verificationCode, { EX: 900 });
@@ -215,8 +227,7 @@ const handleSocialLogin = async (req, res, tokenVerifier, tokenName) => {
 };
 
 exports.postGoogleLogin = (req, res) => {
-    const CLIENT_ID = '';
-    const client = new OAuth2Client(CLIENT_ID);
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENTID);
 
     const verifyGoogleToken = async (token) => {
         const ticket = await client.verifyIdToken({ idToken: token, audience: CLIENT_ID });
