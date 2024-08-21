@@ -3,9 +3,9 @@ const User = require('../models/user');
 const token = require('../utils/token');
 
 const authenticate = async (req, res, next) => {
-    const accessToken = req.headers['authorization'] ? req.headers['authorization'].split(' ')[1] : null;
+    const accessToken = req.headers['authorization'];
     const refreshToken = req.cookies['refreshToken'];
-
+    
     if (!accessToken || !refreshToken) {
         return res.status(403).json({ message: 'Authentication required: no AT or RT' });
     }

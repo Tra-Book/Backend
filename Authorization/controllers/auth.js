@@ -4,6 +4,7 @@ const axios = require('axios');
 const generator = require('generate-password');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user');
 const generateToken = require('../utils/token');
@@ -24,26 +25,32 @@ const generateAuthResponse = (res, statusCode, accessToken, refreshToken, user) 
         .json(user);
 };
 
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'oriquack0423@gmail.com',
-        pass: 'password!Q@W#E',
-    },
-});
+const transporter = nodemailer.createTransport(
+    sendgridTransport({
+        auth: {
+            api_key: process.env.EMAIL_KEY,
+        },
+    })
+);
 
 const sendVerificationEmail = async (email, verificationCode) => {
     const mailOptions = {
-        from: 'no-reply@trabook.com',
+        from: 'yongjuni30@gmail.com',
         to: email,
         subject: 'Email Verification',
-        text: `Your verification code is ${verificationCode}`,
+        html: `
+        <p>You requested verification code in Trabook.</p>
+        <p>Your verification code is:</p>
+        <p>${verificationCode}</p>
+        `,
+        text: 'Trabook'
     };
 
     try {
         await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
+        console.log(error);
         return false;
     }
 };
@@ -90,7 +97,6 @@ exports.postSignup = async (req, res, next) => {
             statusMessage: null,
         });
         const userId = await newUser.save();
-
         const accessToken = generateToken.genAccessToken(userId);
         const refreshToken = generateToken.genRefreshToken();
         return generateAuthResponse(res, 201, accessToken, refreshToken, {
@@ -98,6 +104,7 @@ exports.postSignup = async (req, res, next) => {
             username,
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, 'Server error');
     }
 };
@@ -116,6 +123,7 @@ exports.postSendVerificationCode = async (req, res) => {
             return res.status(500).json({ message: 'Failed to send email' });
         }
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: 'Server error' });
     }
 };
@@ -137,14 +145,15 @@ exports.postVerifyCode = async (req, res) => {
 };
 
 exports.postUpdateProfile = async (req, res, next) => {
-    const { username, email, statusMessage, newPsssword } = req.body;
+    const { username, email, statusMessage, newPassword } = req.body;
 
     try {
         const user = await User.getUserByEmail(email);
-        const hashedPassword = await bcrypt.hash(newPsssword, 12);
-        await user.updateProfile({ username, statusMessage, password: hashedPassword });
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        await user.updateProfile(username, statusMessage, hashedPassword);
         return res.status(200).json({ message: 'Success' });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, 'Server error');
     }
 };

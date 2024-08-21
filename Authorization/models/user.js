@@ -18,7 +18,7 @@ class User {
     async save() {
         try {
             const query = `
-                INSERT INTO user (username, email, password, statusMessage)
+                INSERT INTO User (username, email, password, statusMessage)
                 VALUES (?, ?, ?, ?)
             `;
             const [result] = await db.query(query, [this.username, this.email, this.password, this.statusMessage]);
@@ -34,7 +34,7 @@ class User {
     async updateProfile(username, statusMessage, hashedPassword) {
         try {
             const query = `
-                UPDATE user 
+                UPDATE User 
                 SET username = ?, statusMessage = ?, password = ?
                 WHERE email = ?
             `;
@@ -48,7 +48,7 @@ class User {
     async deleteUser() {
         try {
             const query = `
-                DELETE FROM user 
+                DELETE FROM User 
                 WHERE email = ?
             `;
             await db.query(query, [this.email]);
@@ -62,7 +62,7 @@ class User {
         try {
             const query = `
                 SELECT userId, username, email, password, statusMessage
-                FROM user 
+                FROM User 
                 WHERE email = ?
             `;
             const [rows] = await db.query(query, [userEmail]);
@@ -89,7 +89,7 @@ class User {
         try {
             const query = `
                 SELECT userId, username, email, password, statusMessage
-                FROM user 
+                FROM User 
                 WHERE userId = ?
             `;
             const [rows] = await db.query(query, [userId]);
