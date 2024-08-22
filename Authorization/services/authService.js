@@ -9,12 +9,12 @@ const User = require('../models/user');
 exports.login = async (email, password) => {
     const user = await User.getUserByEmail(email);
     if (!user) {
-        return { error: true, statusCode: 404, message: 'User not found' };
+        return { error: true, statusCode: 404, message: 'User not found', data: null };
     }
 
     const doMatch = await bcryptUtil.comparePassword(password, user.password);
     if (!doMatch) {
-        return { error: true, statusCode: 401, message: 'Incorrect password' };
+        return { error: true, statusCode: 401, message: 'Incorrect password', data: null };
     }
 
     const accessToken = tokenUtil.genAccessToken(user.userId);
@@ -22,9 +22,13 @@ exports.login = async (email, password) => {
 
     return {
         error: false,
-        user: { userId: user.userId, username: user.username },
-        accessToken,
-        refreshToken,
+        statusCode: 200,
+        message: 'Login successful',
+        data: {
+            user: { userId: user.userId, username: user.username },
+            accessToken,
+            refreshToken,
+        },
     };
 };
 
@@ -36,22 +40,31 @@ exports.signup = async (email, password, username) => {
         const existingUser = await User.getUserByEmail(email);
         if (existingUser) {
             await connection.rollback();
-            return { error: true, statusCode: 400, message: 'User already exists' };
+            return { error: true, statusCode: 400, message: 'User already exists', data: null };
         }
 
         const hashedPassword = await bcryptUtil.hashPassword(password);
         const newUser = new User({ username, email, password: hashedPassword });
-        const userId = await newUser.save(connection); // Pass the connection to the save method
+        const userId = await newUser.save(connection);
 
         const accessToken = tokenUtil.genAccessToken(userId);
         const refreshToken = tokenUtil.genRefreshToken();
 
         await connection.commit();
 
-        return { error: false, user: { userId, username }, accessToken, refreshToken };
+        return {
+            error: false,
+            statusCode: 201,
+            message: 'User created successfully',
+            data: {
+                user: { userId, username },
+                accessToken,
+                refreshToken,
+            },
+        };
     } catch (err) {
         await connection.rollback();
-        return { error: true, statusCode: 500, message: 'Server Error' };
+        return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
     }
@@ -65,27 +78,26 @@ exports.sendVerificationCode = async (email) => {
 
     const emailSent = await emailService.sendVerificationEmail(email, verificationCode);
     if (!emailSent) {
-        return { error: true, message: 'Failed to send email' };
+        return { error: true, statusCode: 500, message: 'Failed to send email', data: null };
     }
-    return { error: false };
+    return {
+        error: false,
+        statusCode: 200,
+        message: 'Verification code sent successfully',
+        data: null,
+    };
 };
 
 exports.verifyCode = async (email, code) => {
     const storedCode = await redisUtil.get(email);
     if (!storedCode || storedCode !== code) {
-        return { error: true, message: 'Invalid code' };
+        return { error: true, statusCode: 400, message: 'Invalid code', data: null };
     }
     await redisUtil.del(email);
-    return { error: false };
+    return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
-exports.updateProfile = async (
-    username,
-    email,
-    profilePhoto = null,
-    statusMessage,
-    newPassword
-) => {
+exports.updateProfile = async (username, email, profilePhoto, statusMessage, newPassword) => {
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
@@ -93,17 +105,22 @@ exports.updateProfile = async (
         const user = await User.getUserByEmail(email, connection);
         if (!user) {
             await connection.rollback();
-            return { error: true, statusCode: 404, message: 'User not found' };
+            return { error: true, statusCode: 404, message: 'User not found', data: null };
         }
 
         const hashedPassword = await bcryptUtil.hashPassword(newPassword);
         await user.updateProfile(username, statusMessage, hashedPassword, profilePhoto, connection);
 
         await connection.commit();
-        return { error: false, message: 'Profile updated successfully' };
+        return {
+            error: false,
+            statusCode: 200,
+            message: 'Profile updated successfully',
+            data: null,
+        };
     } catch (err) {
         await connection.rollback();
-        return { error: true, statusCode: 500, message: 'Server Error' };
+        return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
     }
@@ -115,9 +132,10 @@ exports.deleteUser = async (user) => {
     try {
         await user.deleteUser(connection);
         connection.commit();
+        return { error: false, statusCode: 200, message: 'User deleted successfully', data: null };
     } catch (err) {
         connection.rollback();
-        return { error: true, statusCode: 500, message: 'Server Error' };
+        return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
     }
@@ -154,7 +172,7 @@ exports.handleSocialLogin = async (req, res, provider) => {
         });
     } catch (err) {
         await connection.rollback();
-        return { error: true, statusCode: 500, message: `${provider} API server error` };
+        return { error: true, statusCode: 500, message: `${provider} API Server error` };
     } finally {
         connection.release();
     }

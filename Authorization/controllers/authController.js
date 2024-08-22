@@ -5,7 +5,7 @@ exports.postLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         const result = await authService.login(email, password);
-        return result.error 
+        return result.error
             ? sendErrorResponse(res, result.statusCode, result.message)
             : generateAuthResponse(res, 200, result.accessToken, result.refreshToken, result.user);
     } catch (error) {
@@ -52,8 +52,16 @@ exports.postVerifyCode = async (req, res) => {
 exports.postUpdateProfile = async (req, res, next) => {
     const { username, email, profilePhoto, statusMessage, newPassword } = req.body;
     try {
-        await authService.updateProfile(username, email, profilePhoto, statusMessage, newPassword);
-        return res.status(200).json({ message: 'Success' });
+        const result = await authService.updateProfile(
+            username,
+            email,
+            profilePhoto,
+            statusMessage,
+            newPassword
+        );
+        return result.error
+            ? sendErrorResponse(res, result.statusCode, result.message)
+            : res.status(200).json({ message: 'Success' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
@@ -61,8 +69,10 @@ exports.postUpdateProfile = async (req, res, next) => {
 
 exports.deleteUserData = async (req, res, next) => {
     try {
-        await authService.deleteUser(req.user);
-        return res.status(200).json({ message: 'Success signout' });
+        const result = await authService.deleteUser(req.user);
+        return result.error
+            ? sendErrorResponse(res, 500, 'Server error')
+            : res.status(200).json({ message: 'Success signout' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
