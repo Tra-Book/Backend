@@ -1,6 +1,7 @@
 package Trabook.PlanManager.repository.destination;
 
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.City;
 import Trabook.PlanManager.domain.destination.Place;
 
@@ -11,10 +12,14 @@ public interface DestinationRepository {
     Optional<Place> findByPlaceId(long placeId);
 
     List<Place> findPlaceListByCity(long cityId);
+    List<Place> findPlaceListByUserScrap(long cityId);
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);
-
-    void deletePlaceLike(long userId, long placeId);
-    void deletePlaceScrap(long userId, long placeId);
+    void addPlaceComment(Comment comment);
+    int deletePlaceLike(long userId, long placeId);
+    int deletePlaceScrap(long userId, long placeId);
+    int likeDown(long placeId);
+    int scrapDown(long placeId);
 }
+

@@ -1,5 +1,6 @@
 package Trabook.PlanManager.repository.destination;
 
+import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.City;
 import Trabook.PlanManager.domain.destination.Place;
 import org.springframework.data.geo.Point;
@@ -22,14 +23,23 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     //Optional 여부
     @Override
     public Optional<Place> findByPlaceId(long placeId) {
-        List<Place> result = jdbcTemplate.query("SELECT * FROM Place WHERE placeId =?", memberRowMapper(), placeId);
+        List<Place> result = jdbcTemplate.query("SELECT * FROM Place WHERE placeId =?", placeRowMapper(), placeId);
         return result.stream().findAny();
     }
 
 
     @Override
     public List<Place> findPlaceListByCity(long cityId) {
-        return jdbcTemplate.query("SELECT * FROM Place WHERE cityId = ?",memberRowMapper(),cityId);
+        return jdbcTemplate.query("SELECT * FROM Place WHERE cityId = ?",placeRowMapper(),cityId);
+    }
+
+    @Override
+    public List<Place> findPlaceListByUserScrap(long userId) {
+        String sql = "SELECT * " +
+                "FROM Place " +
+                "JOIN ScrappedPlace ON Place.placeId = ScrappedPlace.placeId " +
+                "WHERE ScrappedPlace.userId = ?";
+        return jdbcTemplate.query(sql,placeRowMapper(),userId);
     }
 
     @Override
@@ -47,28 +57,41 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         String sql = "INSERT INTO ScrappedPlace(userId,placeId)" +
                 "values(?, ?)";
         jdbcTemplate.update(sql,userId,placeId);
-        String sql2 = "UPDATE Place SET likes = likes + 1 WHERE placeId = ?";
+        String sql2 = "UPDATE Place SET scraps = scraps + 1 WHERE placeId = ?";
 
         jdbcTemplate.update(sql2, placeId);
     }
 
     @Override
-    public void deletePlaceLike(long userId, long placeId) {
-        String sql = "DELETE FROM LikedPlace WHERE userId = ? AND placeId = ?";
-        String sql2 = "UPDATE Place SET likes = likes - 1 WHERE placeId = ?";
-        jdbcTemplate.update(sql,userId,placeId);
-        jdbcTemplate.update(sql2,placeId);
+    public void addPlaceComment(Comment comment) {
+
     }
 
     @Override
-    public void deletePlaceScrap(long userId, long placeId) {
-        String sql = "DELETE FROM ScrappedPlace WHERE userId = ? AND placeId = ?"; //1번 쿼리 잘 안됐는데 2번쿼리 잘되는 거 고치기
-        String sql2 = "UPDATE Place SET scraps = scraps - 1 WHERE placeId = ?";
-        jdbcTemplate.update(sql,userId,placeId);
-        jdbcTemplate.update(sql2,placeId);
+    public int deletePlaceLike(long userId, long placeId) {
+        String sql = "DELETE FROM LikedPlace WHERE userId = ? AND placeId = ?";
+
+        return jdbcTemplate.update(sql,userId,placeId);
+
+    }
+    @Override
+    public int likeDown(long placeId) {
+        String sql = "UPDATE Place SET likes = likes - 1 WHERE placeId = ?";
+        return jdbcTemplate.update(sql,placeId);
     }
 
-    private RowMapper<Place> memberRowMapper() {
+    @Override
+    public int deletePlaceScrap(long userId, long placeId) {
+        String sql = "DELETE FROM ScrappedPlace WHERE userId = ? AND placeId = ?"; //1번 쿼리 잘 안됐는데 2번쿼리 잘되는 거 고치기
+        return jdbcTemplate.update(sql,userId,placeId);
+    }
+    @Override
+    public int scrapDown(long placeId) {
+        String sql = "UPDATE Place SET scraps = scraps - 1 WHERE placeId = ?";
+        return jdbcTemplate.update(sql,placeId);
+
+    }
+    private RowMapper<Place> placeRowMapper() {
         return new RowMapper<Place>() {
             @Override
             public Place mapRow(ResultSet rs, int rowNum) throws SQLException {

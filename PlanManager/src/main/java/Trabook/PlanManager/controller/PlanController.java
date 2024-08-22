@@ -11,6 +11,7 @@ import Trabook.PlanManager.service.planList.GetUserPlanList;
 import Trabook.PlanManager.service.planList.GetUserScrapPlanList;
 import Trabook.PlanManager.service.planList.PlanListServiceInterface;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +52,7 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/create")
-    public String createPlan(@RequestBody PlanRequestDTO planRequestDTO) {
+    public long createPlan(@RequestBody PlanRequestDTO planRequestDTO) {
        // System.out.println("ok");
         //log.info("{}",planRequestDTO);
       return planService.createPlan(planRequestDTO.getPlan(), planRequestDTO.getScheduleList());
@@ -59,13 +60,19 @@ public class PlanController {
 
     @ResponseBody
     @GetMapping("/")
-    public Optional<Plan> getPlanByPlanId(@RequestParam("planId") long planId) {
-        return planService.getPlan(planId);
+    public Plan getPlanByPlanId(@RequestParam("planId") long planId) {
+        return planService.getPlan(planId)
+                .orElseThrow(()-> new EntityNotFoundException("Plan not found"));
+    }
+    @ResponseBody
+    @PostMapping("/test")
+    public void scrap(@RequestParam("planId") long planId) {
+        planService.deleteLike(3,planId);
     }
 
 
     @ResponseBody
-    @GetMapping("/list")
+    @GetMapping("/plans")
     public List<Plan> getUserPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
         PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
         List<Plan> userPlanList = planListService.getPlanList(planListRequestDTO.getUserId());
@@ -73,6 +80,7 @@ public class PlanController {
 
         return userPlanList;
     }
+
 
     @ResponseBody
     @GetMapping("/like")

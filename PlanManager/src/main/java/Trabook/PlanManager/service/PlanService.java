@@ -6,8 +6,12 @@ import Trabook.PlanManager.domain.plan.Schedule;
 import Trabook.PlanManager.repository.plan.PlanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,17 +25,28 @@ public class PlanService {
     public PlanService(PlanRepository planRepository) {
         this.planRepository = planRepository;
     }
+    @Transactional
+    public long createPlan(Plan newPlan, List<Schedule> scheduleList) {
 
-    public String createPlan(Plan newPlan, List<Schedule> scheduleList) {
-        log.info("service logic plan = {}",newPlan);
         if(validateDuplicatePlanName(newPlan).isPresent()){
-            return "planName already exists";
+            //return "planName already exists";
+            return -1;
         } else {
-            planRepository.save(newPlan,scheduleList);
-            return "Plan saved!";
+            Plan savedPlan;
+
+                if (scheduleList == null || scheduleList.isEmpty()) {
+                    savedPlan = planRepository.savePlan(newPlan);
+                } else {
+                    savedPlan = planRepository.savePlan(newPlan);
+                    planRepository.saveSchedule(scheduleList);
+                }
+
+
+            return savedPlan.getPlanId();
         }
     }
 
+    @Transactional
     public String addComment(Comment comment) {
         if(planRepository.findById(comment.getPlanId()).isPresent()){
             planRepository.addComment(comment);
@@ -50,16 +65,27 @@ public class PlanService {
         }
     }
 
+    @Transactional()
     public String deleteLike(long userId,long planId){
-        if(planRepository.deleteLike(userId,planId) == 1)
+        /*
+        if(planRepository.deleteLike(userId,planId) == 1) {
+            planRepository.downLike(planId);
             return "delete complete";
-        else
+        } else
             return "error";
+            */
+        int updatedLikes = planRepository.downLike(planId);
+        log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
+        return "delete complete";
     }
+
+    @Transactional
     public String deleteScrap(long userId, long planId) {
-        if(planRepository.deleteScrap(userId,planId) == 1)
+        if(planRepository.deleteScrap(userId,planId) == 1) {
+            int updatedScraps = planRepository.downScrap(planId);
+            log.info("planId : {} scrap 수 감소[{} -> {}]",planId,updatedScraps-1,updatedScraps);
             return "delete complete";
-        else
+        }else
             return "error";
     }
 
@@ -70,44 +96,49 @@ public class PlanService {
             return "error";
     }
 
+    @Transactional
     public String likePlan(long userId,long planId) {
-        if(planRepository.findById(planId).isPresent()) {
-            planRepository.likePlan(userId,planId);
-            return "like complete";
+
+        try {
+            if (planRepository.findById(planId).isPresent()) {
+                planRepository.likePlan(userId, planId);
+                planRepository.upLike(planId);
+                return "like complete";
+            } else
+                return "no plan exists";
+        } catch(DataAccessException e){
+            if( e.getCause() instanceof SQLIntegrityConstraintViolationException)
+                return "like already exists";
+            return "error accessing db";
         }
-        else
-            return "no plan exists";
 
-    }
-
-    public String scrapPlan(long userId, long planId) {
-        if(planRepository.findById(planId).isPresent()) {
-            planRepository.scrapPlan(userId,planId);
-            return "scrap complete";
+        /*
+        if (planRepository.findById(planId).isPresent()) {
+            planRepository.upLike(planId);
+            return "like complete";
         } else
             return "no plan exists";
+
+         */
     }
 
-    public List<Plan> getUserPlanList(long userId) {
-        return planRepository.findUserPlanList(userId);
+    @Transactional
+    public String scrapPlan(long userId, long planId) {
+        try {
+            if (planRepository.findById(planId).isPresent()) {
+                planRepository.scrapPlan(userId, planId);
+                planRepository.upScrap(planId);
+                return "scrap complete";
+            } else
+                return "no plan exists";
+        } catch(DataAccessException e) {
+            if(e.getCause() instanceof SQLIntegrityConstraintViolationException) {
+                return "already scrap error";
+            }
+            return "error accessing db";
+        }
     }
 
-    public List<Plan> getUserLikePlanList(long userId) {
-        return planRepository.findUserLikePlanList(userId);
-    }
-
-    public List<Plan> getUserScrapPlanList(long userId){
-            return planRepository.findUserScrapPlanList(userId);
-    }
-
-    public List<Plan> getPlanListByCityId(long cityId) {
-        return planRepository.findPlanListByCityId(cityId);
-    }
-/*
-    public List<Plan> getPlanSearch(PlanSearchDTO planSearchDTO){
-        return planRepository.planSearch(planSearchDTO.getKeyword(),planSearchDTO.getFilters(),planSearchDTO.getSorts());
-    }
-*/
 
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기
     public Optional<Plan> validateDuplicatePlanName(Plan plan){

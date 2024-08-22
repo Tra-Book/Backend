@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public interface PlanRepository {
     Plan save(Plan plan, List<Schedule>scheduleList);
+    Plan savePlan(Plan plan);
+    void saveSchedule(List<Schedule> scheduleList);
     Optional<Plan> findById(long planId);
 
     Optional<Plan> findPlanByUserAndName(long userId, String planName);
@@ -32,5 +34,9 @@ public interface PlanRepository {
     int deleteScrap(long userId, long planId);
     int deleteComment(long commentId);
 
+    int upLike(long planId);
+    int downLike(long planId);
+    int upScrap(long planId);
+    int downScrap(long planId);
     void clearStore();
 }

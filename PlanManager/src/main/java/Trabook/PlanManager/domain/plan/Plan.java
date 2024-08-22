@@ -32,7 +32,6 @@ public class Plan {
         this.planId = planId;
         this.userId = userId;
         this.cityId = cityId;
-        //this.scheduleId = scheduleId;
         this.isPublic = isPublic;
         this.likes = likes;
         this.scraps = scraps;

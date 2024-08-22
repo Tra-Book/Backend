@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -42,7 +43,47 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
         return plan;
     }
+    @Override
+    public Plan savePlan(Plan plan) {
+        String sql = "INSERT INTO Plan(userId,cityId,likes,scraps,dateCreated,title,content,isPublic)" +
+                "values(?,?,?,?,?,?,?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update( connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"planId"});
+            ps.setLong(1,plan.getUserId());
+            ps.setLong(2,plan.getCityId());
+            ps.setInt(3,plan.getLikes());
+            ps.setInt(4,plan.getScraps());
+            ps.setString(5,plan.getDateCreated());
+            ps.setString(6,plan.getTitle());
+            ps.setString(7,plan.getContent());
+            ps.setBoolean(8,plan.isPublic());
+            return ps;
+        }, keyHolder);
+        plan.setPlanId(keyHolder.getKey().longValue());
+        return plan;
 
+    }
+    @Override
+    public void saveSchedule(List<Schedule> scheduleList) {
+        String sql = "INSERT INTO Schedule(planId, placeId, date, startTime, endTime)" +
+                "values(?,?,?,?,?)";
+        for(Schedule schedule : scheduleList) {
+
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
+                ps.setLong(1, schedule.getPlanId());
+                ps.setLong(2, schedule.getPlaceId());
+                ps.setString(3, schedule.getDate());
+                ps.setString(4, schedule.getStartTime());
+                ps.setString(5, schedule.getEndTime());
+                return ps;
+            }, keyHolder);
+            schedule.setScheduleId(keyHolder.getKey().longValue());
+        }
+
+    }
     @Override
     public Optional<Plan> findById(long planId){
         String sql = "SELECT * FROM Plan WHERE planId = ?";
@@ -67,20 +108,60 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public int deleteLike(long userId, long planId) {
         String sql = "DELETE FROM LikedPlan WHERE userId = ? AND planId = ?";
-        return jdbcTemplate.update(sql,userId,planId);
+        //String sql2 = "UPDATE Plan SET scraps = scraps + 1 WHERE planId = ?";
+        int result = jdbcTemplate.update(sql, userId, planId);
+        return result;
     }
 
     @Override
     public int deleteScrap(long userId, long planId) {
         String sql = "DELETE FROM ScrappedPlan WHERE userId = ? AND planId = ?";
-        return jdbcTemplate.update(sql,userId,planId);
+       // String sql2 = "UPDATE Plan SET scraps = scraps - WHERE planId = ?";
+        int result = jdbcTemplate.update(sql, userId, planId);
+        return result;
     }
 
     @Override
     public int deleteComment(long commentId) {
         String sql = "DELETE FROM PlanComment WHERE commentId = ?";
+
         return jdbcTemplate.update(sql,commentId);
     }
+
+    @Override
+    public int upLike(long planId) {
+        String sql = "UPDATE Plan SET likes = likes + 1 WHERE planId = ?";
+        int result = jdbcTemplate.update(sql, planId);
+        return result;
+    }
+
+    @Override
+    public int downLike(long planId) {
+        String sql = "UPDATE Plan SET likes = likes - 1 WHERE planId = ?";
+        int result = jdbcTemplate.update(sql, planId);
+        String sql2 = "SELECT likes FROM Plan WHERE planId=?";
+        Integer updatedLikes = jdbcTemplate.queryForObject(sql2, new Object[]{planId}, Integer.class);
+
+        return updatedLikes;
+    }
+
+    @Override
+    public int upScrap(long planId) {
+        String sql = "UPDATE Plan SET scraps = scraps + 1 WHERE planId = ?";
+        int result = jdbcTemplate.update(sql, planId);
+
+        return result;
+    }
+
+    @Override
+    public int downScrap(long planId) {
+        String sql = "UPDATE Plan SET scraps = scraps - 1 WHERE planId = ?";
+        jdbcTemplate.update(sql,planId);
+        String sql2 = "SELECT scraps FROM Plan WHERE planId=?";
+        Integer updatedScraps = jdbcTemplate.queryForObject(sql2, new Object[]{planId}, Integer.class);
+        return updatedScraps;
+    }
+
 
     /*
     @Override
@@ -131,9 +212,9 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         String sql = "INSERT INTO LikedPlan(userId,planId) " +
                 "values(?,?)";
         jdbcTemplate.update(sql,userId,planId);
-        String sql2 = "UPDATE Plan SET likes = likes + 1 WHERE planId = ?";
+       // String sql2 = "UPDATE Plan SET likes = likes + 1 WHERE planId = ?";
 
-        jdbcTemplate.update(sql2, planId);
+        //jdbcTemplate.update(sql2, planId);
 
     }
 
@@ -141,13 +222,10 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public void scrapPlan(long userId, long planId) {
         String sql1 = "INSERT INTO ScrappedPlan(userId,planId)" +
                 "values(?, ?)";
-
         jdbcTemplate.update(sql1,userId,planId);
 
-        String sql2 = "UPDATE Plan SET scraps = scraps + 1 WHERE planId = ?";
-
-        jdbcTemplate.update(sql2,planId);
-
+       // String sql2 = "UPDATE Plan SET scraps = scraps + 1 WHERE planId = ?";
+        //jdbcTemplate.update(sql2,planId);
     }
 
     @Override

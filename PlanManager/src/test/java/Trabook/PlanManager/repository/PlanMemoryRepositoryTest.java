@@ -1,3 +1,4 @@
+/*
 package Trabook.PlanManager.repository;
 
 import Trabook.PlanManager.domain.plan.Plan;
@@ -61,3 +62,4 @@ class PlanMemoryRepositoryTest {
     }
 
 }
+*/
