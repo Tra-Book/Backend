@@ -1,16 +1,54 @@
-const Post = require('../models/postModel');
+const AccompanyPost = require('../models/postModel.js');
 
 exports.createPost = async (req, res) => {
-    const { title, author, content } = req.body;
+    const {
+        userId,
+        cityId,
+        title,
+        content = null,
+        tag = null,
+        likes = 0,
+        chatroom,
+        maxParticipants = null,
+        minParticipants = null,
+        currentParticipants = 0,
+        genderPreference = null,
+        maxAge = null,
+        minAge = null,
+        purpose = null,
+        planId = null,
+        itinerary,
+        placeList = null
+    } = req.body;
 
-    const dateObject = new Date();
-    const date = dateObject.toISOString().split('T')[0].replace(/-/g, '.');
-    const time = dateObject.getHours() + ':' + dateObject.getMinutes();
-    const dateTime = date + ' ' + time
+    if (!userId || !title || !cityId || !chatroom || !itinerary) {
+        return res.status(400).json({ message: 'Not null fields are missing.' });
+    }
 
-    const newPost = new Post({ title, author, content, dateTime });
+    const createdAt = new Date().toISOString();
+
+    const newPost = new AccompanyPost({
+        userId,
+        cityId,
+        title,
+        content,
+        createdAt,
+        tag,
+        likes,
+        chatroom,
+        maxParticipants,
+        minParticipants,
+        currentParticipants,
+        genderPreference,
+        maxAge,
+        minAge,
+        purpose,
+        planId,
+        itinerary,
+        placeList
+    });
+
     try {
-        // save()
         await newPost.save();
         res.status(201).json(newPost);
     } catch (error) {
@@ -18,10 +56,13 @@ exports.createPost = async (req, res) => {
     }
 };
 
+
 exports.getPost = async (req, res) => {
     try {
-        // findById() (구현 필요)
-        const post = await Post.findById(req.params.id);
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
         res.json(post);
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -30,8 +71,12 @@ exports.getPost = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
     try {
-        // findByIdAndUpdate() (구현 필요)
-        const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        await post.updateProfile(req.body);
         res.json(post);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -40,20 +85,28 @@ exports.updatePost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
-        // findByIdAndDelete() (구현 필요)
-        await Post.findByIdAndDelete(req.params.id);
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        await post.deletePost();
         res.json({ message: 'Post deleted' });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-exports.getUserPosts = async (req, res) => {
+exports.getAccompanyPostsByUserId = async (req, res) => {
     try {
-        // find() (구현 필요)
-        const posts = await Post.find({ author: req.params.author });
-        res.json(posts);
+        const posts = await AccompanyPost.getPostsByUserId(req.params.userId);
+
+        if (posts.length === 0) {
+            return res.status(404).json({ message: 'No posts found for this user.' });
+        }
+
+        return res.json(posts);
     } catch (error) {
-        res.status(404).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 };
