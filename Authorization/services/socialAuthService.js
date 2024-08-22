@@ -38,7 +38,7 @@ const verifyNaverToken = async (token) => {
     return response.data.response.email;
 };
 
-exports.createUser = async (email) => {
+exports.createUser = async (email, connection) => {
     const username = '여행자' + generator.generate({ length: 8, numbers: true });
     const password = generator.generate({
         length: 14,
@@ -54,6 +54,6 @@ exports.createUser = async (email) => {
         password: hashedPassword,
         statusMessage: null,
     });
-    const userId = await newUser.save();
+    const userId = await newUser.save(connection);
     return { userId, username };
 };

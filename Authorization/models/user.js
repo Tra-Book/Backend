@@ -10,13 +10,13 @@ class User {
         this.profilePhoto = profilePhoto;
     }
 
-    async save() {
+    async save(connection) {
         try {
             const query = `
                 INSERT INTO User (username, email, password, statusMessage, profilePhoto)
                 VALUES (?, ?, ?, ?, ?)
             `;
-            const [result] = await db.query(query, [
+            const [result] = await connection.query(query, [
                 this.username,
                 this.email,
                 this.password,
@@ -32,14 +32,14 @@ class User {
         }
     }
 
-    async updateProfile(username, statusMessage, hashedPassword, profilePhoto) {
+    async updateProfile(username, statusMessage, hashedPassword, profilePhoto, connection) {
         try {
             const query = `
                 UPDATE User 
                 SET username = ?, statusMessage = ?, password = ?, profilePhoto = ?
                 WHERE email = ?
             `;
-            await db.query(query, [
+            await connection.query(query, [
                 username,
                 statusMessage,
                 hashedPassword,
@@ -52,13 +52,13 @@ class User {
         }
     }
 
-    async deleteUser() {
+    async deleteUser(connection) {
         try {
             const query = `
                 DELETE FROM User 
                 WHERE email = ?
             `;
-            await db.query(query, [this.email]);
+            await connection.query(query, [this.email]);
         } catch (err) {
             console.error('Error deleting user:', err.message);
             throw new Error('Could not delete user');

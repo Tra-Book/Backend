@@ -3,6 +3,7 @@ const socialAuthService = require('./socialAuthService');
 const tokenUtil = require('../utils/tokenUtil');
 const bcryptUtil = require('../utils/bcryptUtil');
 const redisUtil = require('../utils/redisUtil');
+const db = require('../utils/mysqlUtil');
 const User = require('../models/user');
 
 exports.login = async (email, password) => {
@@ -28,19 +29,32 @@ exports.login = async (email, password) => {
 };
 
 exports.signup = async (email, password, username) => {
-    const existingUser = await User.getUserByEmail(email);
-    if (existingUser) {
-        return { error: true, statusCode: 400, message: 'User already exists' };
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const existingUser = await User.getUserByEmail(email);
+        if (existingUser) {
+            await connection.rollback();
+            return { error: true, statusCode: 400, message: 'User already exists' };
+        }
+
+        const hashedPassword = await bcryptUtil.hashPassword(password);
+        const newUser = new User({ username, email, password: hashedPassword });
+        const userId = await newUser.save(connection); // Pass the connection to the save method
+
+        const accessToken = tokenUtil.genAccessToken(userId);
+        const refreshToken = tokenUtil.genRefreshToken();
+
+        await connection.commit();
+
+        return { error: false, user: { userId, username }, accessToken, refreshToken };
+    } catch (err) {
+        await connection.rollback();
+        return { error: true, statusCode: 500, message: 'Server Error' };
+    } finally {
+        connection.release();
     }
-
-    const hashedPassword = await bcryptUtil.hashPassword(password);
-    const newUser = new User({ username, email, password: hashedPassword });
-    const userId = await newUser.save();
-
-    const accessToken = tokenUtil.genAccessToken(userId);
-    const refreshToken = tokenUtil.genRefreshToken();
-
-    return { error: false, user: { userId, username }, accessToken, refreshToken };
 };
 
 exports.sendVerificationCode = async (email) => {
@@ -72,16 +86,47 @@ exports.updateProfile = async (
     statusMessage,
     newPassword
 ) => {
-    const user = await User.getUserByEmail(email);
-    const hashedPassword = await bcryptUtil.hashPassword(newPassword);
-    await user.updateProfile(username, statusMessage, hashedPassword, profilePhoto);
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const user = await User.getUserByEmail(email, connection);
+        if (!user) {
+            await connection.rollback();
+            return { error: true, statusCode: 404, message: 'User not found' };
+        }
+
+        const hashedPassword = await bcryptUtil.hashPassword(newPassword);
+        await user.updateProfile(username, statusMessage, hashedPassword, profilePhoto, connection);
+
+        await connection.commit();
+        return { error: false, message: 'Profile updated successfully' };
+    } catch (err) {
+        await connection.rollback();
+        return { error: true, statusCode: 500, message: 'Server Error' };
+    } finally {
+        connection.release();
+    }
 };
 
 exports.deleteUser = async (user) => {
-    await user.deleteUser();
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+    try {
+        await user.deleteUser(connection);
+        connection.commit();
+    } catch (err) {
+        connection.rollback();
+        return { error: true, statusCode: 500, message: 'Server Error' };
+    } finally {
+        connection.release();
+    }
 };
 
 exports.handleSocialLogin = async (req, res, provider) => {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
     try {
         const tokenVerifier = socialAuthService.getTokenVerifier(provider);
         const { email, access_token } = req.body;
@@ -92,7 +137,7 @@ exports.handleSocialLogin = async (req, res, provider) => {
 
         const user = await User.getUserByEmail(email);
         if (!user) {
-            const newUserDetails = await socialAuthService.createUser(email);
+            const newUserDetails = await socialAuthService.createUser(email, connection);
             const accessToken = tokenUtil.genAccessToken(newUserDetails.userId);
             const refreshToken = tokenUtil.genRefreshToken();
             return generateAuthResponse(res, 201, accessToken, refreshToken, newUserDetails);
@@ -100,11 +145,17 @@ exports.handleSocialLogin = async (req, res, provider) => {
 
         const accessToken = tokenUtil.genAccessToken(user.userId);
         const refreshToken = tokenUtil.genRefreshToken();
+
+        await connection.commit();
+
         return generateAuthResponse(res, 200, accessToken, refreshToken, {
             userId: user.userId,
             username: user.username,
         });
     } catch (err) {
+        await connection.rollback();
         return { error: true, statusCode: 500, message: `${provider} API server error` };
+    } finally {
+        connection.release();
     }
 };

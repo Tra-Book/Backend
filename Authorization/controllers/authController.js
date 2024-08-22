@@ -5,10 +5,9 @@ exports.postLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         const result = await authService.login(email, password);
-        if (result.error) {
-            return sendErrorResponse(res, result.statusCode, result.message);
-        }
-        return generateAuthResponse(res, 200, result.accessToken, result.refreshToken, result.user);
+        return result.error 
+            ? sendErrorResponse(res, result.statusCode, result.message)
+            : generateAuthResponse(res, 200, result.accessToken, result.refreshToken, result.user);
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
@@ -18,10 +17,9 @@ exports.postSignup = async (req, res, next) => {
     const { email, password, username } = req.body;
     try {
         const result = await authService.signup(email, password, username);
-        if (result.error) {
-            return sendErrorResponse(res, result.statusCode, result.message);
-        }
-        return generateAuthResponse(res, 201, result.accessToken, result.refreshToken, result.user);
+        return result.error
+            ? sendErrorResponse(res, result.statusCode, result.message)
+            : generateAuthResponse(res, 201, result.accessToken, result.refreshToken, result.user);
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
@@ -31,10 +29,9 @@ exports.postSendVerificationCode = async (req, res) => {
     const { email } = req.body;
     try {
         const result = await authService.sendVerificationCode(email);
-        if (result.error) {
-            return sendErrorResponse(res, 500, result.message);
-        }
-        return res.status(200).json({ message: 'Verification code sent' });
+        return result.error
+            ? sendErrorResponse(res, 500, result.message)
+            : res.status(200).json({ message: 'Verification code sent' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
@@ -44,10 +41,9 @@ exports.postVerifyCode = async (req, res) => {
     const { email, code } = req.body;
     try {
         const result = await authService.verifyCode(email, code);
-        if (result.error) {
-            return sendErrorResponse(res, 400, result.message);
-        }
-        return res.status(200).json({ message: 'Valid code' });
+        return result.error
+            ? sendErrorResponse(res, 400, result.message)
+            : res.status(200).json({ message: 'Valid code' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
