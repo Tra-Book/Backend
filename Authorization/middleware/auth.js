@@ -5,23 +5,19 @@ const token = require('../utils/tokenUtil');
 const authenticate = async (req, res, next) => {
     const accessToken = req.headers['authorization'];
     const refreshToken = req.cookies['refreshToken'];
-    
+
     if (!accessToken || !refreshToken) {
         return res.status(403).json({ message: 'Authentication required: no AT or RT' });
     }
 
     try {
-        const accessDecoded = jwt.verify(
-            accessToken,
-            process.env.ACCESS_TOKEN_SECRET,
-            {
-                complete: true,
-                algorithms: ['HS256'],
-                clockTolerance: 0,
-                ignoreExpiration: false,
-                ignoreNotBefore: false,
-            }
-        );
+        const accessDecoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
+            complete: true,
+            algorithms: ['HS256'],
+            clockTolerance: 0,
+            ignoreExpiration: false,
+            ignoreNotBefore: false,
+        });
 
         const user = await User.getUserByUserId(accessDecoded.payload.userId);
         if (!user) {
@@ -32,17 +28,13 @@ const authenticate = async (req, res, next) => {
     } catch (err) {
         // AT invalid or expired
         try {
-            const accessDecoded = jwt.verify(
-                accessToken,
-                process.env.ACCESS_TOKEN_SECRET,
-                {
-                    complete: true,
-                    algorithms: ['HS256'],
-                    clockTolerance: 0,
-                    ignoreExpiration: true,
-                    ignoreNotBefore: false,
-                }
-            );
+            const accessDecoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
+                complete: true,
+                algorithms: ['HS256'],
+                clockTolerance: 0,
+                ignoreExpiration: true,
+                ignoreNotBefore: false,
+            });
 
             try {
                 jwt.verify(
@@ -58,7 +50,8 @@ const authenticate = async (req, res, next) => {
                     async (err, refreshDecoded) => {
                         if (err) {
                             return res.status(403).json({
-                                message: 'Authentication required: AT expired and RT invalid or expired',
+                                message:
+                                    'Authentication required: AT expired and RT invalid or expired',
                             });
                         }
 

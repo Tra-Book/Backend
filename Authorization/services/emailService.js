@@ -11,7 +11,7 @@ exports.sendVerificationEmail = async (email, verificationCode) => {
         html: getVerificationEmailHtml(verificationCode),
         text: getVerificationEmailText(verificationCode),
     };
-
+    
     try {
         await transporter.sendMail(mailOptions);
         return true;
