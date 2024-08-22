@@ -1,27 +1,28 @@
 const db = require('../utils/mysqlUtil');
 
 class User {
-    constructor({
-        userId,
-        username,
-        email,
-        password,
-        statusMessage,
-    }) {
-        this.userId = userId
+    constructor({ userId, username, email, password, statusMessage, profilePhoto }) {
+        this.userId = userId;
         this.username = username;
         this.email = email;
         this.password = password;
         this.statusMessage = statusMessage;
+        this.profilePhoto = profilePhoto;
     }
 
     async save() {
         try {
             const query = `
-                INSERT INTO User (username, email, password, statusMessage)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO User (username, email, password, statusMessage, profilePhoto)
+                VALUES (?, ?, ?, ?, ?)
             `;
-            const [result] = await db.query(query, [this.username, this.email, this.password, this.statusMessage]);
+            const [result] = await db.query(query, [
+                this.username,
+                this.email,
+                this.password,
+                this.statusMessage,
+                this.profilePhoto,
+            ]);
             const userId = result.insertId;
             this.userId = userId;
             return userId;
@@ -31,14 +32,20 @@ class User {
         }
     }
 
-    async updateProfile(username, statusMessage, hashedPassword) {
+    async updateProfile(username, statusMessage, hashedPassword, profilePhoto) {
         try {
             const query = `
                 UPDATE User 
-                SET username = ?, statusMessage = ?, password = ?
+                SET username = ?, statusMessage = ?, password = ?, profilePhoto = ?
                 WHERE email = ?
             `;
-            await db.query(query, [username, statusMessage, hashedPassword, this.email]);
+            await db.query(query, [
+                username,
+                statusMessage,
+                hashedPassword,
+                profilePhoto,
+                this.email,
+            ]);
         } catch (err) {
             console.error('Error updating user profile:', err.message);
             throw new Error('Could not update user profile');
@@ -61,7 +68,7 @@ class User {
     static async getUserByEmail(userEmail) {
         try {
             const query = `
-                SELECT userId, username, email, password, statusMessage
+                SELECT userId, username, email, password, statusMessage, profilePhoto
                 FROM User 
                 WHERE email = ?
             `;
@@ -77,6 +84,7 @@ class User {
                 email: rows[0].email,
                 password: rows[0].password,
                 statusMessage: rows[0].statusMessage,
+                profilePhoto: rows[0].profilePhoto,
             });
             return user;
         } catch (err) {
@@ -88,7 +96,7 @@ class User {
     static async getUserByUserId(userId) {
         try {
             const query = `
-                SELECT userId, username, email, password, statusMessage
+                SELECT userId, username, email, password, statusMessage, profilePhoto
                 FROM User 
                 WHERE userId = ?
             `;
@@ -103,6 +111,7 @@ class User {
                 email: rows[0].email,
                 password: rows[0].password,
                 statusMessage: rows[0].statusMessage,
+                profilePhoto: rows[0].profilePhoto,
             });
             return user;
         } catch (err) {

@@ -65,10 +65,16 @@ exports.verifyCode = async (email, code) => {
     return { error: false };
 };
 
-exports.updateProfile = async (username, email, statusMessage, newPassword) => {
+exports.updateProfile = async (
+    username,
+    email,
+    profilePhoto = null,
+    statusMessage,
+    newPassword
+) => {
     const user = await User.getUserByEmail(email);
     const hashedPassword = await bcryptUtil.hashPassword(newPassword);
-    await user.updateProfile(username, statusMessage, hashedPassword);
+    await user.updateProfile(username, statusMessage, hashedPassword, profilePhoto);
 };
 
 exports.deleteUser = async (user) => {

@@ -54,9 +54,9 @@ exports.postVerifyCode = async (req, res) => {
 };
 
 exports.postUpdateProfile = async (req, res, next) => {
-    const { username, email, statusMessage, newPassword } = req.body;
+    const { username, email, profilePhoto, statusMessage, newPassword } = req.body;
     try {
-        await authService.updateProfile(username, email, statusMessage, newPassword);
+        await authService.updateProfile(username, email, profilePhoto, statusMessage, newPassword);
         return res.status(200).json({ message: 'Success' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
