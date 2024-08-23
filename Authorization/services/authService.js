@@ -116,6 +116,16 @@ exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, n
         );
 
         await connection.commit();
+
+        if (oldProfilePhotoUrl) {
+            await multerUtil.removeImage(oldProfilePhotoUrl);
+        }
+        return {
+            error: false,
+            statusCode: 200,
+            message: 'Profile updated successfully',
+            data: null,
+        };
     } catch (err) {
         await connection.rollback();
 
@@ -126,16 +136,6 @@ exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, n
     } finally {
         connection.release();
     }
-
-    if (oldProfilePhotoUrl) {
-        await multerUtil.removeImage(oldProfilePhotoUrl);
-    }
-    return {
-        error: false,
-        statusCode: 200,
-        message: 'Profile updated successfully',
-        data: null,
-    };
 };
 
 exports.deleteUser = async (user) => {

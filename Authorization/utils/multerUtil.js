@@ -2,6 +2,8 @@ const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const multerGoogleStorage = require('multer-google-storage');
 const config = require('../config/multerConfig');
+const fs = require('fs');
+const path = require('path');
 
 const storage = new Storage({
     projectId: config.projectId,
@@ -21,6 +23,16 @@ const upload = multer({
     }),
 });
 
+async function logFailedDeletion(url) {
+    const failedDeletionsLogFile = path.join(__dirname, '..', 'logs', 'failed_deletions.log');
+    const logEntry = `${new Date().toISOString()} - ${url}\n`;
+    fs.appendFile(failedDeletionsLogFile, logEntry, (err) => {
+        if (err) {
+            console.error('Failed to log deletion error:', err);
+        }
+    });
+}
+
 async function removeImage(fileUrl) {
     try {
         const fileName = fileUrl.split('/').pop();
@@ -28,7 +40,7 @@ async function removeImage(fileUrl) {
         await file.delete();
     } catch (error) {
         console.log(error);
-        throw error;
+        await logFailedDeletion(url);
     }
 }
 
