@@ -21,7 +21,19 @@ const upload = multer({
     }),
 });
 
+async function removeImage(fileUrl) {
+    try {
+        const fileName = fileUrl.split('/').pop();
+        const file = storage.bucket(config.bucketName).file('profilePhoto/' + fileName);
+        await file.delete();
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 module.exports = {
     upload,
     storage,
+    removeImage,
 };

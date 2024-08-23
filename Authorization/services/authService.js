@@ -3,9 +3,10 @@ const socialAuthService = require('./socialAuthService');
 const tokenUtil = require('../utils/tokenUtil');
 const bcryptUtil = require('../utils/bcryptUtil');
 const redisUtil = require('../utils/redisUtil');
+const multerUtil = require('../utils/multerUtil');
 const db = require('../utils/mysqlUtil');
-const { storage, upload } = require('../utils/multerUtil');
 const User = require('../models/user');
+const multer = require('multer');
 
 exports.login = async (email, password) => {
     const user = await User.getUserByEmail(email);
@@ -98,33 +99,13 @@ exports.verifyCode = async (email, code) => {
     return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
-exports.updateProfile = async (username, email, profilePhoto, statusMessage, newPassword) => {
+exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, newPassword) => {
+    const oldProfilePhotoUrl = user.profilePhoto;
+
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
-    let profilePhotoUrl = req.user.profilePhoto;
-    let uploadedFileName = null;
-
     try {
-        const user = await User.getUserByEmail(email, connection);
-        if (!user) {
-            await connection.rollback();
-            return { error: true, statusCode: 404, message: 'User not found', data: null };
-        }
-
-        if (profilePhoto) {
-            await new Promise((resolve, reject) => {
-                upload({ file: profilePhoto }, {}, (err, uploadResponse) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    profilePhotoUrl = uploadResponse.url;
-                    uploadedFileName = uploadResponse.filename;
-                    resolve();
-                });
-            });
-        }
-
         const hashedPassword = await bcryptUtil.hashPassword(newPassword);
         await user.updateProfile(
             username,
@@ -135,28 +116,26 @@ exports.updateProfile = async (username, email, profilePhoto, statusMessage, new
         );
 
         await connection.commit();
-        return {
-            error: false,
-            statusCode: 200,
-            message: 'Profile updated successfully',
-            data: null,
-        };
     } catch (err) {
         await connection.rollback();
 
-        if (uploadedFileName) {
-            const file = storage.bucket(bucketName).file(uploadedFileName);
-            try {
-                await file.delete();
-            } catch (deleteErr) {
-                console.error('Error deleting the uploaded file:', deleteErr);
-            }
+        if (profilePhotoUrl) {
+            await multerUtil.removeImage(profilePhotoUrl);
         }
-
         return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
     }
+
+    if (oldProfilePhotoUrl) {
+        await multerUtil.removeImage(oldProfilePhotoUrl);
+    }
+    return {
+        error: false,
+        statusCode: 200,
+        message: 'Profile updated successfully',
+        data: null,
+    };
 };
 
 exports.deleteUser = async (user) => {
