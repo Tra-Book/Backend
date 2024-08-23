@@ -6,7 +6,7 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 app.use('/auth', authRoutes);

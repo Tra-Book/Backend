@@ -4,6 +4,7 @@ const tokenUtil = require('../utils/tokenUtil');
 const bcryptUtil = require('../utils/bcryptUtil');
 const redisUtil = require('../utils/redisUtil');
 const db = require('../utils/mysqlUtil');
+const { storage, upload } = require('../utils/multerUtil');
 const User = require('../models/user');
 
 exports.login = async (email, password) => {
@@ -101,6 +102,9 @@ exports.updateProfile = async (username, email, profilePhoto, statusMessage, new
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
+    let profilePhotoUrl = req.user.profilePhoto;
+    let uploadedFileName = null;
+
     try {
         const user = await User.getUserByEmail(email, connection);
         if (!user) {
@@ -108,8 +112,27 @@ exports.updateProfile = async (username, email, profilePhoto, statusMessage, new
             return { error: true, statusCode: 404, message: 'User not found', data: null };
         }
 
+        if (profilePhoto) {
+            await new Promise((resolve, reject) => {
+                upload({ file: profilePhoto }, {}, (err, uploadResponse) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    profilePhotoUrl = uploadResponse.url;
+                    uploadedFileName = uploadResponse.filename;
+                    resolve();
+                });
+            });
+        }
+
         const hashedPassword = await bcryptUtil.hashPassword(newPassword);
-        await user.updateProfile(username, statusMessage, hashedPassword, profilePhoto, connection);
+        await user.updateProfile(
+            username,
+            statusMessage,
+            hashedPassword,
+            profilePhotoUrl,
+            connection
+        );
 
         await connection.commit();
         return {
@@ -120,6 +143,16 @@ exports.updateProfile = async (username, email, profilePhoto, statusMessage, new
         };
     } catch (err) {
         await connection.rollback();
+
+        if (uploadedFileName) {
+            const file = storage.bucket(bucketName).file(uploadedFileName);
+            try {
+                await file.delete();
+            } catch (deleteErr) {
+                console.error('Error deleting the uploaded file:', deleteErr);
+            }
+        }
+
         return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
