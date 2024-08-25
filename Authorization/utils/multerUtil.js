@@ -28,7 +28,7 @@ const upload = multer({
 async function uploadToGCS(file) {
     return new Promise((resolve, reject) => {
         if (!file) {
-            resolve('None');
+            resolve(null);
         }
 
         const bucket = storage.bucket(config.bucketName);
