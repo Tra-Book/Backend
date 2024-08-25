@@ -11,17 +11,61 @@ const storage = new Storage({
 });
 
 const upload = multer({
-    storage: multerGoogleStorage.storageEngine({
-        bucket: config.bucketName,
-        projectId: config.projectId,
-        keyFilename: config.keyFilename,
-        acl: 'publicRead',
-        filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            cb(null, 'profilePhoto/' + uniqueSuffix + '-' + file.originalname);
-        },
-    }),
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024,
+    },
+    // multerGoogleStorage.storageEngine({
+    //     bucket: config.bucketName,
+    //     projectId: config.projectId,
+    //     keyFilename: config.keyFilename,
+    //     filename: (req, file, cb) => {
+    //         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    //         cb(null, 'profilePhoto/' + uniqueSuffix + '-' + file.originalname);
+    //     },
+    // }),
 });
+
+async function uploadToGCS(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve('None');
+        }
+
+        const bucket = storage.bucket(bucketName);
+        const gcsFileName = `profilePhoto/${Date.now()}-${file.originalname}`;
+        const fileUpload = bucket.file(gcsFileName);
+
+        const stream = fileUpload.createWriteStream({
+            metadata: {
+                contentType: file.mimetype,
+            },
+        });
+
+        stream.on('error', (err) => {
+            reject(err);
+        });
+
+        stream.on('finish', () => {
+            fileUpload.makePublic().then(() => {
+                resolve(`https://storage.googleapis.com/${bucketName}/${gcsFileName}`);
+            });
+        });
+
+        stream.end(file.buffer);
+    });
+}
+
+async function removeFromGCS(filePath) {
+    try {
+        const fileName = filePath.split('/').pop();
+        const file = storage.bucket(config.bucketName).file('profilePhoto/' + fileName);
+        await file.delete();
+    } catch (error) {
+        console.log(error);
+        await logFailedDeletion(url);
+    }
+}
 
 async function logFailedDeletion(url) {
     const failedDeletionsLogFile = path.join(__dirname, '..', 'logs', 'failed_deletions.log');
@@ -33,19 +77,21 @@ async function logFailedDeletion(url) {
     });
 }
 
-async function removeImage(fileUrl) {
-    try {
-        const fileName = fileUrl.split('/').pop();
-        const file = storage.bucket(config.bucketName).file('profilePhoto/' + fileName);
-        await file.delete();
-    } catch (error) {
-        console.log(error);
-        await logFailedDeletion(url);
-    }
+async function generateSignedUrl(filename) {
+    const options = {
+        version: 'v4',
+        action: 'read',
+        expires: Date.now() + 1000 * 60 * 60,
+    };
+
+    const [url] = await storage.bucket(config.bucketName).file(filename).getSignedUrl(options);
+    return url;
 }
 
 module.exports = {
     upload,
     storage,
-    removeImage,
+    uploadToGCS,
+    generateSignedUrl,
+    removeFromGCS,
 };

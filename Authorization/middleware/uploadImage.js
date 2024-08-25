@@ -1,11 +1,13 @@
 const { upload } = require('../utils/multerUtil');
+const multer = require('multer');
 
-const uploadImage = (req, res, next) => {
+const uploadToMem = (req, res, next) => {
     upload.single('image')(req, res, (err) => {
         if (err) {
             if (err instanceof multer.MulterError) {
                 return res.status(400).json({ message: `Multer error: ${err.message}` });
             } else {
+                console.log(err);
                 return res.status(500).json({ message: 'Failed to upload image' });
             }
         }
@@ -13,4 +15,4 @@ const uploadImage = (req, res, next) => {
     });
 };
 
-module.exports = uploadImage;
+module.exports = uploadToMem;

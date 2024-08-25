@@ -21,7 +21,6 @@ exports.login = async (email, password) => {
 
     const accessToken = tokenUtil.genAccessToken(user.userId);
     const refreshToken = tokenUtil.genRefreshToken();
-
     return {
         error: false,
         statusCode: 200,
@@ -99,13 +98,14 @@ exports.verifyCode = async (email, code) => {
     return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
-exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, newPassword) => {
-    const oldProfilePhotoUrl = user.profilePhoto;
-
+exports.updateProfile = async (user, username, profilePhoto, statusMessage, newPassword) => {
+    let profilePhotoUrl = null;
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
     try {
+        profilePhotoUrl = await multerUtil.uploadToGCS(profilePhoto);
+        const oldProfilePhotoUrl = user.profilePhoto;
         const hashedPassword = await bcryptUtil.hashPassword(newPassword);
         await user.updateProfile(
             username,
@@ -118,7 +118,7 @@ exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, n
         await connection.commit();
 
         if (oldProfilePhotoUrl) {
-            await multerUtil.removeImage(oldProfilePhotoUrl);
+            await multerUtil.removeFromGCS(oldProfilePhotoUrl);
         }
         return {
             error: false,
@@ -130,7 +130,7 @@ exports.updateProfile = async (user, username, profilePhotoUrl, statusMessage, n
         await connection.rollback();
 
         if (profilePhotoUrl) {
-            await multerUtil.removeImage(profilePhotoUrl);
+            await multerUtil.removeFromGCS(profilePhotoUrl);
         }
         return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
