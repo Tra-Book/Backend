@@ -62,7 +62,7 @@ exports.postVerifyCode = async (req, res) => {
 exports.postUpdateProfile = async (req, res, next) => {
     const { username, statusMessage, newPassword } = req.body;
     const profilePhoto = req.file ? req.file : null;
-
+    
     try {
         const { error, statusCode, message } = await authService.updateProfile(
             req.user,

@@ -1,6 +1,5 @@
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
-const multerGoogleStorage = require('multer-google-storage');
 const config = require('../config/multerConfig');
 const fs = require('fs');
 const path = require('path');
@@ -32,7 +31,7 @@ async function uploadToGCS(file) {
             resolve('None');
         }
 
-        const bucket = storage.bucket(bucketName);
+        const bucket = storage.bucket(config.bucketName);
         const gcsFileName = `profilePhoto/${Date.now()}-${file.originalname}`;
         const fileUpload = bucket.file(gcsFileName);
 
@@ -47,9 +46,7 @@ async function uploadToGCS(file) {
         });
 
         stream.on('finish', () => {
-            fileUpload.makePublic().then(() => {
-                resolve(`https://storage.googleapis.com/${bucketName}/${gcsFileName}`);
-            });
+            resolve(`https://storage.googleapis.com/${config.bucketName}/${gcsFileName}`);
         });
 
         stream.end(file.buffer);

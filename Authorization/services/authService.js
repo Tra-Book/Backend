@@ -127,6 +127,7 @@ exports.updateProfile = async (user, username, profilePhoto, statusMessage, newP
             data: null,
         };
     } catch (err) {
+        console.log(err);
         await connection.rollback();
 
         if (profilePhotoUrl) {
