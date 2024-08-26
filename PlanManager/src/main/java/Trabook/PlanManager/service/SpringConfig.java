@@ -22,6 +22,7 @@ public class SpringConfig {
     }
 
 
+
     @Bean
     public PlanService planService() {
         return new PlanService(planRepository());
