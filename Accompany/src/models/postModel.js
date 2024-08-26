@@ -62,7 +62,7 @@ class AccompanyPost {
         }
     }
 
-    async updateProfile({
+    async updatePost({
         cityId, title, content, createdAt, tag, likes, chatroom,
         maxParticipants, minParticipants, currentParticipants, genderPreference, maxAge, minAge, purpose, planId, itinerary, placeList
     }) {
