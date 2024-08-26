@@ -10,6 +10,10 @@ router.patch('/:accompanyId', postController.updatePost);
 router.delete('/:accompanyId', postController.deletePost);
 router.get('/:userId', postController.getAccompanyPostsByUserId);
 
+router.post('/scrap/:userId/:accompanyId', postController.addScrap); // 게시물 스크랩
+router.delete('/scrap/:userId/:accompanyId', postController.removeScrap); // 게시물 스크랩 취소
+router.get('/scrap/:userId', postController.getScrappedPostsByUserId); // 사용자가 스크랩한 모든 게시물 조회
+
 // 댓글
 // router.post('/:postId/comments', commentController.createComment);
 // router.patch('/:postId/comments/:commentId', commentController.updateComment);

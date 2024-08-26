@@ -59,7 +59,7 @@ exports.createPost = async (req, res) => {
 
 exports.getPost = async (req, res) => {
     try {
-        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyId);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -71,7 +71,7 @@ exports.getPost = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
     try {
-        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyId);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -85,7 +85,7 @@ exports.updatePost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
-        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyPostId);
+        const post = await AccompanyPost.getPostByAccompanyId(req.params.accompanyId);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -103,6 +103,42 @@ exports.getAccompanyPostsByUserId = async (req, res) => {
 
         if (posts.length === 0) {
             return res.status(404).json({ message: 'No posts found for this user.' });
+        }
+
+        return res.json(posts);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+exports.addScrap = async (req, res) => {
+    const { userId, accompanyId } = req.params;
+
+    try {
+        await AccompanyPost.addScrap(userId, accompanyId);
+        res.status(201).json({ message: 'Post scrapped successfully' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+exports.removeScrap = async (req, res) => {
+    const { userId, accompanyId } = req.params;
+
+    try {
+        await AccompanyPost.removeScrap(userId, accompanyId);
+        res.status(200).json({ message: 'Scrap removed successfully' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+exports.getScrappedPostsByUserId = async (req, res) => {
+    try {
+        const posts = await AccompanyPost.getScrappedPostsByUserId(req.params.userId);
+
+        if (posts.length === 0) {
+            return res.status(404).json({ message: 'No scrapped posts found for this user.' });
         }
 
         return res.json(posts);

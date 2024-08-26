@@ -62,7 +62,7 @@ class AccompanyPost {
         }
     }
 
-    async updateProfile({
+    async updatePost({
         cityId, title, content, createdAt, tag, likes, chatroom,
         maxParticipants, minParticipants, currentParticipants, genderPreference, maxAge, minAge, purpose, planId, itinerary, placeList
     }) {
@@ -177,6 +177,80 @@ class AccompanyPost {
         } catch (err) {
             console.error('Error retrieving accompany post by accompany id:', err.message);
             throw new Error('Could not retrieve accompany post by accompany id');
+        }
+    }
+
+    // 특정 user가 특정 post를 스크랩
+    static async addScrap(userId, accompanyId) {
+        try {
+            const query = `
+                INSERT INTO ScrapAccompanyPost (userId, accompanyId)
+                VALUES (?, ?)
+            `;
+            await db.query(query, [userId, accompanyId]);
+        } catch (err) {
+            console.error('Error adding scrap:', err.message);
+            throw new Error('Could not add scrap');
+        }
+    }
+
+    // 특정 user가 특정 post의 스크랩을 삭제
+    static async removeScrap(userId, accompanyId) {
+        try {
+            const query = `
+                DELETE FROM ScrapAccompanyPost 
+                WHERE userId = ? AND accompanyId = ?
+            `;
+            await db.query(query, [userId, accompanyId]);
+        } catch (err) {
+            console.error('Error removing scrap:', err.message);
+            throw new Error('Could not remove scrap');
+        }
+    }
+
+    // 특정 user가 스크랩한 모든 post를 조회
+    static async getScrappedPostsByUserId(userId) {
+        try {
+            const query = `
+                SELECT A.accompanyId, A.userId, A.cityId, A.title, A.content, A.createdAt, A.tag, A.likes, A.chatroom, 
+                       A.maxParticipants, A.minParticipants, A.currentParticipants, A.genderPreference, A.maxAge, A.minAge, A.purpose, A.planId, A.itinerary, A.placeList
+                FROM Accompany A
+                JOIN ScrapAccompanyPost S ON A.accompanyId = S.accompanyId
+                WHERE S.userId = ?
+            `;
+            const [rows] = await db.query(query, [userId]);
+
+            if (rows.length === 0) {
+                return [];
+            }
+
+            const scrappedPosts = rows.map(row => new AccompanyPost({
+                accompanyId: row.accompanyId,
+                userId: row.userId,
+                cityId: row.cityId,
+                title: row.title,
+                content: row.content,
+                createdAt: row.createdAt,
+                tag: row.tag,
+                likes: row.likes,
+                chatroom: row.chatroom,
+                maxParticipants: row.maxParticipants,
+                minParticipants: row.minParticipants,
+                currentParticipants: row.currentParticipants,
+                genderPreference: row.genderPreference,
+                maxAge: row.maxAge,
+                minAge: row.minAge,
+                purpose: row.purpose,
+                planId: row.planId,
+                itinerary: JSON.parse(row.itinerary),
+                placeList: JSON.parse(row.placeList),
+            }));
+
+            return scrappedPosts;
+
+        } catch (err) {
+            console.error('Error retrieving scrapped posts by user id:', err.message);
+            throw new Error('Could not retrieve scrapped posts by user id');
         }
     }
 }
