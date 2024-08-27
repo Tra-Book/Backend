@@ -53,6 +53,7 @@ exports.createUser = async (email, connection) => {
         email,
         password: hashedPassword,
         statusMessage: null,
+        profilePhoto: null,
     });
     const userId = await newUser.save(connection);
     return { userId, username };

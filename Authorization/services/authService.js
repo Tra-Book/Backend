@@ -1,6 +1,7 @@
 const emailService = require('./emailService');
 const socialAuthService = require('./socialAuthService');
 const tokenUtil = require('../utils/tokenUtil');
+const responseUtil = require('../utils/responseUtil');
 const bcryptUtil = require('../utils/bcryptUtil');
 const redisUtil = require('../utils/redisUtil');
 const multerUtil = require('../utils/multerUtil');
@@ -171,7 +172,13 @@ exports.handleSocialLogin = async (req, res, provider) => {
             const newUserDetails = await socialAuthService.createUser(email, connection);
             const accessToken = tokenUtil.genAccessToken(newUserDetails.userId);
             const refreshToken = tokenUtil.genRefreshToken();
-            return generateAuthResponse(res, 201, accessToken, refreshToken, newUserDetails);
+            return responseUtil.generateAuthResponse(
+                res,
+                201,
+                accessToken,
+                refreshToken,
+                newUserDetails
+            );
         }
 
         const accessToken = tokenUtil.genAccessToken(user.userId);
@@ -179,7 +186,7 @@ exports.handleSocialLogin = async (req, res, provider) => {
 
         await connection.commit();
 
-        return generateAuthResponse(res, 200, accessToken, refreshToken, {
+        return responseUtil.generateAuthResponse(res, 200, accessToken, refreshToken, {
             userId: user.userId,
             username: user.username,
         });
