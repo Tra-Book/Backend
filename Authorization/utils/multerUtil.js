@@ -45,8 +45,14 @@ async function uploadToGCS(file) {
             reject(err);
         });
 
-        stream.on('finish', () => {
-            resolve(`https://storage.googleapis.com/${config.bucketName}/${gcsFileName}`);
+        stream.on('finish', async () => {
+            try {
+                await fileUpload.makePublic();
+
+                resolve(`https://storage.googleapis.com/${config.bucketName}/${gcsFileName}`);
+            } catch (err) {
+                reject(`Failed to make file public: ${err.message}`);
+            }
         });
 
         stream.end(file.buffer);
