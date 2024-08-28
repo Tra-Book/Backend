@@ -2,12 +2,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
+const corsConfig = require('./config/corsConfig');
 const authRoutes = require('./routes/auth');
 
 const app = express();
 
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(cookieParser());
+app.use(corsConfig);
+app.options('*', corsConfig);
 
 app.use('/auth', authRoutes);
 
