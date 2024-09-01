@@ -73,15 +73,27 @@ exports.signup = async (email, password, username) => {
 };
 
 exports.sendVerificationCode = async (email) => {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
     const verificationCode = Math.floor(Math.random() * 100000000)
         .toString()
         .padStart(8, '0');
-    await redisUtil.set(email, verificationCode, { EX: 900 });
-
+    // await redisUtil.set(email, verificationCode, { EX: 900 });
+    try {
+        const query = `INSERT INTO Test_Email(email, code)
+            VALUES (?, ?)
+        `;
+        await connection.query(query, [email, verificationCode]);
+        await connection.commit();
+    } catch (err) {
+        console.log(err);
+        await connection.rollback();
+    }
     const emailSent = await emailService.sendVerificationEmail(email, verificationCode);
     if (!emailSent) {
         return { error: true, statusCode: 500, message: 'Failed to send email', data: null };
     }
+    connection.release();
     return {
         error: false,
         statusCode: 200,
@@ -91,11 +103,32 @@ exports.sendVerificationCode = async (email) => {
 };
 
 exports.verifyCode = async (email, code) => {
-    const storedCode = await redisUtil.get(email);
-    if (!storedCode || storedCode !== code) {
-        return { error: true, statusCode: 400, message: 'Invalid code', data: null };
+    // const storedCode = await redisUtil.get(email);
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+    try {
+        const query = `SELECT code
+        FROM Test_Email
+        WHERE email = ?
+    `;
+        const [rows] = await connection.query(query, [email]);
+        const storedCode = rows[0].code;
+
+        if (!storedCode || storedCode !== code) {
+            return { error: true, statusCode: 400, message: 'Invalid code', data: null };
+        }
+        // await redisUtil.del(email);
+        const d_query = `
+        DELETE FROM Test_Email 
+        WHERE email = ?
+    `;
+        await connection.query(d_query, [email]);
+        await connection.commit();
+    } catch (err) {
+        console.log(err);
+        await connection.rollback();
     }
-    await redisUtil.del(email);
+    connection.release();
     return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
