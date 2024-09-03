@@ -62,7 +62,7 @@ exports.postVerifyCode = async (req, res) => {
 exports.postUpdateProfile = async (req, res, next) => {
     const { username, statusMessage, newPassword } = req.body;
     const profilePhoto = req.file ? req.file : null;
-    
+
     try {
         const { error, statusCode, message } = await authService.updateProfile(
             req.user,
@@ -88,6 +88,20 @@ exports.deleteUserData = async (req, res, next) => {
         }
         return res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
+        return sendErrorResponse(res, 500, 'Server error');
+    }
+};
+
+exports.getNewAccessToken = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const { error, statusCode, message, data } = await authService.renewToken(req.user);
+        if (error) {
+            return sendErrorResponse(res, statusCode, message);
+        }
+        const { accessToken } = data;
+        return generateAuthResponse(res, 200, accessToken, refreshToken, { userId: userId });
+    } catch (err) {
         return sendErrorResponse(res, 500, 'Server error');
     }
 };

@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
 const socialAuthService = require('./socialAuthService');
 const tokenUtil = require('../utils/tokenUtil');
@@ -7,7 +8,6 @@ const redisUtil = require('../utils/redisUtil');
 const multerUtil = require('../utils/multerUtil');
 const db = require('../utils/mysqlUtil');
 const User = require('../models/user');
-const multer = require('multer');
 
 exports.login = async (email, password) => {
     const user = await User.getUserByEmail(email);
@@ -185,6 +185,47 @@ exports.deleteUser = async (user) => {
         return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();
+    }
+};
+
+exports.renewToken = async (userId, refreshToken) => {
+    try {
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET,
+            {
+                complete: true,
+                algorithms: ['HS256'],
+                clockTolerance: 0,
+                ignoreExpiration: false,
+                ignoreNotBefore: false,
+            },
+            async (err, refreshDecoded) => {
+                if (err) {
+                    return {
+                        error: true,
+                        statusCode: 403,
+                        message: 'RT invalid or expired',
+                        data: null,
+                    };
+                }
+
+                const newAccessToken = tokenUtil.genAccessToken(userId);
+                return {
+                    error: false,
+                    statusCode: 200,
+                    message: 'Renewed access token',
+                    data: { accessToken: newAccessToken },
+                };
+            }
+        );
+    } catch (err) {
+        return {
+            error: true,
+            statusCode: 403,
+            message: 'RT invalid or expired',
+            data: null,
+        };
     }
 };
 
