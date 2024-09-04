@@ -27,7 +27,12 @@ exports.login = async (email, password) => {
         statusCode: 200,
         message: 'Login successful',
         data: {
-            user: { userId: user.userId, username: user.username },
+            user: {
+                userId: user.userId,
+                username: user.username,
+                image: user.profilePhoto,
+                status_message: user.statusMessage,
+            },
             accessToken,
             refreshToken,
         },
@@ -261,6 +266,8 @@ exports.handleSocialLogin = async (req, res, provider) => {
         return responseUtil.generateAuthResponse(res, 200, accessToken, refreshToken, {
             userId: user.userId,
             username: user.username,
+            image: user.profilePhoto,
+            status_message: user.statusMessage,
         });
     } catch (err) {
         await connection.rollback();
