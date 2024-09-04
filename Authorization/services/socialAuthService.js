@@ -4,7 +4,6 @@ const generator = require('generate-password');
 const bcryptUtil = require('../utils/bcryptUtil');
 const User = require('../models/user');
 const googleConfig = require('../config/googleConfig');
-const jwt = require('jsonwebtoken');
 
 exports.getTokenVerifier = (provider) => {
     switch (provider) {
@@ -21,10 +20,8 @@ exports.getTokenVerifier = (provider) => {
 
 const verifyGoogleToken = async (token, timeout = 5000) => {
     const client = new OAuth2Client(googleConfig.clientId);
-    console.log(googleConfig.clientId);
-    const decodedToken = jwt.decode(token, { complete: true });
-    console.log('decoded: ', decodedToken);
-    
+    console.log(googleConfig);
+
     const verifyPromise = client
         .verifyIdToken({
             idToken: token,
