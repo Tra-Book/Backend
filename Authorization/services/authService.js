@@ -73,6 +73,10 @@ exports.signup = async (email, password, username) => {
 };
 
 exports.sendVerificationCode = async (email) => {
+    const user = User.getUserByEmail(email);
+    if (user) {
+        return { error: true, statusCode: 400, message: 'Email already exists', data: null };
+    }
     const verificationCode = Math.floor(Math.random() * 100000000)
         .toString()
         .padStart(8, '0');
@@ -106,13 +110,8 @@ exports.updateProfile = async (user, username, profilePhoto, statusMessage) => {
     try {
         profilePhotoUrl = await multerUtil.uploadToGCS(profilePhoto);
         const oldProfilePhotoUrl = user.profilePhoto;
-        
-        await user.updateProfile(
-            username,
-            statusMessage,
-            profilePhotoUrl,
-            connection
-        );
+
+        await user.updateProfile(username, statusMessage, profilePhotoUrl, connection);
 
         await connection.commit();
 
