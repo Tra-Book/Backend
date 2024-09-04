@@ -98,7 +98,7 @@ exports.verifyCode = async (email, code) => {
     return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
-exports.updateProfile = async (user, username, profilePhoto, statusMessage, newPassword) => {
+exports.updateProfile = async (user, username, profilePhoto, statusMessage) => {
     let profilePhotoUrl = null;
     const connection = await db.getConnection();
     await connection.beginTransaction();
@@ -106,11 +106,10 @@ exports.updateProfile = async (user, username, profilePhoto, statusMessage, newP
     try {
         profilePhotoUrl = await multerUtil.uploadToGCS(profilePhoto);
         const oldProfilePhotoUrl = user.profilePhoto;
-        const hashedPassword = await bcryptUtil.hashPassword(newPassword);
+        
         await user.updateProfile(
             username,
             statusMessage,
-            hashedPassword,
             profilePhotoUrl,
             connection
         );
@@ -133,6 +132,40 @@ exports.updateProfile = async (user, username, profilePhoto, statusMessage, newP
         if (profilePhotoUrl) {
             await multerUtil.removeFromGCS(profilePhotoUrl);
         }
+        return { error: true, statusCode: 500, message: 'Server error', data: null };
+    } finally {
+        connection.release();
+    }
+};
+
+exports.updatePassword = async (user, password, newPassword) => {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const isMatch = await bcryptUtil.comparePassword(password, user.password);
+        if (!isMatch) {
+            return {
+                error: true,
+                statusCode: 400,
+                message: 'Current password is incorrect',
+            };
+        }
+
+        const hashedPassword = await bcryptUtil.hashPassword(newPassword);
+
+        await user.updatePassword(hashedPassword, connection);
+
+        await connection.commit();
+        return {
+            error: false,
+            statusCode: 200,
+            message: 'Password updated successfully',
+            data: null,
+        };
+    } catch (err) {
+        console.log(err);
+        await connection.rollback();
         return { error: true, statusCode: 500, message: 'Server error', data: null };
     } finally {
         connection.release();

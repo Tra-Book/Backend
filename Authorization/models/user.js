@@ -32,23 +32,31 @@ class User {
         }
     }
 
-    async updateProfile(username, statusMessage, hashedPassword, profilePhoto, connection) {
+    async updateProfile(username, statusMessage, profilePhoto, connection) {
         try {
             const query = `
                 UPDATE User 
-                SET username = ?, statusMessage = ?, password = ?, profilePhoto = ?
+                SET username = ?, statusMessage = ?, profilePhoto = ?
                 WHERE email = ?
             `;
-            await connection.query(query, [
-                username,
-                statusMessage,
-                hashedPassword,
-                profilePhoto,
-                this.email,
-            ]);
+            await connection.query(query, [username, statusMessage, profilePhoto, this.email]);
         } catch (err) {
             console.error('Error updating user profile:', err.message);
             throw new Error('Could not update user profile');
+        }
+    }
+
+    async updatePassword(newPassword, connection) {
+        try {
+            const query = `
+                UPDATE User 
+                SET password = ?
+                WHERE email = ?
+            `;
+            await connection.query(query, [newPassword, this.email]);
+        } catch (err) {
+            console.error('Error updating user password:', err.message);
+            throw new Error('Could not update user password');
         }
     }
 

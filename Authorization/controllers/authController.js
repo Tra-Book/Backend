@@ -60,7 +60,7 @@ exports.postVerifyCode = async (req, res) => {
 };
 
 exports.postUpdateProfile = async (req, res, next) => {
-    const { username, statusMessage, newPassword } = req.body;
+    const { username, statusMessage } = req.body;
     const profilePhoto = req.file ? req.file : null;
 
     try {
@@ -68,13 +68,30 @@ exports.postUpdateProfile = async (req, res, next) => {
             req.user,
             username,
             profilePhoto,
-            statusMessage,
-            newPassword
+            statusMessage
         );
         if (error) {
             return sendErrorResponse(res, statusCode, message);
         }
         return res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        return sendErrorResponse(res, 500, 'Server error');
+    }
+};
+
+exports.postUpdatePassword = async (req, res, next) => {
+    const { password, newPassword } = req.body;
+
+    try {
+        const { error, statusCode, message } = await authService.updatePassword(
+            req.user,
+            password,
+            newPassword
+        );
+        if (error) {
+            return sendErrorResponse(res, statusCode, message);
+        }
+        return res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }
