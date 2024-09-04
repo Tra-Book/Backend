@@ -20,8 +20,6 @@ exports.getTokenVerifier = (provider) => {
 
 const verifyGoogleToken = async (token, timeout = 5000) => {
     const client = new OAuth2Client(googleConfig.clientId);
-    console.log(googleConfig);
-
     const verifyPromise = client
         .verifyIdToken({
             idToken: token,
