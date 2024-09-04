@@ -18,10 +18,25 @@ exports.getTokenVerifier = (provider) => {
     }
 };
 
-const verifyGoogleToken = async (token) => {
+const verifyGoogleToken = async (token, timeout = 5000) => {
     const client = new OAuth2Client(googleConfig.clientId);
-    const ticket = await client.verifyIdToken({ idToken: token, audience: googleConfig.clientId });
-    return ticket.getPayload().email;
+
+    const verifyPromise = client
+        .verifyIdToken({
+            idToken: token,
+            audience: googleConfig.clientId,
+        })
+        .then((ticket) => ticket.getPayload().email)
+        .catch((err) => {
+            console.error('Verification error:', err);
+            throw err;
+        });
+
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), timeout)
+    );
+
+    return Promise.race([verifyPromise, timeoutPromise]);
 };
 
 const verifyKakaoToken = async (token) => {
