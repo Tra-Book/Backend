@@ -10,7 +10,7 @@ router.post('/update/:accompanyId', postController.updatePost);
 router.delete('/:accompanyId', postController.deletePost);
 router.get('/user/:userId', postController.getAccompanyPostsByUserId);
 
-router.post('/:accompanyId/:status', postController.setStatus);
+router.post('/status/:accompanyId/:status', postController.setStatus);
 
 router.post('/scrap/:userId/:accompanyId', postController.addScrap); // 게시물 스크랩
 router.delete('/scrap/:userId/:accompanyId', postController.removeScrap); // 게시물 스크랩 취소

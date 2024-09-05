@@ -213,9 +213,9 @@ class AccompanyPost {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
-            // Insert scrap into ScrapAccompanyPost table
+            // Insert scrap into ScrappedAccompany table
             const insertScrapQuery = `
-            INSERT INTO ScrapAccompanyPost (userId, accompanyId)
+            INSERT INTO ScrappedAccompany (userId, accompanyId)
             VALUES (?, ?)
         `;
             await connection.query(insertScrapQuery, [userId, accompanyId]);
@@ -244,9 +244,9 @@ class AccompanyPost {
         try {
             await connection.beginTransaction();
 
-            // Delete scrap from ScrapAccompanyPost table
+            // Delete scrap from ScrappedAccompany table
             const deleteScrapQuery = `
-            DELETE FROM ScrapAccompanyPost 
+            DELETE FROM ScrappedAccompany 
             WHERE userId = ? AND accompanyId = ?
         `;
             await connection.query(deleteScrapQuery, [userId, accompanyId]);
@@ -276,7 +276,7 @@ class AccompanyPost {
                 SELECT A.accompanyId, A.userId, A.cityId, A.title, A.content, A.createdAt, A.tag, A.scraps, A.chatroom, 
                        A.maxParticipants, A.minParticipants, A.currentParticipants, A.genderPreference, A.maxAge, A.minAge, A.purpose, A.planId, A.itinerary, A.placeList, A.status
                 FROM Accompany A
-                JOIN ScrapAccompanyPost S ON A.accompanyId = S.accompanyId
+                JOIN ScrappedAccompany S ON A.accompanyId = S.accompanyId
                 WHERE S.userId = ?
             `;
             const [rows] = await db.query(query, [userId]);
@@ -285,28 +285,39 @@ class AccompanyPost {
                 return [];
             }
 
-            const scrappedPosts = rows.map(row => new AccompanyPost({
-                accompanyId: row.accompanyId,
-                userId: row.userId,
-                cityId: row.cityId,
-                title: row.title,
-                content: row.content,
-                createdAt: row.createdAt,
-                tag: row.tag,
-                scraps: row.scraps,
-                chatroom: row.chatroom,
-                maxParticipants: row.maxParticipants,
-                minParticipants: row.minParticipants,
-                currentParticipants: row.currentParticipants,
-                genderPreference: row.genderPreference,
-                maxAge: row.maxAge,
-                minAge: row.minAge,
-                purpose: row.purpose,
-                planId: row.planId,
-                itinerary: JSON.parse(row.itinerary),
-                placeList: JSON.parse(row.placeList),
-                status: row.status
-            }));
+            const scrappedPosts = rows.map(row => {
+                // Check if itinerary and placeList are strings or arrays and handle accordingly
+                const itineraryParsed = Array.isArray(row.itinerary)
+                    ? row.itinerary
+                    : (row.itinerary ? JSON.parse(row.itinerary) : []);
+
+                const placeListParsed = Array.isArray(row.placeList)
+                    ? row.placeList
+                    : (row.placeList ? JSON.parse(row.placeList) : []);
+
+                return new AccompanyPost({
+                    accompanyId: row.accompanyId,
+                    userId: row.userId,
+                    cityId: row.cityId,
+                    title: row.title,
+                    content: row.content,
+                    createdAt: row.createdAt,
+                    tag: row.tag,
+                    scraps: row.scraps,
+                    chatroom: row.chatroom,
+                    maxParticipants: row.maxParticipants,
+                    minParticipants: row.minParticipants,
+                    currentParticipants: row.currentParticipants,
+                    genderPreference: row.genderPreference,
+                    maxAge: row.maxAge,
+                    minAge: row.minAge,
+                    purpose: row.purpose,
+                    planId: row.planId,
+                    itinerary: itineraryParsed,
+                    placeList: placeListParsed,
+                    status: row.status
+                });
+            });
 
             return scrappedPosts;
 
