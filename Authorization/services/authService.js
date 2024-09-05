@@ -78,7 +78,7 @@ exports.signup = async (email, password, username) => {
 };
 
 exports.sendVerificationCode = async (email) => {
-    const user = User.getUserByEmail(email);
+    const user = await User.getUserByEmail(email);
     if (user) {
         return { error: true, statusCode: 400, message: 'Email already exists', data: null };
     }
