@@ -7,7 +7,7 @@ exports.createPost = async (req, res) => {
         title,
         content = null,
         tag = null,
-        likes = 0,
+        scraps = 0,
         chatroom,
         maxParticipants = null,
         minParticipants = null,
@@ -18,14 +18,15 @@ exports.createPost = async (req, res) => {
         purpose = null,
         planId = null,
         itinerary,
-        placeList = null
+        placeList = null,
+        status = 0
     } = req.body;
 
     if (!userId || !title || !cityId || !chatroom || !itinerary) {
         return res.status(400).json({ message: 'Not null fields are missing.' });
     }
 
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const newPost = new AccompanyPost({
         userId,
@@ -34,7 +35,7 @@ exports.createPost = async (req, res) => {
         content,
         createdAt,
         tag,
-        likes,
+        scraps,
         chatroom,
         maxParticipants,
         minParticipants,
@@ -45,7 +46,8 @@ exports.createPost = async (req, res) => {
         purpose,
         planId,
         itinerary,
-        placeList
+        placeList,
+        status
     });
 
     try {
@@ -76,7 +78,7 @@ exports.updatePost = async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        await post.updateProfile(req.body);
+        await post.updatePost(req.body);
         res.json(post);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -146,3 +148,14 @@ exports.getScrappedPostsByUserId = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 };
+
+exports.setStatus = async (req, res) => {
+    // status field : INT type -> 0: open, 1: closed
+    try {
+        const { accompanyId, status } = req.params;
+        await AccompanyPost.setStatus(accompanyId, status);
+        res.status(201).json({ message: 'Status changed successfully' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}

@@ -6,9 +6,11 @@ const commentController = require('../controllers/commentControllers.js');
 // 나중에 다 수정해야 함!
 router.post('/', postController.createPost);
 router.get('/:accompanyId', postController.getPost);
-router.patch('/:accompanyId', postController.updatePost);
+router.post('/update/:accompanyId', postController.updatePost);
 router.delete('/:accompanyId', postController.deletePost);
-router.get('/:userId', postController.getAccompanyPostsByUserId);
+router.get('/user/:userId', postController.getAccompanyPostsByUserId);
+
+router.post('/:accompanyId/:status', postController.setStatus);
 
 router.post('/scrap/:userId/:accompanyId', postController.addScrap); // 게시물 스크랩
 router.delete('/scrap/:userId/:accompanyId', postController.removeScrap); // 게시물 스크랩 취소
