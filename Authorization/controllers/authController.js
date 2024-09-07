@@ -64,7 +64,7 @@ exports.postUpdateProfile = async (req, res, next) => {
     const profilePhoto = req.file ? req.file : null;
 
     try {
-        const { error, statusCode, message } = await authService.updateProfile(
+        const { error, statusCode, message, data } = await authService.updateProfile(
             req.user,
             username,
             profilePhoto,
@@ -73,7 +73,9 @@ exports.postUpdateProfile = async (req, res, next) => {
         if (error) {
             return sendErrorResponse(res, statusCode, message);
         }
-        return res.status(200).json({ message: 'Profile updated successfully' });
+        return res
+            .status(200)
+            .json({ message: 'Profile updated successfully', profilePhoto: data });
     } catch (error) {
         return sendErrorResponse(res, 500, 'Server error');
     }

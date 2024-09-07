@@ -127,7 +127,7 @@ exports.updateProfile = async (user, username, profilePhoto, statusMessage) => {
             error: false,
             statusCode: 200,
             message: 'Profile updated successfully',
-            data: null,
+            data: profilePhotoUrl,
         };
     } catch (err) {
         console.log(err);
