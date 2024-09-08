@@ -60,7 +60,7 @@ exports.postVerifyCode = async (req, res) => {
 };
 
 exports.postUpdateProfile = async (req, res, next) => {
-    const { username, statusMessage } = req.body;
+    const { username, statusMessage, imageUrl } = req.body;
     const profilePhoto = req.file ? req.file : null;
 
     try {
@@ -68,6 +68,7 @@ exports.postUpdateProfile = async (req, res, next) => {
             req.user,
             username,
             profilePhoto,
+            imageUrl,
             statusMessage
         );
         if (error) {

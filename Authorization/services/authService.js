@@ -107,38 +107,55 @@ exports.verifyCode = async (email, code) => {
     return { error: false, statusCode: 200, message: 'Code verified successfully', data: null };
 };
 
-exports.updateProfile = async (user, username, profilePhoto, statusMessage) => {
+exports.updateProfile = async (user, username, profilePhoto, imageUrl, statusMessage) => {
     let profilePhotoUrl = null;
     const connection = await db.getConnection();
     await connection.beginTransaction();
-
-    try {
-        profilePhotoUrl = await multerUtil.uploadToGCS(profilePhoto);
-        const oldProfilePhotoUrl = user.profilePhoto;
-
-        await user.updateProfile(username, statusMessage, profilePhotoUrl, connection);
-
-        await connection.commit();
-
-        if (oldProfilePhotoUrl) {
-            await multerUtil.removeFromGCS(oldProfilePhotoUrl);
+    if (imageUrl) {
+        try {
+            await user.updateProfile(username, statusMessage, imageUrl, connection);
+            await connection.commit();
+            return {
+                error: false,
+                statusCode: 200,
+                message: 'Profile updated successfully',
+                data: imageUrl,
+            };
+        } catch (err) {
+            await connection.rollback();
+            return { error: true, statusCode: 500, message: 'Server error', data: null };
+        } finally {
+            connection.release();
         }
-        return {
-            error: false,
-            statusCode: 200,
-            message: 'Profile updated successfully',
-            data: profilePhotoUrl,
-        };
-    } catch (err) {
-        console.log(err);
-        await connection.rollback();
+    } else {
+        try {
+            profilePhotoUrl = await multerUtil.uploadToGCS(profilePhoto);
+            const oldProfilePhotoUrl = user.profilePhoto;
 
-        if (profilePhotoUrl) {
-            await multerUtil.removeFromGCS(profilePhotoUrl);
+            await user.updateProfile(username, statusMessage, profilePhotoUrl, connection);
+
+            await connection.commit();
+
+            if (oldProfilePhotoUrl) {
+                await multerUtil.removeFromGCS(oldProfilePhotoUrl);
+            }
+            return {
+                error: false,
+                statusCode: 200,
+                message: 'Profile updated successfully',
+                data: profilePhotoUrl,
+            };
+        } catch (err) {
+            console.log(err);
+            await connection.rollback();
+
+            if (profilePhotoUrl) {
+                await multerUtil.removeFromGCS(profilePhotoUrl);
+            }
+            return { error: true, statusCode: 500, message: 'Server error', data: null };
+        } finally {
+            connection.release();
         }
-        return { error: true, statusCode: 500, message: 'Server error', data: null };
-    } finally {
-        connection.release();
     }
 };
 
