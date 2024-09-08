@@ -37,9 +37,9 @@ class User {
             const query = `
                 UPDATE User 
                 SET username = ?, statusMessage = ?, profilePhoto = ?
-                WHERE email = ?
+                WHERE userId = ?
             `;
-            await connection.query(query, [username, statusMessage, profilePhoto, this.email]);
+            await connection.query(query, [username, statusMessage, profilePhoto, this.userId]);
         } catch (err) {
             console.error('Error updating user profile:', err.message);
             throw new Error('Could not update user profile');
@@ -51,9 +51,9 @@ class User {
             const query = `
                 UPDATE User 
                 SET password = ?
-                WHERE email = ?
+                WHERE userId = ?
             `;
-            await connection.query(query, [newPassword, this.email]);
+            await connection.query(query, [newPassword, this.userId]);
         } catch (err) {
             console.error('Error updating user password:', err.message);
             throw new Error('Could not update user password');
@@ -64,9 +64,9 @@ class User {
         try {
             const query = `
                 DELETE FROM User 
-                WHERE email = ?
+                WHERE userId = ?
             `;
-            await connection.query(query, [this.email]);
+            await connection.query(query, [this.userId]);
         } catch (err) {
             console.error('Error deleting user:', err.message);
             throw new Error('Could not delete user');
