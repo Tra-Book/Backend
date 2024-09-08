@@ -66,7 +66,7 @@ async function removeFromGCS(filePath) {
         await file.delete();
     } catch (error) {
         console.log(error);
-        await logFailedDeletion(url);
+        await logFailedDeletion(filePath);
     }
 }
 
