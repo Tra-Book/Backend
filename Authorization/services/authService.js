@@ -137,7 +137,7 @@ exports.updateProfile = async (user, username, profilePhoto, imageUrl, statusMes
             await connection.commit();
 
             if (oldProfilePhotoUrl) {
-                await multerUtil.removeFromGCS(oldProfilePhotoUrl);
+                multerUtil.removeFromGCS(oldProfilePhotoUrl);
             }
             return {
                 error: false,
@@ -150,7 +150,7 @@ exports.updateProfile = async (user, username, profilePhoto, imageUrl, statusMes
             await connection.rollback();
 
             if (profilePhotoUrl) {
-                await multerUtil.removeFromGCS(profilePhotoUrl);
+                multerUtil.removeFromGCS(profilePhotoUrl);
             }
             return { error: true, statusCode: 500, message: 'Server error', data: null };
         } finally {
