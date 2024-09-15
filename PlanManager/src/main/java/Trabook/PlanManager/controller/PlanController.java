@@ -1,24 +1,25 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.comment.Comment;
-import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.PlanListRequestDTO;
-import Trabook.PlanManager.domain.plan.PlanRequestDTO;
-import Trabook.PlanManager.domain.plan.Schedule;
+import Trabook.PlanManager.domain.plan.*;
+import Trabook.PlanManager.domain.user.User;
+import Trabook.PlanManager.domain.webclient.userInfoDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;
 import Trabook.PlanManager.service.planList.GetUserPlanList;
 import Trabook.PlanManager.service.planList.GetUserScrapPlanList;
 import Trabook.PlanManager.service.planList.PlanListServiceInterface;
+import Trabook.PlanManager.service.webclient.WebClientService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
@@ -27,15 +28,26 @@ import java.util.stream.Collectors;
 @RequestMapping("/plan")
 public class PlanController {
 
+    private final WebClientService webClientService;
     private final PlanService planService;
+
+    @Autowired
+    public PlanController(WebClientService webClientService, PlanService planService) {
+        this.webClientService = webClientService;
+        this.planService = planService;
+    }
+
+/*
     private final Map<String, PlanListServiceInterface> planListServiceInterfaceMap;
 
 
     //PlanListServiceInterface 인터페이스를 구현한 모든 서비스들이 자동으로 주입됨. 스프링이 자동으로 이 인터페이스를 구현한
     //모든 빈을 찾아서 리스트로 제공한다 ㄷㄷ..
     @Autowired
-    public PlanController(List <PlanListServiceInterface> planListService, PlanService planService) {
+    public PlanController(List <PlanListServiceInterface> planListService, PlanService planService,WebClientService webClientService) {
+        this.webClientService= webClientService;
         this.planService = planService;
+
         this.planListServiceInterfaceMap = planListService.stream().collect(Collectors.toMap(
                 service -> {
                     if(service instanceof GetUserLikePlanList) return "likes";
@@ -50,67 +62,64 @@ public class PlanController {
     }
 
 
+
+ */
     @ResponseBody
     @PostMapping("/create")
-    public long createPlan(@RequestBody PlanRequestDTO planRequestDTO) {
-       // System.out.println("ok");
-        //log.info("{}",planRequestDTO);
-      return planService.createPlan(planRequestDTO.getPlan(), planRequestDTO.getScheduleList());
+    public long createPlan(@RequestBody PlanCreateDTO planCreateDTO) {
+        return planService.createPlan(planCreateDTO);
+    }
+
+    @ResponseBody
+    @PostMapping("/update")
+    public long updatePlan(@RequestBody Plan plan){
+        System.out.println(plan);
+        return planService.updatePlan(plan);
     }
 
     @ResponseBody
     @GetMapping("/")
-    public Plan getPlanByPlanId(@RequestParam("planId") long planId) {
-        return planService.getPlan(planId)
-                .orElseThrow(()-> new EntityNotFoundException("Plan not found"));
+    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId") long planId, @RequestParam("userId") long userId) {
+
+        PlanResponseDTO result = planService.getPlan(planId, userId);
+
+        long planOwnerId = result.getPlan().getUserId();
+        User userInfo = webClientService.getUserInfo(planOwnerId);
+        result.setUser(userInfo);
+        return result;
+
     }
+
     @ResponseBody
     @PostMapping("/test")
     public void scrap(@RequestParam("planId") long planId) {
         planService.deleteLike(3,planId);
     }
 
-
+/*
     @ResponseBody
     @GetMapping("/plans")
-    public List<Plan> getUserPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
+    public List<PlanListResponseDTO> getPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
         PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
-        List<Plan> userPlanList = planListService.getPlanList(planListRequestDTO.getUserId());
-        log.info("{}'s plans = {}", planListRequestDTO.getUserId(), userPlanList);
-
-        return userPlanList;
+        List<PlanListResponseDTO> planList = planListService.getPlanList(planListRequestDTO.getUserId());
+        log.info("{}'s plans = {}", planListRequestDTO.getUserId(), planList);
+        return planList;
     }
 
 
-    @ResponseBody
-    @GetMapping("/like")
-    public  List<Plan> getUserLikePlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
-        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
-        //System.out.println(planListService);
-        return planListService.getPlanList(planListRequestDTO.getUserId());
-        //return planService.getUserLikePlanList(userId);
-    }
-
-    @ResponseBody
-    @GetMapping("/scrap")
-    public List<Plan> getUserScrapPlanList(@RequestBody PlanListRequestDTO planListRequestDTO) {
-        PlanListServiceInterface planListService = planListServiceInterfaceMap.get(planListRequestDTO.getType());
-        return planListService.getPlanList(planListRequestDTO.getUserId());
-    }
-
+ */
     @ResponseBody
     @PostMapping("/like")
-    public String likePlan(@RequestParam("userId") long userId,@RequestParam("planId") long planId) {
-
-        return planService.likePlan(userId,planId);
+    public String likePlan(@RequestBody PlanReactionDTO planReactionDTO) {
+        return planService.likePlan(planReactionDTO);
     }
 
 
 
     @ResponseBody
     @PostMapping("/scrap")
-    public String scrapPlan(@RequestParam("userId") long userId,@RequestParam("planId") long planId) {
-        return planService.scrapPlan(userId,planId);
+    public String scrapPlan(@RequestBody PlanReactionDTO planReactionDTO) {
+        return planService.scrapPlan(planReactionDTO);
     }
 
     @ResponseBody

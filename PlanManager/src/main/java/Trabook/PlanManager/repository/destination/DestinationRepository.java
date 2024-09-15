@@ -2,7 +2,6 @@ package Trabook.PlanManager.repository.destination;
 
 
 import Trabook.PlanManager.domain.comment.Comment;
-import Trabook.PlanManager.domain.destination.City;
 import Trabook.PlanManager.domain.destination.Place;
 
 import java.util.List;
@@ -12,7 +11,8 @@ public interface DestinationRepository {
     Optional<Place> findByPlaceId(long placeId);
 
     List<Place> findPlaceListByCity(long cityId);
-    List<Place> findPlaceListByUserScrap(long cityId);
+    List<Place> findPlaceListByUserScrap(long userId);
+    List<Place> findHottestPlaceList();
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);
@@ -21,5 +21,6 @@ public interface DestinationRepository {
     int deletePlaceScrap(long userId, long placeId);
     int likeDown(long placeId);
     int scrapDown(long placeId);
+    int scoreUp(long placeId);
 }
 

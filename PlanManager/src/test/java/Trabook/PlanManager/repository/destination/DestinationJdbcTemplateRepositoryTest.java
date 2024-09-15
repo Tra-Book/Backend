@@ -3,7 +3,7 @@ package Trabook.PlanManager.repository.destination;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+/*
 class DestinationJdbcTemplateRepositoryTest {
 
     @Test
@@ -19,3 +19,5 @@ class DestinationJdbcTemplateRepositoryTest {
     void findPlaceListByCity() {
     }
 }
+
+ */

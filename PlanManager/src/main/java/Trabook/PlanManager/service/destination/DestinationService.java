@@ -3,7 +3,10 @@ package Trabook.PlanManager.service.destination;
 import Trabook.PlanManager.domain.destination.DestinationReactionDto;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +18,8 @@ import java.util.Optional;
 public class DestinationService {
 
     private final DestinationRepository destinationRepository;
+
+
 
     public DestinationService(DestinationRepository destinationRepository) {
         this.destinationRepository = destinationRepository;
@@ -92,9 +97,16 @@ public class DestinationService {
             return "type invalid";
     }
 
+    public List<Place> getHottestPlace(){
+        return destinationRepository.findHottestPlaceList();
+    }
+    /*
     public Optional<Place> getPlaceByPlaceId(long placeId){
         return destinationRepository.findByPlaceId(placeId);
     }
+
+
+     */
     public Optional<Place> getPlace(long placeId) {
         return destinationRepository.findByPlaceId(placeId);
     }

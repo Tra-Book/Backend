@@ -20,36 +20,30 @@ public class DestinationController {
         this.destinationService = destinationService;
     }
 
+/*
     @ResponseBody
     @GetMapping("/")
     public Optional<Place> getPlaceByPlaceId(@RequestParam("placeId") long placeId ){
         return destinationService.getPlaceByPlaceId(placeId);
     }
 
+
+ */
+
+
     @ResponseBody
     @PostMapping("/reaction")
     public String addPlaceReaction(@RequestBody DestinationReactionDto destinationReactionDto) {
         return destinationService.addPlaceReaction(destinationReactionDto);
     }
+
     @ResponseBody
     @DeleteMapping("/reaction")
     public String deletePlanReaction(@RequestBody DestinationReactionDto destinationReactionDto) {
         return destinationService.deletePlaceReaction(destinationReactionDto);
     }
-/*
-    @ResponseBody
-    @GetMapping("/")
-    public List<Place> getPlaceByCity(@RequestBody String cityId) {
-        return destinationService.getPlaceListByCity(cityId);
-    }
-*/
 
-    /*
 
-    @ResponseBody
-    @GetMapping("/places")
-    public List<Place> getPlaces(@RequestBody ) {
 
-    }
-*/
+
 }

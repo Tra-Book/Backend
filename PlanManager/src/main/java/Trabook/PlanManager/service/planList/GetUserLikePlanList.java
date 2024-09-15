@@ -1,6 +1,8 @@
 package Trabook.PlanManager.service.planList;
 
 import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,18 +12,18 @@ import java.util.List;
 @Service
 @Slf4j
 public class GetUserLikePlanList implements PlanListServiceInterface{
-    private final PlanRepository planRepository;
+    private final PlanListRepository planListRepository;
 
-    public GetUserLikePlanList(PlanRepository planRepository) {
-        this.planRepository = planRepository;
+    public GetUserLikePlanList(PlanListRepository planListRepository) {
+        this.planListRepository = planListRepository;
     }
 
 
     @Override
-    public List<Plan> getPlanList(long userId) {
+    public List<PlanListResponseDTO> getPlanList(long userId) {
 
         log.info("get user like plan list = {}",userId);
-        return planRepository.findUserLikePlanList(userId);
+        return planListRepository.findUserPlanList(userId);
     }
 
     @Override

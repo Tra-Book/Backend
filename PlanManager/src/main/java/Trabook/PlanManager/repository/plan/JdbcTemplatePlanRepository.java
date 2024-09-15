@@ -2,7 +2,9 @@ package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.Schedule;
+import Trabook.PlanManager.domain.plan.PlanCreateDTO;
+import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.domain.plan.DayPlan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -12,11 +14,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 
 public class JdbcTemplatePlanRepository implements PlanRepository{
 
@@ -26,64 +27,85 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+
     @Override
-    public Plan save(Plan plan, List<Schedule> scheduleList) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
-
-        String sql = "INSERT INTO Plan(userId,cityId,likes,scraps,dateCreated,title,content)" +
-                "values(:userId,:cityId, :likes, :scraps, :dateCreated, :title, :content)";
-        System.out.println(plan.toString());
-        SqlParameterSource param = new BeanPropertySqlParameterSource(plan);
-
+    public long createPlan(PlanCreateDTO planCreateDTO) {
+        String sql = "INSERT INTO Plan(userId,state,startDate,endDate)" +
+                "VALUES(?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        //db에서 자동으로 1 증가한 값을 pk로 설정해주고 이값을 keyholder에 보관
-        namedParameterJdbcTemplate.update(sql, param, keyHolder);
-        long key = keyHolder.getKey().longValue();
-        plan.setPlanId(key);
+        long planId;
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql,new String[]{"planId"});
+            ps.setLong(1,planCreateDTO.getUserId());
+            ps.setString(2,planCreateDTO.getState());
+            ps.setDate(3, Date.valueOf(planCreateDTO.getStartDate()));
+            ps.setDate(4, Date.valueOf(planCreateDTO.getEndDate()));
+            return ps;
+        },keyHolder);
+        planId = keyHolder.getKey().longValue();
+        return planId;
 
-        return plan;
     }
+
     @Override
-    public Plan savePlan(Plan plan) {
-        String sql = "INSERT INTO Plan(userId,cityId,likes,scraps,dateCreated,title,content,isPublic)" +
-                "values(?,?,?,?,?,?,?,?)";
+    public long updatePlan(Plan plan) {
+        String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, dateCreated = ?, title=?, description = ?," +
+                " isPublic = ?, numOfPeople = ?, budget = ?, state=?, city=? "
+                +"WHERE planId= ?";
+        int update = jdbcTemplate.update(sql,
+                plan.getUserId(),
+                plan.getLikes(),
+                plan.getScraps(),
+                plan.getDateCreated(),
+                plan.getTitle(),
+                plan.getDescription(),
+                plan.isPublic(),
+                plan.getNumOfPeople(),
+                plan.getBudget(),
+                plan.getPlanId(),
+                plan.getState(),
+                plan.getCity());
+        System.out.println(plan.getPlanId());
+        return update;
+
+    }
+
+
+    @Override
+    public void saveDayPlan(DayPlan dayPlan) {
+        String sql = "INSERT INTO DayPlan(planId, dayPlanId, day, startTime, endTime)" +
+                "values(?,?,?,?,?)";
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update( connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"planId"});
-            ps.setLong(1,plan.getUserId());
-            ps.setLong(2,plan.getCityId());
-            ps.setInt(3,plan.getLikes());
-            ps.setInt(4,plan.getScraps());
-            ps.setString(5,plan.getDateCreated());
-            ps.setString(6,plan.getTitle());
-            ps.setString(7,plan.getContent());
-            ps.setBoolean(8,plan.isPublic());
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
+            ps.setLong(1, dayPlan.getPlanId());
+            ps.setLong(2, dayPlan.getDayPlanId());
+            ps.setInt(3, dayPlan.getDay());
+            ps.setTime(4, Time.valueOf(dayPlan.getStartTime()));
+            ps.setTime(5, Time.valueOf(dayPlan.getEndTime()));
             return ps;
         }, keyHolder);
-        plan.setPlanId(keyHolder.getKey().longValue());
-        return plan;
+        dayPlan.setDayPlanId(keyHolder.getKey().longValue());
 
     }
+
     @Override
-    public void saveSchedule(List<Schedule> scheduleList) {
-        String sql = "INSERT INTO Schedule(planId, placeId, date, startTime, endTime)" +
-                "values(?,?,?,?,?)";
-        for(Schedule schedule : scheduleList) {
-
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
-                ps.setLong(1, schedule.getPlanId());
-                ps.setLong(2, schedule.getPlaceId());
-                ps.setString(3, schedule.getDate());
-                ps.setString(4, schedule.getStartTime());
-                ps.setString(5, schedule.getEndTime());
-                return ps;
-            }, keyHolder);
-            schedule.setScheduleId(keyHolder.getKey().longValue());
-        }
-
+    public void saveSchedule(long dayPlanId, DayPlan.Schedule schedule) {
+        String sql = "INSERT INTO Schedule(DayPlanId,`order`,`time`,placeId) "+
+                "VALUES(?,?,?,?)";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
+            ps.setLong(1,dayPlanId);
+            ps.setInt(2,schedule.getOrder());
+            ps.setInt(3,schedule.getTime());
+            ps.setLong(4,schedule.getPlaceId());
+            return ps;
+        });
     }
+
+
+
     @Override
     public Optional<Plan> findById(long planId){
         String sql = "SELECT * FROM Plan WHERE planId = ?";
@@ -98,6 +120,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         List<Plan> result = jdbcTemplate.query("SELECT * FROM Plan WHERE userId = ? AND title = ?", planRowMapper(), userId, planName);
         return result.stream().findAny();
     }
+
+
 
     @Override
     public int deletePlan(long planId) {
@@ -124,7 +148,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public int deleteComment(long commentId) {
         String sql = "DELETE FROM PlanComment WHERE commentId = ?";
-
         return jdbcTemplate.update(sql,commentId);
     }
 
@@ -162,59 +185,79 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         return updatedScraps;
     }
 
+    @Override
+    public boolean isLiked(long planId, long userId) {
+        String sql = "SELECT EXISTS ( " +
+                "SELECT 1 " +
+                "FROM LikedPlan " +
+                "WHERE planId = ? AND userId = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class,planId,userId);
 
-    /*
-    @Override
-    public List<Plan> findPlanList() {
-        return super.findPlanList(); //몇개씩 가져와야 하는지 ?
-    }
-    */
-    @Override
-    public List<Plan> findUserPlanList(long userId) {
-        String sql = "SELECT * " +
-                "FROM Plan " +
-                "WHERE userId = ?";
-        return jdbcTemplate.query(sql,planRowMapper(),userId);
-    }
-    @Override
-    public List<Plan> findUserLikePlanList(long userId) {
-        String sql = "SELECT * " +
-                "FROM Plan " +
-                "JOIN LikedPlan on Plan.planId = LikedPlan.planId " +
-                "WHERE LikedPlan.userId = ? ";
-        return jdbcTemplate.query(sql,planRowMapper(),userId);
     }
 
     @Override
-    public List<Plan> findUserScrapPlanList(long userId) {
-        String sql = "SELECT * " +
-                "FROM Plan " +
-                "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
-                "WHERE ScrappedPlan.userId = ? ";
-        return jdbcTemplate.query(sql,planRowMapper(),userId);
+    public boolean isScrapped(long planId, long userId) {
+        String sql = "SELECT EXISTS ( " +
+                "SELECT 1 " +
+                "FROM ScrappedPlan " +
+                "WHERE planId = ? AND userId = ?)";
+        return jdbcTemplate.queryForObject(sql, new Object[]{planId, userId}, Boolean.class);
+
     }
 
     @Override
-    public List<Plan> findPlanListByCityId(long cityId) {
-        return jdbcTemplate.query("SELECT * FROM Plans WHERE cityId =? ",planRowMapper(),cityId);
+    public boolean isCommentExists(long commentId) {
+        String sql = "SELECT EXISTS ( SELECT 1 " +
+                "FROM PlanComment " +
+                "WHERE commentId = ?)";
+        return jdbcTemplate.queryForObject(sql,new Object[]{commentId}, Boolean.class);
     }
-/*
+
+
     @Override
-    public List<Plan> planSearch(String keyword, PlanSearchDTO.Filters filters,String sorts) {
-        String region = filters.getRegion();
-        int memberCount = filters.getMemberCount();
-        int duration = filters.getDuration();
-        return jdbcTemplate.query("SELECT * FROM Plans WHERE planTitle like '%?% ",planRowMapper(),keyword);
+    public int deleteCommentByRef(long ref) {
+        String sql = "DELETE FROM PlanComment " +
+                "WHERE ref = ? ";
+        return jdbcTemplate.update(sql, ref);
+
     }
-*/
+
+    @Override
+    public List<PlanListResponseDTO> findUserLikePlanList(long userId) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Comment> findCommentById(long commentId) {
+        String sql = "SELECT * "+
+                "FROM PlanComment "+
+                "WHERE commentId = ? ";
+        List<Comment> result = jdbcTemplate.query(sql, commentRowMapper(), commentId);
+        return result.stream().findAny();
+    }
+
+    @Override
+    public List<DayPlan> findDayPlanListByPlanId(long planId) {
+        String sql = "SELECT * " +
+                "FROM DayPlan "+
+                "WHERE planId = ?";
+        return jdbcTemplate.query(sql,dayPlanRowMapper(),planId);
+
+    }
+
+    @Override
+    public List<DayPlan.Schedule> findScheduleListByDayPlanList(long dayPlanId) {
+        String sql = "SELECT * "+
+                "FROM Schedule " +
+                "WHERE dayPlanId = ?";
+        return jdbcTemplate.query(sql,scheduleRowMapper(),dayPlanId);
+    }
+
     @Override
     public void likePlan(long userId,long planId) {
         String sql = "INSERT INTO LikedPlan(userId,planId) " +
                 "values(?,?)";
         jdbcTemplate.update(sql,userId,planId);
-       // String sql2 = "UPDATE Plan SET likes = likes + 1 WHERE planId = ?";
-
-        //jdbcTemplate.update(sql2, planId);
 
     }
 
@@ -253,17 +296,63 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setTitle(rs.getString("title"));
                 plan.setUserId(rs.getLong("userId"));
                 plan.setPlanId(rs.getLong("planId"));
-                plan.setCityId(rs.getLong("cityId"));
                 plan.setLikes(rs.getInt("likes"));
                 plan.setScraps(rs.getInt("scraps"));
                 plan.setPublic(rs.getBoolean("isPublic"));
                 plan.setDateCreated(rs.getString("dateCreated"));
-                plan.setContent(rs.getString("content"));
+                plan.setState(rs.getString("state"));
+                plan.setCity(rs.getString("city"));
+                plan.setStartDate(rs.getDate("startDate").toLocalDate());
+                plan.setEndDate(rs.getDate("endDate").toLocalDate());
                 return plan;
             }
 
 
         };
     }
+    private RowMapper<DayPlan> dayPlanRowMapper() {
+        return new RowMapper<DayPlan>() {
+            @Override
+            public DayPlan mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DayPlan dayPlan = new DayPlan();
+                dayPlan.setDay(rs.getInt("day"));
+                dayPlan.setPlanId(rs.getLong("planId"));
+                dayPlan.setDayPlanId(rs.getLong("dayPlanId"));
+                dayPlan.setStartTime(rs.getTime("startTime").toLocalTime());
+                dayPlan.setEndTime(rs.getTime("endTime").toLocalTime());
+                return dayPlan;
+            }
+        };
+    }
 
+    private  RowMapper<DayPlan.Schedule> scheduleRowMapper() {
+        return new RowMapper<DayPlan.Schedule>() {
+            @Override
+            public DayPlan.Schedule mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DayPlan.Schedule schedule = new DayPlan.Schedule();
+                schedule.setTime(rs.getInt("time"));
+                schedule.setPlaceId(rs.getLong("placeId"));
+                schedule.setScheduleId(rs.getLong("scheduleId"));
+                schedule.setOrder(rs.getInt("order"));
+                return schedule;
+            }
+        };
+    }
+
+    private RowMapper<Comment> commentRowMapper() {
+        return new RowMapper<Comment>() {
+            @Override
+            public Comment mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Comment comment = new Comment();
+                comment.setCommentId(rs.getLong("commentId"));
+                comment.setRef(rs.getLong("ref"));
+                comment.setContent(rs.getString("content"));
+                comment.setPlanId(rs.getLong("planId"));
+                comment.setTime(rs.getTimestamp("time").toLocalDateTime());
+                comment.setRefOrder(rs.getInt("refOrder"));
+                comment.setUserId(rs.getLong("userId"));
+                return comment;
+            }
+        };
+    }
 }

@@ -1,7 +1,6 @@
 package Trabook.PlanManager.repository.destination;
 
 import Trabook.PlanManager.domain.comment.Comment;
-import Trabook.PlanManager.domain.destination.City;
 import Trabook.PlanManager.domain.destination.Place;
 import org.springframework.data.geo.Point;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,23 +22,35 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     //Optional 여부
     @Override
     public Optional<Place> findByPlaceId(long placeId) {
-        List<Place> result = jdbcTemplate.query("SELECT * FROM Place WHERE placeId =?", placeRowMapper(), placeId);
+        List<Place> result = jdbcTemplate.query("SELECT *,ST_X(coordinate) AS x, ST_Y(coordinate) AS y" +
+                " FROM Place WHERE placeId =?", placeRowMapper(), placeId);
         return result.stream().findAny();
     }
 
 
     @Override
     public List<Place> findPlaceListByCity(long cityId) {
-        return jdbcTemplate.query("SELECT * FROM Place WHERE cityId = ?",placeRowMapper(),cityId);
+        return jdbcTemplate.query("SELECT *,ST_X(coordinate) AS x, ST_Y(coordinate) AS y" +
+                " FROM Place WHERE cityId = ?",placeRowMapper(),cityId);
     }
 
     @Override
     public List<Place> findPlaceListByUserScrap(long userId) {
-        String sql = "SELECT * " +
+        String sql = "SELECT Place.placeId as placeId,scraps,cityId,address,placeName,star,category,imageSrc,ratingScore, ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
                 "FROM Place " +
                 "JOIN ScrappedPlace ON Place.placeId = ScrappedPlace.placeId " +
                 "WHERE ScrappedPlace.userId = ?";
         return jdbcTemplate.query(sql,placeRowMapper(),userId);
+    }
+
+    @Override
+    public List<Place> findHottestPlaceList() {
+        String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
+                "FROM Place " +
+                "ORDER BY ratingScore DESC " +
+                "LIMIT 5;";
+        List<Place> result = jdbcTemplate.query(sql, placeRowMapper());
+        return result;
     }
 
     @Override
@@ -81,6 +92,11 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     }
 
     @Override
+    public int scoreUp(long placeId){
+        String sql = "UPDATE Place SET ratingScore = ratingScore + 1 WHERE placeId = ?";
+        return jdbcTemplate.update(sql,placeId);
+    }
+    @Override
     public int deletePlaceScrap(long userId, long placeId) {
         String sql = "DELETE FROM ScrappedPlace WHERE userId = ? AND placeId = ?"; //1번 쿼리 잘 안됐는데 2번쿼리 잘되는 거 고치기
         return jdbcTemplate.update(sql,userId,placeId);
@@ -98,22 +114,15 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 Place place = new Place();
                 place.setPlaceName(rs.getString("placeName"));
                 place.setPlaceId(rs.getLong("placeId"));
-                place.setScraps(rs.getInt("scraps"));
-                place.setLikes(rs.getInt("likes"));
+                place.setNumOfAdded(rs.getInt("scraps"));
                 place.setAddress(rs.getString("address"));
-               // place.setXMap(rs.getDouble("xMap"));
-                //place.setYMap(rs.getDouble("yMap"));
-                String pointString = rs.getString("location");
-                if(pointString != null && !pointString.isEmpty()) {
-                    String[] points = pointString.replace("POINT(", "").replace(")", "").split(" ");
-                    double latitude = Double.parseDouble(points[0]);
-                    double altitude = Double.parseDouble(points[1]);
-                    place.setGeography(new Point(latitude,altitude));
-                }
+                place.setLongitude(rs.getDouble("x"));
+                place.setLatitude(rs.getDouble("y"));
                 place.setCategory(rs.getString("category"));
                 place.setCityId(rs.getLong("cityId"));
                 place.setImageSrc(rs.getString("imageSrc"));
-                place.setRating(rs.getLong("rating"));
+                place.setStar(rs.getLong("star"));
+                place.setRatingScore(rs.getLong("ratingScore"));
                 return place;
             }
         };

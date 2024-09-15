@@ -7,7 +7,6 @@ import lombok.Getter;
 public class PlanListRequestDTO {
     private long userId;
     private String type;
-
     public PlanListRequestDTO() {}
 
 }

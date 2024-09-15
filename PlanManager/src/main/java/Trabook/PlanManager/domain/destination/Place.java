@@ -9,14 +9,14 @@ public class Place {
     long placeId;
     long cityId;
     int likes;
-    int scraps;
-    //double xMap;
-    Point geography;
-    //double yMap;
-    long rating;
+    int numOfAdded;
+    double latitude;
+    double longitude;
+    long star;
+    long ratingScore;
     String address;
     String placeName;
-    String description;
+    //String description;
     String imageSrc;
     String category;
 
@@ -24,17 +24,17 @@ public class Place {
 
     }
 
-
-    public Place(long placeId, long cityId, int likes, int scraps, Point geography, long rating, String address, String placeName, String description, String imageSrc, String category) {
+    public Place(long placeId, long cityId, int likes, int numOfAdded, double latitude, double longitude, long star, long ratingScore, String address, String placeName, String imageSrc, String category) {
         this.placeId = placeId;
         this.cityId = cityId;
         this.likes = likes;
-        this.scraps = scraps;
-        this.geography = geography;
-        this.rating = rating;
+        this.numOfAdded = numOfAdded;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.star = star;
+        this.ratingScore = ratingScore;
         this.address = address;
         this.placeName = placeName;
-        this.description = description;
         this.imageSrc = imageSrc;
         this.category = category;
     }

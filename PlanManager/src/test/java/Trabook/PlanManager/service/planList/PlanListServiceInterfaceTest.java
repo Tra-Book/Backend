@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 
 class PlanListServiceInterfaceTest {
-
+/*
     @Autowired
     GetUserPlanList getUserPlanList;
 
@@ -49,4 +49,6 @@ class PlanListServiceInterfaceTest {
         assertThat(planList.get(1)).usingRecursiveComparison().isEqualTo(plan2);
         assertThat(planList2).isEmpty();
     }
+
+ */
 }

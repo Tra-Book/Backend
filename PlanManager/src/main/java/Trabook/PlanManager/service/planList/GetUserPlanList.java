@@ -1,6 +1,8 @@
 package Trabook.PlanManager.service.planList;
 
 import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
 import org.springframework.stereotype.Service;
 
@@ -8,15 +10,15 @@ import java.util.List;
 
 @Service
 public class GetUserPlanList implements PlanListServiceInterface{
-    private final PlanRepository planRepository;
+    private final PlanListRepository planListRepository;
 
-    public GetUserPlanList(PlanRepository planRepository) {
-        this.planRepository = planRepository;
+    public GetUserPlanList(PlanListRepository planListRepository) {
+        this.planListRepository = planListRepository;
     }
 
     @Override
-    public List<Plan> getPlanList(long userId) {
-        return planRepository.findUserPlanList(userId);
+    public List<PlanListResponseDTO> getPlanList(long userId) {
+        return planListRepository.findUserPlanList(userId);
     }
 
     @Override

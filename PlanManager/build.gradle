@@ -22,7 +22,13 @@ configurations {
 repositories {
 	mavenCentral()
 }
+/*
+ext {
+	set('springCloudVersion',"2023.0.3")
+}
 
+
+ */
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -31,12 +37,33 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.32'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+//	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+	//redis
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//web client
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
 	compileOnly 'org.projectlombok:lombok'
+
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+/*
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+
+ */
+
+
 
 tasks.named('test') {
 	useJUnitPlatform()
