@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
 
@@ -9,7 +9,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://34.64.100.41:3306/test
     username: root
-
+    #password:
   jpa:
     show-sql: true
   redis:

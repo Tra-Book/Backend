@@ -11,7 +11,6 @@ public class Plan {
     private long planId;
     private long userId;
     private String state; //도 단위 &
-
     private boolean isPublic;
     private boolean isFinished;
     private int likes;

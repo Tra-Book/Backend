@@ -34,7 +34,6 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     }
 
 
-
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {
             @Override
