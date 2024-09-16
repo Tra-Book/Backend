@@ -17,13 +17,13 @@ class WebClientServiceTest {
     @Test
     void getUserInfo() {
         //given
-        User user = new User(3,"test","test");
+        long userId = 3;
         //when
         User userInfo = webClientService.getUserInfo(3);
 
         System.out.println(userInfo.toString());
 
         //then
-        Assertions.assertThat(userInfo.getUserId()).isEqualTo(user.getUserId());
+        Assertions.assertThat(userInfo.getUserId()).isEqualTo(userId);
     }
 }

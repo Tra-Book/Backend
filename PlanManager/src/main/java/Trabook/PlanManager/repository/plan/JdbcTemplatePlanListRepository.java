@@ -1,6 +1,5 @@
 package Trabook.PlanManager.repository.plan;
 
-import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -48,8 +47,18 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setFinished(rs.getBoolean("isFinished"));
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
-                plan.setStartDate(rs.getDate("startDate").toLocalDate());
-                plan.setEndDate(rs.getDate("endDate").toLocalDate());
+                if (rs.getDate("startDate") != null) {
+                    plan.setStartDate(rs.getDate("startDate").toLocalDate());
+                } else {
+                    plan.setStartDate(null); // null로 설정하거나 기본 값을 설정할 수 있음
+                }
+
+                if (rs.getDate("endDate") != null) {
+                    plan.setEndDate(rs.getDate("endDate").toLocalDate());
+                } else {
+                    plan.setEndDate(null); // null로 설정하거나 기본 값을 설정할 수 있음
+                }
+
                 return plan;
             }
 
