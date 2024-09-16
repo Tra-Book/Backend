@@ -1,5 +1,5 @@
 package Trabook.PlanManager.controller;
-import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;

@@ -3,9 +3,9 @@ package Trabook.PlanManager.service;
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.*;
-import Trabook.PlanManager.domain.user.User;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.response.PlanResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -82,7 +82,7 @@ public class PlanService {
     }
 
     @Transactional
-    public PlanResponseDTO getPlan(long planId,long userId) {
+    public PlanResponseDTO getPlan(long planId, long userId) {
         PlanResponseDTO result;
 
         Optional<Plan> planResult = planRepository.findById(planId);
@@ -124,7 +124,7 @@ public class PlanService {
     public String deleteLike(long userId,long planId){
 
         int updatedLikes = planRepository.downLike(planId);
-        log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
+       // log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
         return "delete complete";
     }
 
@@ -142,6 +142,8 @@ public class PlanService {
     public String deleteComment(long commentId) {
 
         Comment comment = planRepository.findCommentById(commentId).get();
+        if(comment == null)
+            return "comment already deleted";
         if(comment.getRefOrder()==0)//comment ref oreder가 0인지 확인 로직
         {
             planRepository.deleteCommentByRef(comment.getRef());

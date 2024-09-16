@@ -2,7 +2,13 @@ server:
   port: 8080
 
 spring:
-
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:maximal-grin-431513-j2-638d61de0271.json
+        project-id: maximal-grin-431513-j2
+        bucket: trabook-20240822
   application:
     name: PLAN-MANAGER
   datasource:

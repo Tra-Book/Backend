@@ -3,12 +3,17 @@ package Trabook.PlanManager.controller;
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.domain.user.User;
+import Trabook.PlanManager.response.PlanIdResponseDTO;
+import Trabook.PlanManager.response.PlanResponseDTO;
+import Trabook.PlanManager.response.ResponseMessage;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.webclient.WebClientService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
@@ -28,88 +33,96 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/create")
-    public PlanIdResponseDTO createPlan(@RequestBody PlanCreateDTO planCreateDTO,@RequestHeader("userId") long userId) {
-        System.out.println(userId);
+    public ResponseEntity<PlanIdResponseDTO> createPlan(@RequestBody PlanCreateDTO planCreateDTO, @RequestHeader("userId") long userId) {
+        //System.out.println(userId);
         planCreateDTO.setUserId(userId);
         long planId = planService.createPlan(planCreateDTO);
         PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId);
-        return planIdResponseDTO;
-        //return 0;
+        return new ResponseEntity<>(planIdResponseDTO, HttpStatus.OK);
+
     }
 
     @ResponseBody
     @PostMapping("/update")
-    public PlanIdResponseDTO updatePlan(@RequestBody Plan plan){
-        System.out.println(plan);
+    public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestBody Plan plan){
+
         long planId = planService.updatePlan(plan);
-        return new PlanIdResponseDTO(planId);
+        PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId);
+        return new ResponseEntity<>(planIdResponseDTO,HttpStatus.OK);
     }
 
     @ResponseBody
     @GetMapping("/")
-    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId") long planId, @RequestHeader("userId") long userId) {
-
+    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId") long planId, @RequestHeader(value = "userId") long userId) {
         PlanResponseDTO result = planService.getPlan(planId, userId);
         long planOwnerId = result.getPlan().getUserId();
         User userInfo = webClientService.getUserInfo(planOwnerId);
         result.setUser(userInfo);
-        return result;
-
+        //return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok(result);
     }
 
     @ResponseBody
     @PostMapping("/test")
-    public void scrap(@RequestParam("planId") long planId) {
+    public ResponseEntity<ResponseMessage> scrap(@RequestParam("planId") long planId) {
         planService.deleteLike(3,planId);
+        return ResponseEntity.ok(new ResponseMessage("OK"));
     }
 
     @ResponseBody
     @PostMapping("/like")
-    public String likePlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader("userId") long userId) {
+    public ResponseEntity<ResponseMessage> likePlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader("userId") long userId) {
         planReactionDTO.setUserId(userId);
-        return planService.likePlan(planReactionDTO);
+        String message = planService.likePlan(planReactionDTO);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 
 
 
     @ResponseBody
     @PostMapping("/scrap")
-    public String scrapPlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader("userId") long userId) {
+    public ResponseEntity<ResponseMessage> scrapPlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader(value = "userId") long userId) {
         planReactionDTO.setUserId(userId);
-        return planService.scrapPlan(planReactionDTO);
+        String message = planService.scrapPlan(planReactionDTO);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 
     @ResponseBody
     @PostMapping("/comment")
-    public String addComment(@RequestBody Comment comment, @RequestHeader("userId") long userId) {
+    public  ResponseEntity<ResponseMessage> addComment(@RequestBody Comment comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
-        return planService.addComment(comment);
+        String message = planService.addComment(comment);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 
     @ResponseBody
     @DeleteMapping("/")
-    public String deletePlan(@RequestParam("planId") long planId,@RequestHeader("userId") long userId) {
+    public ResponseEntity<ResponseMessage> deletePlan(@RequestParam("planId") long planId,@RequestHeader("userId") long userId) {
         //계획과 유저 일치하는 로직 추가
-        return planService.deletePlan(planId);
+        String message = planService.deletePlan(planId);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 
     @ResponseBody
     @DeleteMapping("/like")
-    public String deleteLike(@RequestHeader("userId") long userId, @RequestParam("planId") long planId){
-        return planService.deleteLike(userId,planId);
+    public ResponseEntity<ResponseMessage> deleteLike(@RequestHeader("userId") long userId, @RequestParam("planId") long planId){
+        String message = planService.deleteLike(userId, planId);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 
     @ResponseBody
     @DeleteMapping("/scrap")
-    public String deleteScrap(@RequestHeader("userId") long userId, @RequestParam("planId") long planId) {
-        return planService.deleteScrap(userId,planId);
+    public ResponseEntity<ResponseMessage> deleteScrap(@RequestHeader("userId") long userId, @RequestParam("planId") long planId) {
+        String message = planService.deleteScrap(userId, planId);
+        return ResponseEntity.ok(new ResponseMessage(message));
 
     }
 
     @ResponseBody
     @DeleteMapping("/comment")
-    public String deleteComment(@RequestParam("commentId") long commentId) {
+    public ResponseEntity<ResponseMessage> deleteComment(@RequestParam("commentId") long commentId) {
         //유저아이디랑 댓글 아이디 일치여부 로직 추가
-        return planService.deleteComment(commentId);
+        String message = planService.deleteComment(commentId);
+        return ResponseEntity.ok(new ResponseMessage(message));
     }
 }

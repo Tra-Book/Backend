@@ -1,8 +1,6 @@
 package Trabook.PlanManager.service.planList;
 
-import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
-import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 
 import java.util.List;
 
