@@ -8,8 +8,6 @@ import java.util.Optional;
 
 
 public interface PlanRepository {
-    //Plan save(Plan plan, List<DayPlan> dayPlanList);
-    //Plan savePlan(Plan plan);
 
     long createPlan(PlanCreateDTO planCreateDTO);
 
@@ -21,13 +19,10 @@ public interface PlanRepository {
     Optional<Plan> findPlanByUserAndName(long userId, String planName);
 
     Optional<Comment> findCommentById(long commentId);
-    //List<Plan> findUserPlanList(long userId);
+
     List<PlanListResponseDTO> findUserLikePlanList(long userId);
-    //List<Plan> findUserScrapPlanList(long userId);
-    //List<Plan> findPlanListByCityId(long cityId);
     List<DayPlan> findDayPlanListByPlanId(long planId);
     List<DayPlan.Schedule> findScheduleListByDayPlanList(long dayPlanId);
-    //List<Plan> planSearch(String keyword, PlanSearchDTO.Filters filter, String sort);
 
     void likePlan(long userId, long planId);
     void scrapPlan(long userId,long planId);

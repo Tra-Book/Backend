@@ -37,31 +37,34 @@ public class PlanService {
 
     @Transactional
     public long updatePlan(Plan newPlan) {
-
+/*
         if(validateDuplicatePlanName(newPlan).isPresent()){
             //return "planName already exists";
             return -2;
         } else {
-            long savedPlanId;
-            List<DayPlan> dayPlanList = newPlan.getDayPlanList();
-            if (dayPlanList == null || dayPlanList.isEmpty()) {
-                savedPlanId = planRepository.updatePlan(newPlan);
-            } else {
-                savedPlanId = planRepository.updatePlan(newPlan);
 
-                for (DayPlan dayPlan : dayPlanList) {
-                    planRepository.saveDayPlan(dayPlan);
-                    long dayPlanId = dayPlan.getDayPlanId();
-                    for(DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
-                        planRepository.saveSchedule(dayPlanId,schedule);
-                        if(newPlan.isFinished()) //레디스에 있는 목록인지 확인 로직 추가
-                            destinationRepository.scoreUp(schedule.getPlaceId());
-                    }
+ */
+        long savedPlanId;
+        List<DayPlan> dayPlanList = newPlan.getDayPlanList();
+        if (dayPlanList == null || dayPlanList.isEmpty()) {
+            savedPlanId = planRepository.updatePlan(newPlan);
+
+        } else {
+            savedPlanId = planRepository.updatePlan(newPlan);
+
+            for (DayPlan dayPlan : dayPlanList) {
+                planRepository.saveDayPlan(dayPlan);
+                long dayPlanId = dayPlan.getDayPlanId();
+                for (DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
+                    planRepository.saveSchedule(dayPlanId, schedule);
+                    if (newPlan.isFinished()) //레디스에 있는 목록인지 확인 로직 추가
+                        destinationRepository.scoreUp(schedule.getPlaceId());
                 }
             }
-
-            return savedPlanId;
+            //    }
         }
+            return savedPlanId;
+
     }
 
 

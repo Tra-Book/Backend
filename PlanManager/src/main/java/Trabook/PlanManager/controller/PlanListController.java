@@ -53,7 +53,7 @@ public class PlanListController {
 
     @ResponseBody
     @GetMapping("")
-    public List<PlanListResponseDTO> getPlanList(@RequestParam(name="type") String type, @RequestParam(name="userId") long userId) {
+    public List<PlanListResponseDTO> getPlanList(@RequestParam(name="type") String type, @RequestHeader(name="userId") long userId) {
         PlanListServiceInterface planListService = planListServiceInterfaceMap.get(type);
         List<PlanListResponseDTO> planList = planListService.getPlanList(userId);
         log.info("{}'s plans = {}", userId, planList);

@@ -49,22 +49,20 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public long updatePlan(Plan plan) {
-        String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, dateCreated = ?, title=?, description = ?," +
-                " isPublic = ?, numOfPeople = ?, budget = ?, state=?, city=? "
+        String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, title=?, description = ?," +
+                " isPublic = ?, numOfPeople = ?, budget = ?, planId=?,state=? "
                 +"WHERE planId= ?";
         int update = jdbcTemplate.update(sql,
                 plan.getUserId(),
                 plan.getLikes(),
                 plan.getScraps(),
-                plan.getDateCreated(),
                 plan.getTitle(),
                 plan.getDescription(),
                 plan.isPublic(),
                 plan.getNumOfPeople(),
                 plan.getBudget(),
                 plan.getPlanId(),
-                plan.getState(),
-                plan.getCity());
+                plan.getState(),plan.getPlanId());
         System.out.println(plan.getPlanId());
         return update;
 
@@ -267,8 +265,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 "values(?, ?)";
         jdbcTemplate.update(sql1,userId,planId);
 
-       // String sql2 = "UPDATE Plan SET scraps = scraps + 1 WHERE planId = ?";
-        //jdbcTemplate.update(sql2,planId);
     }
 
     @Override
@@ -299,15 +295,22 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setLikes(rs.getInt("likes"));
                 plan.setScraps(rs.getInt("scraps"));
                 plan.setPublic(rs.getBoolean("isPublic"));
-                plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setState(rs.getString("state"));
-                plan.setCity(rs.getString("city"));
-                plan.setStartDate(rs.getDate("startDate").toLocalDate());
-                plan.setEndDate(rs.getDate("endDate").toLocalDate());
+                Date startDate = rs.getDate("startDate");
+                if (startDate != null) {
+                    plan.setStartDate(startDate.toLocalDate());
+                } else {
+                    plan.setStartDate(null); // 또는 기본값 설정
+                }
+
+                Date endDate = rs.getDate("endDate");
+                if (endDate != null) {
+                    plan.setEndDate(endDate.toLocalDate());
+                } else {
+                    plan.setEndDate(null); // 또는 기본
+                }
                 return plan;
             }
-
-
         };
     }
     private RowMapper<DayPlan> dayPlanRowMapper() {
