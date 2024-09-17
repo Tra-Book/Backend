@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,8 @@ public class PlanService {
 
  */
         long savedPlanId;
+        newPlan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(newPlan.getPlanId()));
+
         List<DayPlan> dayPlanList = newPlan.getDayPlanList();
         if (dayPlanList == null || dayPlanList.isEmpty()) {
             savedPlanId = planRepository.updatePlan(newPlan);
@@ -104,13 +107,28 @@ public class PlanService {
             boolean isScrapped = planRepository.isScrapped(planId, userId);
 
             System.out.println(isLiked);
-            result = new PlanResponseDTO(planResult.get(), dayPlanList,isLiked,isScrapped,null);
+            result = new PlanResponseDTO(planResult.get(), dayPlanList,null,isLiked,isScrapped,null);
             return result;
         }
         else
             return null;
     }
 
+    public List<String> getTags(PlanResponseDTO planResponseDTO) {
+        //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
+        List<String> tags = new ArrayList<>();
+        List<DayPlan> dayPlanList = planResponseDTO.getDayPlanList();
+
+        for(DayPlan dayPlan : dayPlanList) {
+            List<DayPlan.Schedule> scheduleList = dayPlan.getScheduleList();
+            for(DayPlan.Schedule schedule : scheduleList) {
+                tags.add(destinationRepository.findTagByPlaceId(schedule.getPlaceId()));
+                if(tags.size()==3)
+                    return tags;
+            }
+        }
+        return tags;
+    }
     @Transactional
     public String deletePlan(long planId) {
         if(planRepository.deletePlan(planId) == 1)

@@ -19,6 +19,13 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @Override
+    public String findTagByPlaceId(long placeId) {
+        String sql = "SELECT subcategory FROM Place WHERE placeId = ?";
+        return jdbcTemplate.queryForObject(sql, String.class,placeId);
+
+    }
+
     //Optional 여부
     @Override
     public Optional<Place> findByPlaceId(long placeId) {
