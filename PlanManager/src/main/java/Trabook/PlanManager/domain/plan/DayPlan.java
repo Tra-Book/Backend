@@ -20,6 +20,7 @@ public class DayPlan {
     @Getter
     @Setter
     public static class Schedule{
+        private long dayPlanId;
         private long scheduleId;
         private int order;
         private int time;
@@ -31,7 +32,8 @@ public class DayPlan {
 
         public Schedule() {}
 
-        public Schedule(long scheduleId, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longtitude) {
+        public Schedule(long dayPlanId,long scheduleId, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longtitude) {
+            this.dayPlanId = dayPlanId;
             this.scheduleId = scheduleId;
             this.order = order;
             this.time = time;
