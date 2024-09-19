@@ -16,7 +16,7 @@ spring:
     gcp:
       storage:
         credentials:
-          location: classpath:
+          location: classpath:2132eb15076b7940d2cf40e70b88aff8a80304b
         project-id: maximal-grin-431513-j2
         bucket: trabook-20240822
   application:

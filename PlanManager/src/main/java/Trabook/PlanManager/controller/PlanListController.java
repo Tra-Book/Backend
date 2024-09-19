@@ -60,5 +60,18 @@ public class PlanListController {
         return planList;
     }
 
+    @ResponseBody
+    @GetMapping("/general")
+    public List<PlanListResponseDTO> getCustomPlans(
+            @RequestParam String search,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) Integer memberCount,
+            @RequestParam(required = false) Integer duration,
+            @RequestParam(required = false, defaultValue = "likes") String sorts) {
+        log.info("/plans/general");
+
+        return planService.findCustomPlanList(search, region, memberCount, duration, sorts);
+    }
+
 
 }

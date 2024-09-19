@@ -33,6 +33,33 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         return jdbcTemplate.query(sql,planListRowMapper(),userId);
     }
 
+    @Override
+    public List<PlanListResponseDTO> findCustomPlanList(String search,
+                                                        String region,
+                                                        Integer memberCount,
+                                                        Integer duration,
+                                                        String sorts) {
+        String likeSearch = "%" + search + "%"; // SQL injection 방지
+        if(region.isEmpty()) region = null;
+
+        String sql = "SELECT * " +
+                "FROM Plan " +
+                "WHERE (title LIKE ? OR description LIKE ?) " + // 혹시 region 이 하나가 아닌 여러개 올 수 있나?
+                "AND (region = ? OR ? IS NULL) " +
+                "AND (numOfPeople = ? OR ? IS NULL) " +
+                "AND (DATEDIFF(endDate, startDate) + 1 = ? OR ? IS NULL) " +
+                "ORDER BY " +
+                "CASE WHEN ? = 'likes' THEN likes END DESC ";
+        //"    CASE WHEN ? = 'reviewCnt' THEN reviewCnt END DESC"; // 리뷰 아직 미구현
+
+        return jdbcTemplate.query(sql,planListRowMapper(),
+                likeSearch, likeSearch,
+                region, region,
+                memberCount, memberCount,
+                duration, duration,
+                sorts);
+    }
+
 
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {

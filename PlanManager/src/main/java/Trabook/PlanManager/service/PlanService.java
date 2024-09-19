@@ -4,7 +4,9 @@ import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
+import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +24,13 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final DestinationRepository destinationRepository;
+    private  final PlanListRepository planListRepository;
 
     @Autowired
-    public PlanService(PlanRepository planRepository,DestinationRepository destinationRepository) {
+    public PlanService(PlanRepository planRepository, DestinationRepository destinationRepository, PlanListRepository planListRepository) {
         this.planRepository = planRepository;
         this.destinationRepository = destinationRepository;
+        this.planListRepository = planListRepository;
     }
 
     @Transactional
@@ -63,11 +67,9 @@ public class PlanService {
             }
             //    }
         }
-            return savedPlanId;
+        return savedPlanId;
 
     }
-
-
 
     @Transactional
     public String addComment(Comment comment) {
@@ -124,7 +126,7 @@ public class PlanService {
     public String deleteLike(long userId,long planId){
 
         int updatedLikes = planRepository.downLike(planId);
-       // log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
+        // log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
         return "delete complete";
     }
 
@@ -203,6 +205,15 @@ public class PlanService {
             }
             return "error accessing db";
         }
+    }
+
+    @Transactional
+    public List<PlanListResponseDTO> findCustomPlanList(String search,
+                                                        String region,
+                                                        Integer memberCount,
+                                                        Integer duration,
+                                                        String sorts) {
+        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts);
     }
 
 
