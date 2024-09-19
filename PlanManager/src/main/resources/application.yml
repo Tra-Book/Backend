@@ -2,11 +2,21 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    # .env import
+    config:
+      import: optional:file:.env[.properties]
+
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 10MB
+      max-request-size: 10MB
   cloud:
     gcp:
       storage:
         credentials:
-          location: classpath:maximal-grin-431513-j2-638d61de0271.json
+          location: classpath:
         project-id: maximal-grin-431513-j2
         bucket: trabook-20240822
   application:
@@ -28,14 +38,5 @@ eureka:
     register-with-eureka: true
     service-url:
       defaultZone: http://34.64.54.36:8761//eureka
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
-
-#  instance:
-#    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 
