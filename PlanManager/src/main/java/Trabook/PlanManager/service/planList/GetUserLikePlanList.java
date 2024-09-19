@@ -1,9 +1,7 @@
 package Trabook.PlanManager.service.planList;
 
-import Trabook.PlanManager.domain.plan.Plan;
-import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.repository.plan.PlanListRepository;
-import Trabook.PlanManager.repository.plan.PlanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
