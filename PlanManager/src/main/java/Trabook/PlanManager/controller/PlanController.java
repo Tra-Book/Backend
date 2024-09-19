@@ -52,7 +52,6 @@ public class PlanController {
     }
 
     @ResponseBody
-    //@RequestMapping(value="/update",method = RequestMethod.POST,consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE})
     @PatchMapping("/update")
     public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
                                                         @RequestPart("image") MultipartFile image){
