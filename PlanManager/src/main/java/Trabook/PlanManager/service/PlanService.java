@@ -36,37 +36,53 @@ public class PlanService {
     }
 
     @Transactional
-    public long updatePlan(Plan newPlan) {
+    public long updatePlan(Plan plan) {
 /*
         if(validateDuplicatePlanName(newPlan).isPresent()){
             //return "planName already exists";
             return -2;
         } else {
-
- */
-        long savedPlanId;
-        List<DayPlan> dayPlanList = newPlan.getDayPlanList();
-        if (dayPlanList == null || dayPlanList.isEmpty()) {
-            savedPlanId = planRepository.updatePlan(newPlan);
-
-        } else {
-            savedPlanId = planRepository.updatePlan(newPlan);
-
-            for (DayPlan dayPlan : dayPlanList) {
-                planRepository.saveDayPlan(dayPlan);
-                long dayPlanId = dayPlan.getDayPlanId();
-                for (DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
-                    planRepository.saveSchedule(dayPlanId, schedule);
-                    if (newPlan.isFinished()) //레디스에 있는 목록인지 확인 로직 추가
-                        destinationRepository.scoreUp(schedule.getPlaceId());
-                }
-            }
-            //    }
         }
-            return savedPlanId;
+ */
+        List<DayPlan> dayPlanList = plan.getDayPlanList();
+        long savedPlanId = planRepository.updatePlan(plan);
 
+        if(dayPlanList != null) {
+            for (DayPlan dayPlan : dayPlanList) {
+                long dayPlanId = updateOrSaveDayPlan(dayPlan);
+                updateOrSaveSchedule(plan, dayPlan, dayPlanId);
+            }
+        }
+
+        return savedPlanId;
     }
 
+    private void updateOrSaveSchedule(Plan plan, DayPlan dayPlan, long dayPlanId) {
+        for (DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
+            if(schedule.getScheduleId() == 0) // 새로 생성한 스케쥴
+                planRepository.saveSchedule(dayPlanId, schedule);
+            else // 기존에 있는 스케쥴 업데이트
+                planRepository.updateSchedule(dayPlanId,schedule);
+
+            placeRatingScoreUp(plan, schedule);
+        }
+    }
+
+    private void placeRatingScoreUp(Plan plan, DayPlan.Schedule schedule) {
+        if (plan.isFinished()) // 점수 추가
+            destinationRepository.scoreUp(schedule.getPlaceId());
+        // 레디스에 있는 목록인지 확인 로직 추가
+    }
+
+    private long updateOrSaveDayPlan(DayPlan dayPlan) {
+        long dayPlanId;
+        if(dayPlan.getDayPlanId() == 0) { // 새로 생성한 dayplan
+            dayPlanId = planRepository.saveDayPlan(dayPlan);
+        } else { // 기존에 있는 dayplan
+            dayPlanId = planRepository.updateDayPlan(dayPlan);
+        }
+        return dayPlanId;
+    }
 
 
     @Transactional
