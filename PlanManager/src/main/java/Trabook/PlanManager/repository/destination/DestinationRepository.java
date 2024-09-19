@@ -22,5 +22,7 @@ public interface DestinationRepository {
     int likeDown(long placeId);
     int scrapDown(long placeId);
     int scoreUp(long placeId);
+
+    String findTagByPlaceId(long placeId);
 }
 

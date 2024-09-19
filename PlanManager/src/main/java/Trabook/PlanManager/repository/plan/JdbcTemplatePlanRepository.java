@@ -46,8 +46,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public long updatePlan(Plan plan) {
         String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, title=?, description = ?," +
-                " isPublic = ?, numOfPeople = ?, budget = ?, planId=?,state=? "
-                +"WHERE planId= ?";
+                " isPublic = ?,isFinished=?, numOfPeople = ?, budget = ?, planId=?,state=?,imgSrc=? " +
+                "WHERE planId= ?";
         int update = jdbcTemplate.update(sql,
                 plan.getUserId(),
                 plan.getLikes(),
@@ -55,10 +55,14 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.getTitle(),
                 plan.getDescription(),
                 plan.isPublic(),
+                plan.isFinished(),
                 plan.getNumOfPeople(),
                 plan.getBudget(),
                 plan.getPlanId(),
-                plan.getState(),plan.getPlanId());
+                plan.getState(),
+                plan.getImgSrc(),
+                plan.getPlanId());
+
         System.out.println(plan.getPlanId());
         return plan.getPlanId();
 
@@ -317,6 +321,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setScraps(rs.getInt("scraps"));
                 plan.setPublic(rs.getBoolean("isPublic"));
                 plan.setState(rs.getString("state"));
+                plan.setImgSrc(rs.getString("imgSrc"));
                 Date startDate = rs.getDate("startDate");
                 if (startDate != null) {
                     plan.setStartDate(startDate.toLocalDate());
