@@ -59,22 +59,10 @@ public class AdminController {
                 Boolean add = zsetOps.add("topPlaces", placeString, score);
                 System.out.println(add);
             } catch (JsonProcessingException e) {
-
+                e.printStackTrace();
             }
         }
-
-
-
-    }
-/*
-    @ResponseBody
-    @GetMapping("/popular")
-    public List<Place> getHottestPlace(){
-        return destinationRedisService.getHottestPlace();
-
     }
 
-
- */
 
 }

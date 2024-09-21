@@ -50,6 +50,7 @@ public class PlanService {
 
         if(dayPlanList != null) {
             for (DayPlan dayPlan : dayPlanList) {
+                dayPlan.setPlanId(savedPlanId);
                 long dayPlanId = updateOrSaveDayPlan(dayPlan);
                 updateOrSaveSchedule(plan, dayPlan, dayPlanId);
             }
