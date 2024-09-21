@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JdbcTemplatePlanListRepository implements PlanListRepository{
@@ -35,29 +37,38 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 
     @Override
     public List<PlanListResponseDTO> findCustomPlanList(String search,
-                                                        String region,
+                                                        List<String> region,
                                                         Integer memberCount,
                                                         Integer duration,
                                                         String sorts) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
-        if(region.isEmpty()) region = null;
-
+        List<Object> params = new ArrayList<>();
         String sql = "SELECT * " +
                 "FROM Plan " +
-                "WHERE (title LIKE ? OR description LIKE ?) " + // 혹시 region 이 하나가 아닌 여러개 올 수 있나?
-                "AND (region = ? OR ? IS NULL) " +
-                "AND (numOfPeople = ? OR ? IS NULL) " +
+                "WHERE (title LIKE ? OR description LIKE ?) ";
+        params.add(likeSearch);
+        params.add(likeSearch);
+        if (region != null && !region.isEmpty()) {
+            String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));
+            sql += "AND region IN (";
+            sql += regionPlaceholders;
+            sql += ") ";
+            params.addAll(region);
+        }
+
+        sql += "AND (numOfPeople = ? OR ? IS NULL) " +
                 "AND (DATEDIFF(endDate, startDate) + 1 = ? OR ? IS NULL) " +
                 "ORDER BY " +
                 "CASE WHEN ? = 'likes' THEN likes END DESC ";
         //"    CASE WHEN ? = 'reviewCnt' THEN reviewCnt END DESC"; // 리뷰 아직 미구현
 
-        return jdbcTemplate.query(sql,planListRowMapper(),
-                likeSearch, likeSearch,
-                region, region,
-                memberCount, memberCount,
-                duration, duration,
-                sorts);
+        params.add(memberCount);
+        params.add(memberCount);
+        params.add(duration);
+        params.add(duration);
+        params.add(sorts);
+
+        return jdbcTemplate.query(sql,planListRowMapper(), params.toArray());
     }
 
 

@@ -64,7 +64,7 @@ public class PlanListController {
     @GetMapping("/general")
     public List<PlanListResponseDTO> getCustomPlans(
             @RequestParam String search,
-            @RequestParam(required = false) String region,
+            @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) Integer memberCount,
             @RequestParam(required = false) Integer duration,
             @RequestParam(required = false, defaultValue = "likes") String sorts) {

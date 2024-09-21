@@ -209,7 +209,7 @@ public class PlanService {
 
     @Transactional
     public List<PlanListResponseDTO> findCustomPlanList(String search,
-                                                        String region,
+                                                        List<String> region,
                                                         Integer memberCount,
                                                         Integer duration,
                                                         String sorts) {

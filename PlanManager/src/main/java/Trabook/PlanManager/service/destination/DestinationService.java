@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
@@ -97,6 +98,14 @@ public class DestinationService {
             return "type invalid";
     }
 
+    @Transactional
+    public List<Place> getUserCustomPlaceList(String search,
+                                              List<String> state,
+                                              List<String> subcategory,
+                                              String sorts) {
+        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts);
+    }
+
     public List<Place> getHottestPlace(){
         return destinationRepository.findHottestPlaceList();
     }
@@ -107,6 +116,7 @@ public class DestinationService {
 
 
      */
+
     public Optional<Place> getPlace(long placeId) {
         return destinationRepository.findByPlaceId(placeId);
     }

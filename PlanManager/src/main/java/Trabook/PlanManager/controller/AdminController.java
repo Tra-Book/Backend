@@ -55,7 +55,7 @@ public class AdminController {
             System.out.println("insert"+place.getPlaceName()+ "and score is "+ place.getRatingScore() );
             try {
                 String placeString = objectMapper.writeValueAsString(place);
-                long score = place.getRatingScore();
+                Double score = place.getRatingScore();
                 Boolean add = zsetOps.add("topPlaces", placeString, score);
                 System.out.println(add);
             } catch (JsonProcessingException e) {
