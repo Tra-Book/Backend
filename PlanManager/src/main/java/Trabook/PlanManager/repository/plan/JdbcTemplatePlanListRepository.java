@@ -1,6 +1,10 @@
 package Trabook.PlanManager.repository.plan;
 
+
 import Trabook.PlanManager.response.PlanListResponseDTO;
+
+import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
