@@ -6,36 +6,43 @@ import org.springframework.data.geo.Point;
 
 @Getter @Setter
 public class Place {
-    long placeId;
-    long cityId;
-    int likes;
-    int numOfAdded;
-    double latitude;
-    double longitude;
-    long star;
-    long ratingScore;
+    Long placeId;
+    Long cityId;
     String address;
     String placeName;
-    //String description;
-    String imageSrc;
+    String description;
+    Double latitude;
+    Double Longitude;
+    Long star;
     String category;
+    String imageSrc;
+    String subcategory;
+    String tel;
+    String zipcode;
+    Double ratingScore;
+    Integer scraps;
+    Integer numOfAdded;
+    Integer likes;
 
-    public Place() {
+    public Place(){};
 
-    }
-
-    public Place(long placeId, long cityId, int likes, int numOfAdded, double latitude, double longitude, long star, long ratingScore, String address, String placeName, String imageSrc, String category) {
+    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer numOfAdded, Integer likes) {
         this.placeId = placeId;
         this.cityId = cityId;
-        this.likes = likes;
-        this.numOfAdded = numOfAdded;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.star = star;
-        this.ratingScore = ratingScore;
         this.address = address;
         this.placeName = placeName;
-        this.imageSrc = imageSrc;
+        this.description = description;
+        this.latitude = latitude;
+        Longitude = longitude;
+        this.star = star;
         this.category = category;
+        this.imageSrc = imageSrc;
+        this.subcategory = subcategory;
+        this.tel = tel;
+        this.zipcode = zipcode;
+        this.ratingScore = ratingScore;
+        this.scraps = scraps;
+        this.numOfAdded = numOfAdded;
+        this.likes = likes;
     }
 }

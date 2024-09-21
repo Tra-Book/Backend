@@ -16,7 +16,7 @@ spring:
     gcp:
       storage:
         credentials:
-          location: classpath:maximal-grin-431513-j2-3634a1f29802.json
+          location: classpath:
         project-id: maximal-grin-431513-j2
         bucket: trabook-20240822
   application:
@@ -32,11 +32,11 @@ spring:
     port: 6379
     host: 34.133.241.170
     password:
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://34.64.54.36:8761//eureka
+#eureka:
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://34.64.54.36:8761//eureka
 
 
