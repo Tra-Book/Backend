@@ -13,6 +13,10 @@ public interface DestinationRepository {
     List<Place> findPlaceListByCity(long cityId);
     List<Place> findPlaceListByUserScrap(long userId);
     List<Place> findHottestPlaceList();
+    List<Place> findCustomPlaceList(String search,
+                                    List<String> state,
+                                    List<String> subcategory,
+                                    String sorts);
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);

@@ -1,5 +1,7 @@
-package Trabook.PlanManager.domain.plan;
+package Trabook.PlanManager.response;
 
+import Trabook.PlanManager.domain.plan.DayPlan;
+import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.user.User;
 import lombok.Getter;
 import lombok.Setter;

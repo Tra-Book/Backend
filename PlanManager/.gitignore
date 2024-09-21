@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+gradle.properties
 
 ### STS ###
 .apt_generated
@@ -35,3 +36,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### env ###
+.env*
+resources/maximal-grin-431513-j2-3634a1f29802.json

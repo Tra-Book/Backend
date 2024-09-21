@@ -2,6 +2,7 @@ package Trabook.PlanManager.domain.plan;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +18,7 @@ public class Plan {
     private int scraps;
     private int numOfPeople; //바꾸기
     private int budget;
-
+    //private MultipartFile image;
     private LocalDate startDate;
     private LocalDate endDate;
     private String title;

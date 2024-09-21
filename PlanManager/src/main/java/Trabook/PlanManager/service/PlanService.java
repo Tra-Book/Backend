@@ -3,9 +3,11 @@ package Trabook.PlanManager.service;
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.*;
-import Trabook.PlanManager.domain.user.User;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
+import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.response.PlanListResponseDTO;
+import Trabook.PlanManager.response.PlanResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -22,11 +24,13 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final DestinationRepository destinationRepository;
+    private  final PlanListRepository planListRepository;
 
     @Autowired
-    public PlanService(PlanRepository planRepository,DestinationRepository destinationRepository) {
+    public PlanService(PlanRepository planRepository, DestinationRepository destinationRepository, PlanListRepository planListRepository) {
         this.planRepository = planRepository;
         this.destinationRepository = destinationRepository;
+        this.planListRepository = planListRepository;
     }
 
     @Transactional
@@ -63,11 +67,13 @@ public class PlanService {
             }
             //    }
         }
-            return savedPlanId;
+
+        return savedPlanId;
 
     }
 
 
+    }
 
     @Transactional
     public String addComment(Comment comment) {
@@ -82,7 +88,7 @@ public class PlanService {
     }
 
     @Transactional
-    public PlanResponseDTO getPlan(long planId,long userId) {
+    public PlanResponseDTO getPlan(long planId, long userId) {
         PlanResponseDTO result;
 
         Optional<Plan> planResult = planRepository.findById(planId);
@@ -124,7 +130,7 @@ public class PlanService {
     public String deleteLike(long userId,long planId){
 
         int updatedLikes = planRepository.downLike(planId);
-        log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
+        // log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
         return "delete complete";
     }
 
@@ -142,6 +148,8 @@ public class PlanService {
     public String deleteComment(long commentId) {
 
         Comment comment = planRepository.findCommentById(commentId).get();
+        if(comment == null)
+            return "comment already deleted";
         if(comment.getRefOrder()==0)//comment ref oreder가 0인지 확인 로직
         {
             planRepository.deleteCommentByRef(comment.getRef());
@@ -201,6 +209,15 @@ public class PlanService {
             }
             return "error accessing db";
         }
+    }
+
+    @Transactional
+    public List<PlanListResponseDTO> findCustomPlanList(String search,
+                                                        List<String> region,
+                                                        Integer memberCount,
+                                                        Integer duration,
+                                                        String sorts) {
+        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts);
     }
 
 

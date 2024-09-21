@@ -1,4 +1,4 @@
-package Trabook.PlanManager.domain.plan;
+package Trabook.PlanManager.response;
 
 import lombok.Getter;
 import lombok.Setter;

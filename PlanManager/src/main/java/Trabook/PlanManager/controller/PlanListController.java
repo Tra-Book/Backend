@@ -1,5 +1,5 @@
 package Trabook.PlanManager.controller;
-import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;
@@ -58,6 +58,19 @@ public class PlanListController {
         List<PlanListResponseDTO> planList = planListService.getPlanList(userId);
         log.info("{}'s plans = {}", userId, planList);
         return planList;
+    }
+
+    @ResponseBody
+    @GetMapping("/general")
+    public List<PlanListResponseDTO> getCustomPlans(
+            @RequestParam String search,
+            @RequestParam(required = false) List<String> region,
+            @RequestParam(required = false) Integer memberCount,
+            @RequestParam(required = false) Integer duration,
+            @RequestParam(required = false, defaultValue = "likes") String sorts) {
+        log.info("/plans/general");
+
+        return planService.findCustomPlanList(search, region, memberCount, duration, sorts);
     }
 
 

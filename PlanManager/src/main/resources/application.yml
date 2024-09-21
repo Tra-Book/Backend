@@ -2,7 +2,23 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    # .env import
+    config:
+      import: optional:file:.env[.properties]
 
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:2132eb15076b7940d2cf40e70b88aff8a80304b
+        project-id: maximal-grin-431513-j2
+        bucket: trabook-20240822
   application:
     name: PLAN-MANAGER
   datasource:
@@ -16,20 +32,11 @@ spring:
     port: 6379
     host: 34.133.241.170
     password:
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://34.64.54.36:8761//eureka
 #eureka:
 #  client:
 #    fetch-registry: true
 #    register-with-eureka: true
 #    service-url:
-#      defaultZone: http://localhost:8761/eureka
-
-#  instance:
-#    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+#      defaultZone: http://34.64.54.36:8761//eureka
 
 

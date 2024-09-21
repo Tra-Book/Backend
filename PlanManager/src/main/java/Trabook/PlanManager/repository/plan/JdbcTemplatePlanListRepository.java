@@ -1,12 +1,18 @@
 package Trabook.PlanManager.repository.plan;
 
+
+import Trabook.PlanManager.response.PlanListResponseDTO;
+
 import Trabook.PlanManager.domain.plan.PlanListResponseDTO;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JdbcTemplatePlanListRepository implements PlanListRepository{
@@ -31,6 +37,42 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
                 "WHERE ScrappedPlan.userId = ? ";
         return jdbcTemplate.query(sql,planListRowMapper(),userId);
+    }
+
+    @Override
+    public List<PlanListResponseDTO> findCustomPlanList(String search,
+                                                        List<String> region,
+                                                        Integer memberCount,
+                                                        Integer duration,
+                                                        String sorts) {
+        String likeSearch = "%" + search + "%"; // SQL injection 방지
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT * " +
+                "FROM Plan " +
+                "WHERE (title LIKE ? OR description LIKE ?) ";
+        params.add(likeSearch);
+        params.add(likeSearch);
+        if (region != null && !region.isEmpty()) {
+            String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));
+            sql += "AND region IN (";
+            sql += regionPlaceholders;
+            sql += ") ";
+            params.addAll(region);
+        }
+
+        sql += "AND (numOfPeople = ? OR ? IS NULL) " +
+                "AND (DATEDIFF(endDate, startDate) + 1 = ? OR ? IS NULL) " +
+                "ORDER BY " +
+                "CASE WHEN ? = 'likes' THEN likes END DESC ";
+        //"    CASE WHEN ? = 'reviewCnt' THEN reviewCnt END DESC"; // 리뷰 아직 미구현
+
+        params.add(memberCount);
+        params.add(memberCount);
+        params.add(duration);
+        params.add(duration);
+        params.add(sorts);
+
+        return jdbcTemplate.query(sql,planListRowMapper(), params.toArray());
     }
 
 

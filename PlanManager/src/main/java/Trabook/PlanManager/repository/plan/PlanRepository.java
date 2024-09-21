@@ -2,6 +2,7 @@ package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
+import Trabook.PlanManager.response.PlanListResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
