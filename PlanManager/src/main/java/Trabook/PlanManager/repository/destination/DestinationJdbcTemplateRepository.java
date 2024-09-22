@@ -55,11 +55,14 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         return result;
     }
 
+    /*
+    ### 중요 ###
+    review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
+     */
     @Override
     public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory, String sorts) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
-
         // 기본 쿼리
         String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
                 "FROM Place "+
@@ -70,18 +73,24 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
 
         // state 리스트가 비어있지 않으면 IN 절 추가
         if (state != null && !state.isEmpty()) {
-            String statePlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
-            sql += ("AND City.stateName IN (" + statePlaceholders + ") ");
-            params.addAll(state);
+            if(!state.get(0).equals("전체")) {
+                String statePlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
+                sql += ("AND City.stateName IN (" + statePlaceholders + ") ");
+                params.addAll(state);
+            }
         }
 
         // subcategory 리스트가 비어있지 않으면 IN 절 추가
         if (subcategory != null && !subcategory.isEmpty()) {
-            String subcategoryPlaceholders = String.join(", ", Collections.nCopies(subcategory.size(), "?"));
-            sql += ("AND Place.subcategory IN (" + subcategoryPlaceholders + ") ");
-            params.addAll(subcategory);
+            if(!subcategory.get(0).equals("전체")) {
+                String subcategoryPlaceholders = String.join(", ", Collections.nCopies(subcategory.size(), "?"));
+                sql += ("AND Place.subcategory IN (" + subcategoryPlaceholders + ") ");
+                params.addAll(subcategory);
+            }
         }
         // sort 생략
+        if(sorts.equals("numOfAdded")) sorts = "" + "scraps";
+        sql += "ORDER BY " + sorts + " DESC ";
         return jdbcTemplate.query(sql, placeRowMapper(), params.toArray());
     }
 

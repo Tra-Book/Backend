@@ -50,7 +50,7 @@ public class DestinationListController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) List<String> state,
             @RequestParam(required = false) List<String> subcategory,
-            @RequestParam(defaultValue = "reviews") String sorts,
+            @RequestParam(defaultValue = "stars") String sorts,
             @RequestParam Integer pageSize,
             @RequestParam Integer pageNum) {
         log.info("/places/general");
