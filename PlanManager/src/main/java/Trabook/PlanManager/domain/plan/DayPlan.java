@@ -10,9 +10,7 @@ import java.util.List;
 
 @Getter @Setter
 public class DayPlan {
-    private long dayPlanId;
     private long planId;
-
     private int day;
     private LocalTime startTime;
     private LocalTime endTime;
@@ -21,8 +19,8 @@ public class DayPlan {
     @Getter
     @Setter
     public static class Schedule{
-        private long dayPlanId;
-        private long scheduleId;
+        private long planId;
+        private int day;
         private int order;
         private int time;
         private long placeId;
@@ -33,9 +31,9 @@ public class DayPlan {
 
         public Schedule() {}
 
-        public Schedule(long dayPlanId,long scheduleId, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longtitude) {
-            this.dayPlanId = dayPlanId;
-            this.scheduleId = scheduleId;
+        public Schedule(long planId, int day, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longtitude) {
+            this.planId = planId;
+            this.day = day;
             this.order = order;
             this.time = time;
             this.placeId = placeId;
@@ -47,8 +45,7 @@ public class DayPlan {
     }
     public DayPlan() {}
 
-    public DayPlan(long dayPlanId, long planId, int day, LocalTime startTime, LocalTime endTime, List<Schedule> scheduleList) {
-        this.dayPlanId = dayPlanId;
+    public DayPlan( long planId, int day, LocalTime startTime, LocalTime endTime, List<Schedule> scheduleList) {
         this.planId = planId;
         this.day = day;
         this.startTime = startTime;

@@ -46,25 +46,30 @@ public class PlanService {
         plan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
-        long savedPlanId = planRepository.updatePlan(plan);
+        long planId = planRepository.updatePlan(plan);
 
         if(dayPlanList != null) {
             for (DayPlan dayPlan : dayPlanList) {
-                dayPlan.setPlanId(savedPlanId);
-                long dayPlanId = updateOrSaveDayPlan(dayPlan);
-                updateOrSaveSchedule(plan, dayPlan, dayPlanId);
+                dayPlan.setPlanId(planId);
+                updateOrSaveDayPlan(dayPlan);
+                updateOrSaveSchedule(plan, dayPlan);
             }
         }
-
-        return savedPlanId;
+        return planId;
     }
 
-    private void updateOrSaveSchedule(Plan plan, DayPlan dayPlan, long dayPlanId) {
+    private void updateOrSaveSchedule(Plan plan, DayPlan dayPlan) {
+        int day = dayPlan.getDay();
+        long planId = plan.getPlanId();
         for (DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
-            if(schedule.getScheduleId() == 0) // 새로 생성한 스케쥴
-                planRepository.saveSchedule(dayPlanId, schedule);
+            int order = schedule.getOrder();
+            schedule.setPlanId(planId);
+            schedule.setDay(day);
+
+            if(planRepository.findSchedule(planId,day,order).isPresent()) // 새로 생성한 스케쥴
+                planRepository.updateSchedule(schedule);
             else // 기존에 있는 스케쥴 업데이트
-                planRepository.updateSchedule(dayPlanId,schedule);
+                planRepository.saveSchedule( schedule);
 
             placeRatingScoreUp(plan, schedule);
         }
@@ -76,14 +81,14 @@ public class PlanService {
         // 레디스에 있는 목록인지 확인 로직 추가
     }
 
-    private long updateOrSaveDayPlan(DayPlan dayPlan) {
-        long dayPlanId;
-        if(dayPlan.getDayPlanId() == 0) { // 새로 생성한 dayplan
-            dayPlanId = planRepository.saveDayPlan(dayPlan);
+    private void updateOrSaveDayPlan(DayPlan dayPlan) {
+        long planId = dayPlan.getPlanId();
+        int day = dayPlan.getDay();
+        if(planRepository.findDayPlan(planId,day).isPresent()) { // 새로 생성한 dayplan
+            planRepository.updateDayPlan(dayPlan);
         } else { // 기존에 있는 dayplan
-            dayPlanId = planRepository.updateDayPlan(dayPlan);
+            planRepository.saveDayPlan(dayPlan);
         }
-        return dayPlanId;
     }
 
 
@@ -112,7 +117,7 @@ public class PlanService {
             List<DayPlan> dayPlanList = planRepository.findDayPlanListByPlanId(planId);
 
             for (DayPlan dayPlan : dayPlanList) {
-                List<DayPlan.Schedule> scheduleList = planRepository.findScheduleListByDayPlanList(dayPlan.getDayPlanId());
+                List<DayPlan.Schedule> scheduleList = planRepository.findScheduleList(dayPlan.getPlanId(),dayPlan.getDay());
                 for(DayPlan.Schedule schedule : scheduleList) {
                     Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
                     schedule.setLatitude(place.getLatitude());

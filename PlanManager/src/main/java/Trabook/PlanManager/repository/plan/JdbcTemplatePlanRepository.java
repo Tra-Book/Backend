@@ -44,6 +44,21 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
+    public Optional<DayPlan.Schedule> findSchedule(long planId, int day, int order) {
+        String sql = "SELECT * FROM Schedule WHERE planId = ? AND `day` = ? AND `order` = ?";
+        List<DayPlan.Schedule> result = jdbcTemplate.query(sql, scheduleRowMapper(), planId, day, order);
+        return result.stream().findAny();
+
+    }
+
+    @Override
+    public Optional<DayPlan> findDayPlan(long planId, int day) {
+        String sql = "SELECT * FROM DayPlan WHERE planId = ? AND `day` = ?";
+        List<DayPlan> result = jdbcTemplate.query(sql, dayPlanRowMapper(), planId, day);
+        return result.stream().findAny();
+    }
+
+    @Override
     public long updatePlan(Plan plan) {
         String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, title=?, description = ?," +
                 " isPublic = ?,isFinished=?, numOfPeople = ?, budget = ?, planId=?,state=?,imgSrc=? " +
@@ -69,35 +84,44 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
-    public long updateSchedule(long DayPlanId, DayPlan.Schedule schedule) {
+    public long updateSchedule(DayPlan.Schedule schedule) {
+
         String sql = "UPDATE Schedule SET  `order` = ?, `time` = ?, placeId = ?" +
-                " WHERE scheduleId = ?";
+                " WHERE  planId = ? AND `day` = ? AND `order` = ?";
         int update = jdbcTemplate.update(sql,
                 schedule.getOrder(),
                 schedule.getTime(),
                 schedule.getPlaceId(),
-                schedule.getScheduleId());
-        return schedule.getScheduleId();
+                schedule.getPlanId(),
+                schedule.getDay(),
+                schedule.getOrder());
+        return update;
     }
 
     @Override
     public long updateDayPlan(DayPlan dayPlan) {
-        String sql = "UPDATE DayPlan SET dayPlanId = ?,planId = ?,day = ?,startTime = ?,endTime = ? " +
-                "WHERE dayPlanId = ?";
+        String sql = "UPDATE DayPlan SET planId = ?,day = ?,startTime = ?,endTime = ? " +
+                "WHERE planId = ? AND `day` = ?";
         int update = jdbcTemplate.update(sql,
-                dayPlan.getDayPlanId(),
                 dayPlan.getPlanId(),
                 dayPlan.getDay(),
                 dayPlan.getStartTime(),
-                dayPlan.getEndTime(), dayPlan.getDayPlanId());
-        return dayPlan.getDayPlanId();
+                dayPlan.getEndTime(), dayPlan.getPlanId(),dayPlan.getDay());
+        return update;
     }
 
     @Override
     public long saveDayPlan(DayPlan dayPlan) {
-        String sql = "INSERT INTO DayPlan(planId, dayPlanId, day, startTime, endTime)" +
-                "values(?,?,?,?,?)";
+        String sql = "INSERT INTO DayPlan(planId, day, startTime, endTime)" +
+                "values(?,?,?,?)";
+         return  jdbcTemplate.update(sql,
+                dayPlan.getPlanId(),
+                dayPlan.getDay(),
+                dayPlan.getStartTime(),
+                dayPlan.getEndTime()
+        );
 
+/*
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
@@ -110,12 +134,21 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         }, keyHolder);
         dayPlan.setDayPlanId(keyHolder.getKey().longValue());
         return dayPlan.getDayPlanId();
+        */
+
     }
 
     @Override
-    public void saveSchedule(long dayPlanId, DayPlan.Schedule schedule) {
-        String sql = "INSERT INTO Schedule(DayPlanId,`order`,`time`,placeId) "+
-                "VALUES(?,?,?,?)";
+    public void saveSchedule(DayPlan.Schedule schedule) {
+        String sql = "INSERT INTO Schedule(planId,`day`,`order`,`time`,placeId) "+
+                "VALUES(?,?,?,?,?)";
+        jdbcTemplate.update(sql,
+                schedule.getPlanId(),
+                schedule.getDay(),
+                schedule.getOrder(),
+                schedule.getTime(),
+                schedule.getPlaceId());
+        /*
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
             ps.setLong(1,dayPlanId);
@@ -124,6 +157,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             ps.setLong(4,schedule.getPlaceId());
             return ps;
         });
+
+         */
     }
 
 
@@ -268,11 +303,11 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
-    public List<DayPlan.Schedule> findScheduleListByDayPlanList(long dayPlanId) {
+    public List<DayPlan.Schedule> findScheduleList(long planId,int day) {
         String sql = "SELECT * "+
                 "FROM Schedule " +
-                "WHERE dayPlanId = ?";
-        return jdbcTemplate.query(sql,scheduleRowMapper(),dayPlanId);
+                "WHERE planId = ? AND day = ?";
+        return jdbcTemplate.query(sql,scheduleRowMapper(),planId,day);
     }
 
     @Override
@@ -345,7 +380,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 DayPlan dayPlan = new DayPlan();
                 dayPlan.setDay(rs.getInt("day"));
                 dayPlan.setPlanId(rs.getLong("planId"));
-                dayPlan.setDayPlanId(rs.getLong("dayPlanId"));
                 dayPlan.setStartTime(rs.getTime("startTime").toLocalTime());
                 dayPlan.setEndTime(rs.getTime("endTime").toLocalTime());
                 return dayPlan;
@@ -358,9 +392,10 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             @Override
             public DayPlan.Schedule mapRow(ResultSet rs, int rowNum) throws SQLException {
                 DayPlan.Schedule schedule = new DayPlan.Schedule();
+                schedule.setPlanId(rs.getLong("planId"));
+                schedule.setDay(rs.getInt("day"));
                 schedule.setTime(rs.getInt("time"));
                 schedule.setPlaceId(rs.getLong("placeId"));
-                schedule.setScheduleId(rs.getLong("scheduleId"));
                 schedule.setOrder(rs.getInt("order"));
                 return schedule;
             }

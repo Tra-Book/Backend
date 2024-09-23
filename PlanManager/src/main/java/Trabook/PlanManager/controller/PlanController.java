@@ -2,7 +2,6 @@ package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
-import Trabook.PlanManager.domain.test.ImageTest;
 import Trabook.PlanManager.domain.user.User;
 
 import Trabook.PlanManager.response.PlanIdResponseDTO;
@@ -60,7 +59,6 @@ public class PlanController {
     @PatchMapping("/update")
     public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
                                                         @RequestPart("image") MultipartFile image){
-
         log.info("{}",plan.isFinished());
         long planId = planService.updatePlan(plan);
 
