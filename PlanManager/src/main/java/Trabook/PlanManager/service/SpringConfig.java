@@ -29,7 +29,7 @@ public class SpringConfig {
 
     @Bean
     public PlanService planService() {
-        return new PlanService(planRepository(),destinationRepository());
+        return new PlanService(planRepository(),destinationRepository(), planListRepository());
     }
 
     @Bean

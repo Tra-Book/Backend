@@ -8,4 +8,9 @@ public interface PlanListRepository {
 
     List<PlanListResponseDTO> findUserPlanList(long userId);
     List<PlanListResponseDTO> findUserScrappedPlanList(long userId);
+    List<PlanListResponseDTO> findCustomPlanList(String search,
+                                                 List<String> region,
+                                                 Integer memberCount,
+                                                 Integer duration,
+                                                 String sorts);
 }

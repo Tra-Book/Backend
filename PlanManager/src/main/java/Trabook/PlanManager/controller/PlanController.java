@@ -4,9 +4,11 @@ import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.domain.test.ImageTest;
 import Trabook.PlanManager.domain.user.User;
+
 import Trabook.PlanManager.response.PlanIdResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
 import Trabook.PlanManager.response.ResponseMessage;
+
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.file.FileUploadService;
 import Trabook.PlanManager.service.webclient.WebClientService;
@@ -16,9 +18,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +37,7 @@ public class PlanController {
     private final WebClientService webClientService;
     private final PlanService planService;
     private final FileUploadService fileUploadService;
+
     @Autowired
     public PlanController(WebClientService webClientService, PlanService planService, FileUploadService fileUploadService) {
         this.webClientService = webClientService;
@@ -73,6 +78,7 @@ public class PlanController {
     @ResponseBody
     @GetMapping("/")
     public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId") long planId, @RequestHeader(value = "userId") long userId) {
+
         PlanResponseDTO result = planService.getPlan(planId, userId);
         long planOwnerId = result.getPlan().getUserId();
         result.setTags(planService.getTags(result));
@@ -94,6 +100,7 @@ public class PlanController {
         planReactionDTO.setUserId(userId);
         String message = planService.likePlan(planReactionDTO);
         return ResponseEntity.ok(new ResponseMessage(message));
+
     }
 
 
@@ -104,6 +111,7 @@ public class PlanController {
         planReactionDTO.setUserId(userId);
         String message = planService.scrapPlan(planReactionDTO);
         return ResponseEntity.ok(new ResponseMessage(message));
+
     }
 
     @ResponseBody
@@ -127,6 +135,7 @@ public class PlanController {
     public ResponseEntity<ResponseMessage> deleteLike(@RequestHeader("userId") long userId, @RequestParam("planId") long planId){
         String message = planService.deleteLike(userId, planId);
         return ResponseEntity.ok(new ResponseMessage(message));
+
     }
 
     @ResponseBody
@@ -134,7 +143,6 @@ public class PlanController {
     public ResponseEntity<ResponseMessage> deleteScrap(@RequestHeader("userId") long userId, @RequestParam("planId") long planId) {
         String message = planService.deleteScrap(userId, planId);
         return ResponseEntity.ok(new ResponseMessage(message));
-
     }
 
     @ResponseBody

@@ -70,14 +70,13 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public long updateSchedule(long DayPlanId, DayPlan.Schedule schedule) {
-        String sql = "UPDATE Schedule SET dayPlanId = ?, scheduleId = ?,order = ?,time = ?,placeId = ?" +
-                " WHERE dayPlanId = ?";
+        String sql = "UPDATE Schedule SET  `order` = ?, `time` = ?, placeId = ?" +
+                " WHERE scheduleId = ?";
         int update = jdbcTemplate.update(sql,
-                schedule.getDayPlanId(),
-                schedule.getScheduleId(),
                 schedule.getOrder(),
                 schedule.getTime(),
-                schedule.getPlaceId());
+                schedule.getPlaceId(),
+                schedule.getScheduleId());
         return schedule.getScheduleId();
     }
 
