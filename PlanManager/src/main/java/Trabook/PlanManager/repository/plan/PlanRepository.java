@@ -13,9 +13,10 @@ public interface PlanRepository {
     long createPlan(PlanCreateDTO planCreateDTO);
 
     long updatePlan(Plan plan);
-    void saveDayPlan(DayPlan dayPlan);
+    long saveDayPlan(DayPlan dayPlan);
+    long updateDayPlan(DayPlan dayPlan);
     void saveSchedule(long DayPlanId, DayPlan.Schedule schedule);
-
+    long updateSchedule(long DayPlanId, DayPlan.Schedule schedule);
     Optional<Plan> findById(long planId);
     Optional<Plan> findPlanByUserAndName(long userId, String planName);
 

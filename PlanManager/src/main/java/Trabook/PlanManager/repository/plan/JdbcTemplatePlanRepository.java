@@ -46,8 +46,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public long updatePlan(Plan plan) {
         String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, title=?, description = ?," +
-                " isPublic = ?, numOfPeople = ?, budget = ?, planId=?,state=? "
-                +"WHERE planId= ?";
+                " isPublic = ?,isFinished=?, numOfPeople = ?, budget = ?, planId=?,state=?,imgSrc=? " +
+                "WHERE planId= ?";
         int update = jdbcTemplate.update(sql,
                 plan.getUserId(),
                 plan.getLikes(),
@@ -55,18 +55,46 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.getTitle(),
                 plan.getDescription(),
                 plan.isPublic(),
+                plan.isFinished(),
                 plan.getNumOfPeople(),
                 plan.getBudget(),
                 plan.getPlanId(),
-                plan.getState(),plan.getPlanId());
+                plan.getState(),
+                plan.getImgSrc(),
+                plan.getPlanId());
+
         System.out.println(plan.getPlanId());
-        return update;
+        return plan.getPlanId();
 
     }
 
+    @Override
+    public long updateSchedule(long DayPlanId, DayPlan.Schedule schedule) {
+        String sql = "UPDATE Schedule SET  `order` = ?, `time` = ?, placeId = ?" +
+                " WHERE scheduleId = ?";
+        int update = jdbcTemplate.update(sql,
+                schedule.getOrder(),
+                schedule.getTime(),
+                schedule.getPlaceId(),
+                schedule.getScheduleId());
+        return schedule.getScheduleId();
+    }
 
     @Override
-    public void saveDayPlan(DayPlan dayPlan) {
+    public long updateDayPlan(DayPlan dayPlan) {
+        String sql = "UPDATE DayPlan SET dayPlanId = ?,planId = ?,day = ?,startTime = ?,endTime = ? " +
+                "WHERE dayPlanId = ?";
+        int update = jdbcTemplate.update(sql,
+                dayPlan.getDayPlanId(),
+                dayPlan.getPlanId(),
+                dayPlan.getDay(),
+                dayPlan.getStartTime(),
+                dayPlan.getEndTime(), dayPlan.getDayPlanId());
+        return dayPlan.getDayPlanId();
+    }
+
+    @Override
+    public long saveDayPlan(DayPlan dayPlan) {
         String sql = "INSERT INTO DayPlan(planId, dayPlanId, day, startTime, endTime)" +
                 "values(?,?,?,?,?)";
 
@@ -81,7 +109,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             return ps;
         }, keyHolder);
         dayPlan.setDayPlanId(keyHolder.getKey().longValue());
-
+        return dayPlan.getDayPlanId();
     }
 
     @Override
@@ -98,8 +126,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         });
     }
 
-
-
     @Override
     public Optional<Plan> findById(long planId){
         String sql = "SELECT * FROM Plan WHERE planId = ?";
@@ -114,8 +140,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         List<Plan> result = jdbcTemplate.query("SELECT * FROM Plan WHERE userId = ? AND title = ?", planRowMapper(), userId, planName);
         return result.stream().findAny();
     }
-
-
 
     @Override
     public int deletePlan(long planId) {
@@ -292,6 +316,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setScraps(rs.getInt("scraps"));
                 plan.setPublic(rs.getBoolean("isPublic"));
                 plan.setState(rs.getString("state"));
+                plan.setImgSrc(rs.getString("imgSrc"));
                 Date startDate = rs.getDate("startDate");
                 if (startDate != null) {
                     plan.setStartDate(startDate.toLocalDate());

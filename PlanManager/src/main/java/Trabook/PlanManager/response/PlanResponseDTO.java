@@ -15,14 +15,15 @@ public class PlanResponseDTO {
     private User user;
     private boolean isLiked;
     private boolean isScrapped;
-
+    private List<String> tags;
     public PlanResponseDTO() {}
 
-    public PlanResponseDTO(Plan plan, List<DayPlan> dayPlanList, boolean isLiked, boolean isScrapped,User user) {
+    public PlanResponseDTO(Plan plan, List<DayPlan> dayPlanList, User user, boolean isLiked, boolean isScrapped, List<String> tags) {
         this.plan = plan;
         this.dayPlanList = dayPlanList;
+        this.user = user;
         this.isLiked = isLiked;
         this.isScrapped = isScrapped;
-        this.user = user;
+        this.tags = tags;
     }
 }

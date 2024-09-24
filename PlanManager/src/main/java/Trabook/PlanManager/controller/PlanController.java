@@ -2,6 +2,7 @@ package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
+import Trabook.PlanManager.domain.test.ImageTest;
 import Trabook.PlanManager.domain.user.User;
 
 import Trabook.PlanManager.response.PlanIdResponseDTO;
@@ -9,16 +10,23 @@ import Trabook.PlanManager.response.PlanResponseDTO;
 import Trabook.PlanManager.response.ResponseMessage;
 
 import Trabook.PlanManager.service.PlanService;
+import Trabook.PlanManager.service.file.FileUploadService;
 import Trabook.PlanManager.service.webclient.WebClientService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
 @Slf4j
@@ -28,11 +36,13 @@ public class PlanController {
 
     private final WebClientService webClientService;
     private final PlanService planService;
+    private final FileUploadService fileUploadService;
 
     @Autowired
-    public PlanController(WebClientService webClientService, PlanService planService) {
+    public PlanController(WebClientService webClientService, PlanService planService, FileUploadService fileUploadService) {
         this.webClientService = webClientService;
         this.planService = planService;
+        this.fileUploadService = fileUploadService;
     }
 
     @ResponseBody
@@ -47,11 +57,21 @@ public class PlanController {
     }
 
     @ResponseBody
-    @PostMapping("/update")
-    public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestBody Plan plan){
+    @PatchMapping("/update")
+    public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
+                                                        @RequestPart("image") MultipartFile image){
 
+        log.info("{}",plan.isFinished());
         long planId = planService.updatePlan(plan);
+
+        try {
+            fileUploadService.uploadPlanImage(image, planId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId);
+
         return new ResponseEntity<>(planIdResponseDTO,HttpStatus.OK);
     }
 
@@ -61,9 +81,9 @@ public class PlanController {
 
         PlanResponseDTO result = planService.getPlan(planId, userId);
         long planOwnerId = result.getPlan().getUserId();
+        result.setTags(planService.getTags(result));
         User userInfo = webClientService.getUserInfo(planOwnerId);
         result.setUser(userInfo);
-        //return new ResponseEntity<>(result, HttpStatus.OK);
         return ResponseEntity.ok(result);
     }
 
