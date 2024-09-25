@@ -126,8 +126,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         });
     }
 
-
-
     @Override
     public Optional<Plan> findById(long planId){
         String sql = "SELECT * FROM Plan WHERE planId = ?";
@@ -142,8 +140,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         List<Plan> result = jdbcTemplate.query("SELECT * FROM Plan WHERE userId = ? AND title = ?", planRowMapper(), userId, planName);
         return result.stream().findAny();
     }
-
-
 
     @Override
     public int deletePlan(long planId) {

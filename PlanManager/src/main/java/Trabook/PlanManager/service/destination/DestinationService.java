@@ -102,8 +102,9 @@ public class DestinationService {
     public List<Place> getUserCustomPlaceList(String search,
                                               List<String> state,
                                               List<String> subcategory,
-                                              String sorts) {
-        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts);
+                                              String sorts,
+                                              Integer userId) {
+        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts, userId);
     }
 
     public List<Place> getHottestPlace(){

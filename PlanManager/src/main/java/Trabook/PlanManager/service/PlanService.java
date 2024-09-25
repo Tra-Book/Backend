@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final DestinationRepository destinationRepository;
-    private  final PlanListRepository planListRepository;
+    private final PlanListRepository planListRepository;
 
     @Autowired
     public PlanService(PlanRepository planRepository, DestinationRepository destinationRepository, PlanListRepository planListRepository) {
@@ -80,16 +79,12 @@ public class PlanService {
         long dayPlanId;
         if(dayPlan.getDayPlanId() == 0) { // 새로 생성한 dayplan
             dayPlanId = planRepository.saveDayPlan(dayPlan);
-        } else { // 기존에 있는 dayplan
+        }
+        else { // 기존에 있는 dayplan
             dayPlanId = planRepository.updateDayPlan(dayPlan);
         }
         return dayPlanId;
     }
-
-
-
-
-
 
     @Transactional
     public String addComment(Comment comment) {
@@ -148,6 +143,7 @@ public class PlanService {
         }
         return tags;
     }
+
     @Transactional
     public String deletePlan(long planId) {
         if(planRepository.deletePlan(planId) == 1)
@@ -247,10 +243,10 @@ public class PlanService {
                                                         List<String> region,
                                                         Integer memberCount,
                                                         Integer duration,
-                                                        String sorts) {
-        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts);
+                                                        String sorts,
+                                                        Integer userId) {
+        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts, userId);
     }
-
 
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기
     public Optional<Plan> validateDuplicatePlanName(Plan plan){
@@ -258,6 +254,4 @@ public class PlanService {
         return planRepository.findPlanByUserAndName(plan.getUserId(),plan.getTitle());
 
     }
-
-
 }

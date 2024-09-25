@@ -22,8 +22,8 @@ public class PlanListResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private boolean isFinished;
-    private boolean isLiked;
-    private boolean isScrapped;
+    private Boolean isLiked;
+    private Boolean isScrapped;
     private boolean isPublic;
 
     public PlanListResponseDTO(long planId, String planTitle, String description, String placeRegion, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic) {

@@ -12,5 +12,6 @@ public interface PlanListRepository {
                                                  List<String> region,
                                                  Integer memberCount,
                                                  Integer duration,
-                                                 String sorts);
+                                                 String sorts,
+                                                 Integer userId);
 }
