@@ -23,7 +23,7 @@ public class Plan {
     private int numOfPeople; //바꾸기
     private int budget;
    // private MultipartFile image;
-    private String image;
+    //private String image;
     private String imgSrc;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -37,7 +37,7 @@ public class Plan {
     //시작 날짜 종료 날짜
 
 
-    public Plan(long planId, long userId, String state, boolean isPublic, boolean isFinished, int likes, int scraps, int numOfPeople, int budget, LocalDate startDate, LocalDate endDate, String title, String description,  List<DayPlan> dayPlanList) {
+    public Plan(long planId, long userId, String state, boolean isPublic, boolean isFinished, int likes, int scraps, int numOfPeople, int budget, LocalDate startDate, LocalDate endDate, String title, String description,List<DayPlan> dayPlanList) {
         this.planId = planId;
         this.userId = userId;
         this.state = state;
@@ -73,8 +73,6 @@ public class Plan {
                 ", endDate=" + endDate +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-
-                ", dayPlanList=" + dayPlanList +
                 '}';
     }
 }

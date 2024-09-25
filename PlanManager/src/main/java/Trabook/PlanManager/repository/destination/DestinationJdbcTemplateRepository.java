@@ -2,7 +2,6 @@ package Trabook.PlanManager.repository.destination;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
-import org.springframework.data.geo.Point;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
@@ -57,7 +56,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
                 "FROM Place " +
                 "ORDER BY ratingScore DESC " +
-                "LIMIT 5;";
+                "LIMIT 10;";
         List<Place> result = jdbcTemplate.query(sql, placeRowMapper());
         return result;
     }
@@ -113,6 +112,8 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
 
         return jdbcTemplate.query(sql, generalPlaceRowMapper(), params.toArray());
     }
+
+
 
 
     @Override
@@ -177,7 +178,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 Place place = new Place();
                 place.setPlaceName(rs.getString("placeName"));
                 place.setPlaceId(rs.getLong("placeId"));
-                place.setNumOfAdded(rs.getInt("scraps"));
+                place.setNumOfAdded(rs.getInt("numOfAdded"));
                 place.setAddress(rs.getString("address"));
                 place.setLongitude(rs.getDouble("x"));
                 place.setLatitude(rs.getDouble("y"));

@@ -15,16 +15,17 @@ public interface PlanRepository {
     long updatePlan(Plan plan);
     long saveDayPlan(DayPlan dayPlan);
     long updateDayPlan(DayPlan dayPlan);
-    void saveSchedule(long DayPlanId, DayPlan.Schedule schedule);
-    long updateSchedule(long DayPlanId, DayPlan.Schedule schedule);
+    void saveSchedule( DayPlan.Schedule schedule);
+    long updateSchedule(DayPlan.Schedule schedule);
     Optional<Plan> findById(long planId);
     Optional<Plan> findPlanByUserAndName(long userId, String planName);
-
+    Optional <DayPlan> findDayPlan(long planId,int day);
     Optional<Comment> findCommentById(long commentId);
+    Optional <DayPlan.Schedule> findSchedule(long planId,int day,int order);
 
     List<PlanListResponseDTO> findUserLikePlanList(long userId);
     List<DayPlan> findDayPlanListByPlanId(long planId);
-    List<DayPlan.Schedule> findScheduleListByDayPlanList(long dayPlanId);
+    List<DayPlan.Schedule> findScheduleList(long planId,int day);
 
     void likePlan(long userId, long planId);
     void scrapPlan(long userId,long planId);
