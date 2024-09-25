@@ -57,7 +57,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
                 "FROM Place " +
                 "ORDER BY ratingScore DESC " +
-                "LIMIT 5;";
+                "LIMIT 10;";
         List<Place> result = jdbcTemplate.query(sql, placeRowMapper());
         return result;
     }

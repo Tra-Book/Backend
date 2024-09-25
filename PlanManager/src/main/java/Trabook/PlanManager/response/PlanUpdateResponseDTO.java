@@ -4,12 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class PlanIdResponseDTO {
+public class PlanUpdateResponseDTO {
     private long planId;
     private String message;
-    public  PlanIdResponseDTO() {}
-    public PlanIdResponseDTO(long planId, String message) {
+    private String imgSrc;
+    public PlanUpdateResponseDTO() {}
+
+    public PlanUpdateResponseDTO(long planId, String message, String imgSrc) {
         this.planId = planId;
         this.message = message;
+        this.imgSrc = imgSrc;
     }
 }

@@ -34,6 +34,31 @@ public class DestinationService {
         return destinationRepository.findPlaceListByUserScrap(userId);
     }
     @Transactional
+    public String addPlaceScrap(long userId, long placeId) {
+        if(destinationRepository.findByPlaceId(placeId).isPresent()) {
+            try {
+                destinationRepository.addPlaceScrap(userId, placeId);
+                return "scrap complete";
+            }catch (DataAccessException e) {
+                if(e.getCause() instanceof SQLIntegrityConstraintViolationException) {
+                    return "already scrapped";
+                }
+                return "error accessing db";
+            }
+        } else
+            return "place does not exist";
+    }
+
+    @Transactional
+    public String deletePlaceScrap(long userId, long placeId) {
+        if(destinationRepository.deletePlaceScrap(userId,placeId)==1) {
+            destinationRepository.scrapDown(placeId);
+            return "delete scrap complete";
+        }
+        else
+            return "can't delete null";
+    }
+    @Transactional
     public String addPlaceReaction(DestinationReactionDto destinationReactionDto) {
 
         String reactionType = destinationReactionDto.getReactionType();

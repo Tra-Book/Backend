@@ -2,11 +2,11 @@ package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.plan.*;
-import Trabook.PlanManager.domain.test.ImageTest;
 import Trabook.PlanManager.domain.user.User;
 
 import Trabook.PlanManager.response.PlanIdResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
+import Trabook.PlanManager.response.PlanUpdateResponseDTO;
 import Trabook.PlanManager.response.ResponseMessage;
 
 import Trabook.PlanManager.service.PlanService;
@@ -51,28 +51,30 @@ public class PlanController {
         //System.out.println(userId);
         planCreateDTO.setUserId(userId);
         long planId = planService.createPlan(planCreateDTO);
-        PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId);
+        PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId,"create complete");
         return new ResponseEntity<>(planIdResponseDTO, HttpStatus.OK);
 
     }
 
     @ResponseBody
     @PatchMapping("/update")
-    public ResponseEntity<PlanIdResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
-                                                        @RequestPart("image") MultipartFile image){
+    public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
+                                                            @RequestPart("image") MultipartFile image){
 
-        log.info("{}",plan.isFinished());
         long planId = planService.updatePlan(plan);
-
+        if(planId == 0)
+            return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists",null), HttpStatus.NOT_FOUND);
         try {
-            fileUploadService.uploadPlanImage(image, planId);
+
+            if(!image.isEmpty())
+                fileUploadService.uploadPlanImage(image, planId);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId);
+        PlanUpdateResponseDTO planUpdateResponseDTO = new PlanUpdateResponseDTO(planId,"update complete","https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(planId));
 
-        return new ResponseEntity<>(planIdResponseDTO,HttpStatus.OK);
+        return new ResponseEntity<>(planUpdateResponseDTO,HttpStatus.OK);
     }
 
     @ResponseBody
@@ -80,6 +82,11 @@ public class PlanController {
     public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId") long planId, @RequestHeader(value = "userId") long userId) {
 
         PlanResponseDTO result = planService.getPlan(planId, userId);
+
+        if(result == null){
+            System.out.println("pp");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         long planOwnerId = result.getPlan().getUserId();
         result.setTags(planService.getTags(result));
         User userInfo = webClientService.getUserInfo(planOwnerId);

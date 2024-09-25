@@ -32,7 +32,7 @@ public class PlanListController {
     private final DestinationRedisService destinationRedisService;
 
     //PlanListServiceInterface 인터페이스를 구현한 모든 서비스들이 자동으로 주입됨. 스프링이 자동으로 이 인터페이스를 구현한
-    //모든 빈을 찾아서 리스트로 제공한다 ㄷㄷ..
+    //모든 빈을 찾아서 리스트로 제공한다
     @Autowired
     public PlanListController(List<PlanListServiceInterface> planListService,
                               PlanService planService,

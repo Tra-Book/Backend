@@ -39,7 +39,7 @@ public class DestinationRedisService {
         objectMapper.registerModule(new SimpleModule().addDeserializer(Point.class, new PointDeserializer()));
 
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
-        Set<String> topPlaces = zsetOps.reverseRange("topPlaces", 0, 4);
+        Set<String> topPlaces = zsetOps.reverseRange("topPlaces", 0, 9);
 
         List<Place> top5Places = new ArrayList<>();
 
