@@ -67,7 +67,9 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
      */
     @Override
-    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory, String sorts, Integer userId) {
+    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory,
+                                           String sorts, Integer userId,
+                                           Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
 
@@ -82,6 +84,11 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         params.add(userId);
         params.add(likeSearch);  // placeName LIKE ?
         params.add(likeSearch);  // description LIKE ?
+
+        if(userScrapOnly) {
+            sql += "AND (sp.userId = ?) ";
+            params.add(userId);
+        }
 
         // state 리스트가 비어있지 않으면 IN 절 추가
         if (state != null && !state.isEmpty()) {
@@ -110,7 +117,6 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         // 파라미터 추가
         params.add(sorts);  // 첫 번째 CASE 조건 (numOfAdded, star)
         params.add(sorts);  // 두 번째 CASE 조건 (numOfAdded, star)
-
         return jdbcTemplate.query(sql, generalPlaceRowMapper(), params.toArray());
     }
 

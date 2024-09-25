@@ -73,6 +73,7 @@ public class PlanListController {
             @RequestParam(required = false, defaultValue = "likes") String sorts,
             @RequestParam Integer pageSize,
             @RequestParam Integer pageNum,
+            @RequestParam Boolean userScrapOnly,
             @RequestHeader Integer userId) {
         log.info("/plans/general");
         // 좋아요/스크랩 여부 둘다 보내기
@@ -88,7 +89,7 @@ public class PlanListController {
 
 
         List<PlanListResponseDTO> customPlanList =
-                planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId);
+                planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
         //return customPlanList;
         Integer totalPages = (customPlanList.size() + pageSize - 1) / pageSize;
 

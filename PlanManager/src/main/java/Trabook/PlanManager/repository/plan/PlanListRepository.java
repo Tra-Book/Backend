@@ -13,5 +13,6 @@ public interface PlanListRepository {
                                                  Integer memberCount,
                                                  Integer duration,
                                                  String sorts,
-                                                 Integer userId);
+                                                 Integer userId,
+                                                 Boolean userScrapOnly);
 }

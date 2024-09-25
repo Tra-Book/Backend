@@ -17,7 +17,8 @@ public interface DestinationRepository {
                                     List<String> state,
                                     List<String> subcategory,
                                     String sorts,
-                                    Integer userId);
+                                    Integer userId,
+                                    Boolean userScrapOnly);
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);

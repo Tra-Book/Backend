@@ -244,8 +244,9 @@ public class PlanService {
                                                         Integer memberCount,
                                                         Integer duration,
                                                         String sorts,
-                                                        Integer userId) {
-        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts, userId);
+                                                        Integer userId,
+                                                        Boolean userScrapOnly) {
+        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
     }
 
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기

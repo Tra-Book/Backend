@@ -40,7 +40,8 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                                                         Integer memberCount,
                                                         Integer duration,
                                                         String sorts,
-                                                        Integer userId) {
+                                                        Integer userId,
+                                                        Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
 
@@ -56,6 +57,11 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         params.add(userId);
         params.add(likeSearch);
         params.add(likeSearch);
+
+        if(userScrapOnly) {
+            sql += "AND (sp.userId = ?) ";
+            params.add(userId);
+        }
 
         if (region != null && !region.isEmpty()) {
             String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));

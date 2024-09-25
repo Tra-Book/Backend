@@ -103,8 +103,9 @@ public class DestinationService {
                                               List<String> state,
                                               List<String> subcategory,
                                               String sorts,
-                                              Integer userId) {
-        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts, userId);
+                                              Integer userId,
+                                              Boolean userScrapOnly) {
+        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts, userId, userScrapOnly);
     }
 
     public List<Place> getHottestPlace(){
