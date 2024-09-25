@@ -57,7 +57,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
                 "FROM Place " +
                 "ORDER BY ratingScore DESC " +
-                "LIMIT 5;";
+                "LIMIT 10;";
         List<Place> result = jdbcTemplate.query(sql, placeRowMapper());
         return result;
     }
@@ -208,7 +208,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 Place place = new Place();
                 place.setPlaceName(rs.getString("placeName"));
                 place.setPlaceId(rs.getLong("placeId"));
-                place.setNumOfAdded(rs.getInt("scraps"));
+                place.setNumOfAdded(rs.getInt("numOfAdded"));
                 place.setAddress(rs.getString("address"));
                 place.setLongitude(rs.getDouble("x"));
                 place.setLatitude(rs.getDouble("y"));

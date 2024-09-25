@@ -21,12 +21,13 @@ public class Place {
     String zipcode;
     Double ratingScore;
     Integer scraps;
-    Integer numOfAdded;
     Integer likes;
+    Integer numOfAdded;
+    Integer numOfReview;
 
     public Place(){};
 
-    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer numOfAdded, Integer likes) {
+    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer likes) {
         this.placeId = placeId;
         this.cityId = cityId;
         this.address = address;
@@ -42,7 +43,7 @@ public class Place {
         this.zipcode = zipcode;
         this.ratingScore = ratingScore;
         this.scraps = scraps;
-        this.numOfAdded = numOfAdded;
+
         this.likes = likes;
     }
 }

@@ -2,8 +2,11 @@ package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.destination.DestinationReactionDto;
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.destination.PlaceScrapRequestDTO;
+import Trabook.PlanManager.response.ResponseMessage;
 import Trabook.PlanManager.service.destination.DestinationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +32,19 @@ public class DestinationController {
 
 
  */
+    @ResponseBody
+    @PostMapping("/scrap")
+    public ResponseEntity<ResponseMessage> addPlaceScrap(@RequestBody PlaceScrapRequestDTO placeScrapRequestDTO, @RequestHeader("userId")long userId){
+        String message = destinationService.addPlaceScrap(userId, placeScrapRequestDTO.getPlaceId());
+        return ResponseEntity.ok(new ResponseMessage(message));
+    }
 
+    @ResponseBody
+    @DeleteMapping("/scrap")
+    public  ResponseEntity<ResponseMessage> deletePlaceScrap(@RequestBody PlaceScrapRequestDTO placeScrapRequestDTO,@RequestHeader("userId")long userId){
+        String message = destinationService.deletePlaceScrap(userId, placeScrapRequestDTO.getPlaceId());
+        return ResponseEntity.ok(new ResponseMessage(message));
+    }
 
     @ResponseBody
     @PostMapping("/reaction")

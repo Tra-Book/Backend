@@ -23,15 +23,23 @@ public class DayPlan {
         private int day;
         private int order;
         private int time;
+        //about place
         private long placeId;
         private String imageSrc;
         private String placeName;
         private double latitude;
-        private double longtitude;
+        private double longitude;
+        private String address;
+        private String subcategory;
+        private int stars;
+        private int numOfAdded;
+        private int numOfReview;
+        //private int scraps;
+
 
         public Schedule() {}
 
-        public Schedule(long planId, int day, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longtitude) {
+        public Schedule(long planId, int day, int order, int time, long placeId, String imageSrc, String placeName, double latitude, double longitude) {
             this.planId = planId;
             this.day = day;
             this.order = order;
@@ -40,7 +48,7 @@ public class DayPlan {
             this.imageSrc = imageSrc;
             this.placeName = placeName;
             this.latitude = latitude;
-            this.longtitude = longtitude;
+            this.longitude = longitude;
         }
     }
     public DayPlan() {}

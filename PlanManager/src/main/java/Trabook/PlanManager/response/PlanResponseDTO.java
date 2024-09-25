@@ -11,7 +11,7 @@ import java.util.List;
 @Setter @Getter
 public class PlanResponseDTO {
     private Plan plan;
-    private List<DayPlan> dayPlanList;
+    //private List<DayPlan> dayPlanList;
     private User user;
     private boolean isLiked;
     private boolean isScrapped;
@@ -20,7 +20,7 @@ public class PlanResponseDTO {
 
     public PlanResponseDTO(Plan plan, List<DayPlan> dayPlanList, User user, boolean isLiked, boolean isScrapped, List<String> tags) {
         this.plan = plan;
-        this.dayPlanList = dayPlanList;
+        //this.dayPlanList = dayPlanList;
         this.user = user;
         this.isLiked = isLiked;
         this.isScrapped = isScrapped;

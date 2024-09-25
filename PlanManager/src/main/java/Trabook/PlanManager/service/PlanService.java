@@ -42,6 +42,9 @@ public class PlanService {
     @Transactional
     public long updatePlan(Plan plan) {
 
+        if(planRepository.findById(plan.getPlanId()).isEmpty()) {
+            return 0;
+        }
         plan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
@@ -111,16 +114,18 @@ public class PlanService {
     public PlanResponseDTO getPlan(long planId, long userId) {
         PlanResponseDTO result;
 
-        Optional<Plan> planResult = planRepository.findById(planId);
-        if(planResult.isPresent()) {
+        Optional<Plan> plan = planRepository.findById(planId);
+        if(plan.isPresent()) {
+
             List<DayPlan> dayPlanList = planRepository.findDayPlanListByPlanId(planId);
 
             for (DayPlan dayPlan : dayPlanList) {
                 List<DayPlan.Schedule> scheduleList = planRepository.findScheduleList(dayPlan.getPlanId(),dayPlan.getDay());
+
                 for(DayPlan.Schedule schedule : scheduleList) {
                     Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
                     schedule.setLatitude(place.getLatitude());
-                    schedule.setLongtitude(place.getLongitude());
+                    schedule.setLongitude(place.getLongitude());
                     schedule.setImageSrc(place.getImageSrc());
                     schedule.setPlaceName(place.getPlaceName());
                 }
@@ -129,8 +134,8 @@ public class PlanService {
             boolean isLiked = planRepository.isLiked(planId, userId);
             boolean isScrapped = planRepository.isScrapped(planId, userId);
 
-            System.out.println(isLiked);
-            result = new PlanResponseDTO(planResult.get(), dayPlanList,null,isLiked,isScrapped,null);
+            plan.get().setDayPlanList(dayPlanList);
+            result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null);
             return result;
         }
         else
@@ -140,7 +145,7 @@ public class PlanService {
     public List<String> getTags(PlanResponseDTO planResponseDTO) {
         //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
         List<String> tags = new ArrayList<>();
-        List<DayPlan> dayPlanList = planResponseDTO.getDayPlanList();
+        List<DayPlan> dayPlanList = planResponseDTO.getPlan().getDayPlanList();
 
         for(DayPlan dayPlan : dayPlanList) {
             List<DayPlan.Schedule> scheduleList = dayPlan.getScheduleList();
