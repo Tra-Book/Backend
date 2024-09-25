@@ -16,7 +16,8 @@ public interface DestinationRepository {
     List<Place> findCustomPlaceList(String search,
                                     List<String> state,
                                     List<String> subcategory,
-                                    String sorts);
+                                    String sorts,
+                                    Integer userId);
 
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);

@@ -1,4 +1,6 @@
 package Trabook.PlanManager.controller;
+import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
+import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,16 +65,42 @@ public class PlanListController {
 
     @ResponseBody
     @GetMapping("/general")
-    public List<PlanListResponseDTO> getCustomPlans(
+    public CustomPlanListDTO getCustomPlans(
             @RequestParam String search,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) Integer memberCount,
             @RequestParam(required = false) Integer duration,
-            @RequestParam(required = false, defaultValue = "likes") String sorts) {
+            @RequestParam(required = false, defaultValue = "likes") String sorts,
+            @RequestParam Integer pageSize,
+            @RequestParam Integer pageNum,
+            @RequestHeader Integer userId) {
         log.info("/plans/general");
+        // 좋아요/스크랩 여부 둘다 보내기
 
-        return planService.findCustomPlanList(search, region, memberCount, duration, sorts);
+//        System.out.println("search = " + search);
+//        System.out.println("region = " + region);
+//        System.out.println("memberCount = " + memberCount);
+//        System.out.println("duration = " + duration);
+//        System.out.println("sorts = " + sorts);
+//        System.out.println("pageSize = " + pageSize);
+//        System.out.println("pageNum = " + pageNum);
+//        System.out.println("userId = " + userId);
+
+
+        List<PlanListResponseDTO> customPlanList =
+                planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId);
+        //return customPlanList;
+        Integer totalPages = (customPlanList.size() + pageSize - 1) / pageSize;
+
+        // 페이지 번호가 유효한지 확인 (잘못된 pageNum이면 빈 리스트와 totalPages 반환)
+        if (pageNum < 0 || pageNum >= totalPages) {
+            return new CustomPlanListDTO(Collections.emptyList(), totalPages);
+        }
+
+        // 해당 페이지에 맞는 시작과 끝 인덱스 계산
+        int startIndex = pageNum * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, customPlanList.size());
+        // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
+        return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
     }
-
-
 }

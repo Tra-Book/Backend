@@ -62,6 +62,59 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         return result;
     }
 
+    /*
+    ### 중요 ###
+    review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
+     */
+    @Override
+    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory, String sorts, Integer userId) {
+        String likeSearch = "%" + search + "%"; // SQL injection 방지
+        List<Object> params = new ArrayList<>();
+
+        // 기본 쿼리
+        String sql = "SELECT Place.*, ST_X(coordinate) AS x, ST_Y(coordinate) AS y, " +
+                "CASE WHEN sp.placeId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped " +  // scrap 여부 확인
+                "FROM Place " +
+                "JOIN City ON Place.cityId = City.cityId " +
+                "LEFT JOIN ScrappedPlace sp ON Place.placeId = sp.placeId AND sp.userId = ? " +  // ScrappedPlace를 LEFT JOIN
+                "WHERE (Place.placeName LIKE ? OR Place.description LIKE ?) ";
+
+        params.add(userId);
+        params.add(likeSearch);  // placeName LIKE ?
+        params.add(likeSearch);  // description LIKE ?
+
+        // state 리스트가 비어있지 않으면 IN 절 추가
+        if (state != null && !state.isEmpty()) {
+            if (!state.get(0).equals("전체")) {
+                String statePlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
+                sql += ("AND City.stateName IN (" + statePlaceholders + ") ");
+                params.addAll(state);
+            }
+        }
+
+        // subcategory 리스트가 비어있지 않으면 IN 절 추가
+        if (subcategory != null && !subcategory.isEmpty()) {
+            if (!subcategory.get(0).equals("전체")) {
+                String subcategoryPlaceholders = String.join(", ", Collections.nCopies(subcategory.size(), "?"));
+                sql += ("AND Place.subcategory IN (" + subcategoryPlaceholders + ") ");
+                params.addAll(subcategory);
+            }
+        }
+
+        // 정렬 조건 처리
+        sql += "ORDER BY " +
+                "CASE WHEN ? = 'numOfAdded' THEN Place.numOfAdded " +
+                "WHEN ? = 'star' THEN Place.star " +
+                "ELSE Place.star END DESC ";
+
+        // 파라미터 추가
+        params.add(sorts);  // 첫 번째 CASE 조건 (numOfAdded, star)
+        params.add(sorts);  // 두 번째 CASE 조건 (numOfAdded, star)
+
+        return jdbcTemplate.query(sql, generalPlaceRowMapper(), params.toArray());
+    }
+
+
     @Override
     public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory, String sorts) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
@@ -147,6 +200,35 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         return jdbcTemplate.update(sql,placeId);
 
     }
+
+    private RowMapper<Place> generalPlaceRowMapper() {
+        return new RowMapper<Place>() {
+            @Override
+            public Place mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Place place = new Place();
+                place.setPlaceName(rs.getString("placeName"));
+                place.setPlaceId(rs.getLong("placeId"));
+                place.setNumOfAdded(rs.getInt("scraps"));
+                place.setAddress(rs.getString("address"));
+                place.setLongitude(rs.getDouble("x"));
+                place.setLatitude(rs.getDouble("y"));
+                place.setCategory(rs.getString("category"));
+                place.setSubcategory(rs.getString("subcategory"));
+                place.setCityId(rs.getLong("cityId"));
+                place.setImageSrc(rs.getString("imageSrc"));
+                place.setStar(rs.getLong("star"));
+                place.setRatingScore(rs.getDouble("ratingScore"));
+                place.setAddress(rs.getString("address"));
+                place.setIsScraped(rs.getBoolean("isScrapped"));
+                place.setScraps(rs.getInt("scraps"));
+                place.setZipcode(rs.getString("zipcode"));
+                place.setDescription(rs.getString("description"));
+                place.setImageSrc(rs.getString("imageSrc"));
+                return place;
+            }
+        };
+    }
+
     private RowMapper<Place> placeRowMapper() {
         return new RowMapper<Place>() {
             @Override
@@ -159,6 +241,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setLongitude(rs.getDouble("x"));
                 place.setLatitude(rs.getDouble("y"));
                 place.setCategory(rs.getString("category"));
+                place.setSubcategory(rs.getString("subcategory"));
                 place.setCityId(rs.getLong("cityId"));
                 place.setImageSrc(rs.getString("imageSrc"));
                 place.setStar(rs.getLong("star"));
@@ -168,6 +251,4 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
             }
         };
     }
-
-
 }
