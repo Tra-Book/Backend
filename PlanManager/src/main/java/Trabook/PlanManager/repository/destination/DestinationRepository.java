@@ -19,6 +19,7 @@ public interface DestinationRepository {
                                     String sorts,
                                     Integer userId);
 
+
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);
     void addPlaceComment(Comment comment);

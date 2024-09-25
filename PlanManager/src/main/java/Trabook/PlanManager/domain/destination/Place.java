@@ -12,7 +12,7 @@ public class Place {
     String placeName;
     String description;
     Double latitude;
-    Double Longitude;
+    Double longitude;
     Long star;
     String category;
     String imageSrc;
@@ -24,17 +24,17 @@ public class Place {
     Integer likes;
     Integer numOfAdded;
     Integer numOfReview;
-
+    Boolean isScraped;
     public Place(){};
 
-    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer likes) {
+    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer likes,Boolean isScraped) {
         this.placeId = placeId;
         this.cityId = cityId;
         this.address = address;
         this.placeName = placeName;
         this.description = description;
         this.latitude = latitude;
-        Longitude = longitude;
+        this.longitude = longitude;
         this.star = star;
         this.category = category;
         this.imageSrc = imageSrc;
@@ -43,7 +43,7 @@ public class Place {
         this.zipcode = zipcode;
         this.ratingScore = ratingScore;
         this.scraps = scraps;
-
+        this.isScraped = isScraped;
         this.likes = likes;
     }
 }

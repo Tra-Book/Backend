@@ -2,7 +2,6 @@ package Trabook.PlanManager.repository.destination;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
-import org.springframework.data.geo.Point;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
@@ -115,35 +114,6 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     }
 
 
-    @Override
-    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory, String sorts) {
-        String likeSearch = "%" + search + "%"; // SQL injection 방지
-        List<Object> params = new ArrayList<>();
-
-        // 기본 쿼리
-        String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
-                "FROM Place "+
-                "JOIN City ON Place.cityId = City.cityId " +
-                "WHERE (Place.placeName LIKE ? OR Place.description LIKE ?) ";
-        params.add(likeSearch); // placeName LIKE ?
-        params.add(likeSearch); // description LIKE ?
-
-        // state 리스트가 비어있지 않으면 IN 절 추가
-        if (state != null && !state.isEmpty()) {
-            String statePlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
-            sql += ("AND City.stateName IN (" + statePlaceholders + ") ");
-            params.addAll(state);
-        }
-
-        // subcategory 리스트가 비어있지 않으면 IN 절 추가
-        if (subcategory != null && !subcategory.isEmpty()) {
-            String subcategoryPlaceholders = String.join(", ", Collections.nCopies(subcategory.size(), "?"));
-            sql += ("AND Place.subcategory IN (" + subcategoryPlaceholders + ") ");
-            params.addAll(subcategory);
-        }
-        // sort 생략
-        return jdbcTemplate.query(sql, placeRowMapper(), params.toArray());
-    }
 
 
     @Override
