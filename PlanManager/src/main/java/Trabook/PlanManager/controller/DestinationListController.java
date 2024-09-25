@@ -52,10 +52,11 @@ public class DestinationListController {
             @RequestParam(required = false) List<String> subcategory,
             @RequestParam(defaultValue = "stars") String sorts,
             @RequestParam Integer pageSize,
-            @RequestParam Integer pageNum) {
+            @RequestParam Integer pageNum,
+            @RequestHeader Integer userId) {
         log.info("/places/general");
 
-        List<Place> customPlaceList = destinationService.getUserCustomPlaceList(search, state, subcategory, sorts);
+        List<Place> customPlaceList = destinationService.getUserCustomPlaceList(search, state, subcategory, sorts, userId);
 
         // 전체 페이지 수 계산
         Integer totalPages = (customPlaceList.size() + pageSize - 1) / pageSize; // 올림 처리
@@ -72,5 +73,4 @@ public class DestinationListController {
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlaceListDTO(customPlaceList.subList(startIndex, endIndex), totalPages);
     }
-
 }

@@ -6,23 +6,23 @@ import org.springframework.data.geo.Point;
 
 @Getter @Setter
 public class Place {
-    Long placeId;
-    Long cityId;
-    String address;
-    String placeName;
-    String description;
-    Double latitude;
-    Double Longitude;
-    Long star;
-    String category;
-    String imageSrc;
-    String subcategory;
-    String tel;
-    String zipcode;
-    Double ratingScore;
-    Integer scraps;
-    Integer numOfAdded;
-    Integer likes;
+    private Long placeId;
+    private Long cityId;
+    private String address;
+    private String placeName;
+    private String description;
+    private Double latitude;
+    private Double Longitude;
+    private Long star;
+    private String category;
+    private String imageSrc;
+    private String subcategory;
+    private String tel;
+    private String zipcode;
+    private Double ratingScore;
+    private Integer scraps;
+    private Integer numOfAdded;
+    private Boolean isScraped;
 
     public Place(){};
 
@@ -43,6 +43,5 @@ public class Place {
         this.ratingScore = ratingScore;
         this.scraps = scraps;
         this.numOfAdded = numOfAdded;
-        this.likes = likes;
     }
 }

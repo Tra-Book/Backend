@@ -25,7 +25,6 @@ public class ResponseData<T> {
                 .data(t)
                 .statusCode(statusCode)
                 .message(message).build();
-
     }
 }
 
