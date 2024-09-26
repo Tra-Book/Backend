@@ -1,32 +1,30 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.comment.Comment;
+import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.domain.user.User;
 
-import Trabook.PlanManager.response.PlanIdResponseDTO;
-import Trabook.PlanManager.response.PlanResponseDTO;
-import Trabook.PlanManager.response.PlanUpdateResponseDTO;
-import Trabook.PlanManager.response.ResponseMessage;
+import Trabook.PlanManager.response.*;
 
+import Trabook.PlanManager.response.PlanIdResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.file.FileUploadService;
 import Trabook.PlanManager.service.webclient.WebClientService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
 @Slf4j
@@ -65,32 +63,40 @@ public class PlanController {
         if(planId == 0)
             return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists",null), HttpStatus.NOT_FOUND);
         try {
-
-            if(!image.isEmpty())
+            if(!image.isEmpty()) {
+                System.out.println("ok");
                 fileUploadService.uploadPlanImage(image, planId);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        PlanUpdateResponseDTO planUpdateResponseDTO = new PlanUpdateResponseDTO(planId,"update complete","https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(planId));
+        PlanUpdateResponseDTO planUpdateResponseDTO = new PlanUpdateResponseDTO(planId,"update complete",plan.getImgSrc());
 
         return new ResponseEntity<>(planUpdateResponseDTO,HttpStatus.OK);
     }
 
     @ResponseBody
     @GetMapping("/")
-    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId") long planId, @RequestHeader(value = "userId") long userId) {
+    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestBody PlanIdDTO planIdDto, @RequestHeader(value = "userId") long userId) {
 
-        PlanResponseDTO result = planService.getPlan(planId, userId);
+
+        PlanResponseDTO result = planService.getPlan(planIdDto.getPlanId(), userId);
 
         if(result == null){
-            System.out.println("pp");
+
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         long planOwnerId = result.getPlan().getUserId();
         result.setTags(planService.getTags(result));
         User userInfo = webClientService.getUserInfo(planOwnerId);
         result.setUser(userInfo);
+        for(Comment comment : result.getComments() ) {
+            long commentUserId = comment.getUser().getUserId();
+            User commentUserInfo = webClientService.getUserInfo(commentUserId);
+            comment.setUser(commentUserInfo);
+        }
+
         return ResponseEntity.ok(result);
     }
 
@@ -103,9 +109,9 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/like")
-    public ResponseEntity<ResponseMessage> likePlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader("userId") long userId) {
-        planReactionDTO.setUserId(userId);
-        String message = planService.likePlan(planReactionDTO);
+    public ResponseEntity<ResponseMessage> likePlan(@RequestBody PlanIdDTO planIdDTO, @RequestHeader("userId") long userId) {
+
+        String message = planService.likePlan(planIdDTO.getPlanId(),userId);
         return ResponseEntity.ok(new ResponseMessage(message));
 
     }
@@ -113,20 +119,20 @@ public class PlanController {
 
 
     @ResponseBody
-    @PostMapping("/scrap")
-    public ResponseEntity<ResponseMessage> scrapPlan(@RequestBody PlanReactionDTO planReactionDTO,@RequestHeader(value = "userId") long userId) {
-        planReactionDTO.setUserId(userId);
-        String message = planService.scrapPlan(planReactionDTO);
+    @PostMapping("/scrap/add")
+    public ResponseEntity<ResponseMessage> scrapPlan(@RequestBody PlanIdDTO planIdDTO, @RequestHeader(value = "userId") long userId) {
+
+        String message = planService.scrapPlan(planIdDTO.getPlanId(),userId);
         return ResponseEntity.ok(new ResponseMessage(message));
 
     }
 
     @ResponseBody
-    @PostMapping("/comment")
-    public  ResponseEntity<ResponseMessage> addComment(@RequestBody Comment comment, @RequestHeader("userId") long userId) {
+    @PostMapping("/comment/add")
+    public  ResponseEntity<CommentUpdateResponseDTO> addComment(@RequestBody CommentRequestDTO comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
-        String message = planService.addComment(comment);
-        return ResponseEntity.ok(new ResponseMessage(message));
+        CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
+        return ResponseEntity.ok(commentUpdateResponseDTO);
     }
 
     @ResponseBody

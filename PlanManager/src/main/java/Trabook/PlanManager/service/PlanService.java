@@ -1,11 +1,13 @@
 package Trabook.PlanManager.service;
 
 import Trabook.PlanManager.domain.comment.Comment;
+import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
 import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.response.CommentUpdateResponseDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +47,8 @@ public class PlanService {
         if(planRepository.findById(plan.getPlanId()).isEmpty()) {
             return 0;
         }
-        plan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
+
+        plan.setImgSrc("https://storage.cloud.google.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
         long planId = planRepository.updatePlan(plan);
@@ -94,15 +97,16 @@ public class PlanService {
     }
 
     @Transactional
-    public String addComment(Comment comment) {
+    public CommentUpdateResponseDTO addComment(CommentRequestDTO comment) {
         if(planRepository.findById(comment.getPlanId()).isPresent() ){
-            if(comment.getRefOrder()!=0)
-                if(planRepository.isCommentExists(comment.getRef()))
-                    return "parent comment deleted";
-            planRepository.addComment(comment);
-            return "added comment";
+            //if(comment.getRefOrder()!=0)//대댓글
+             //   if(planRepository.isCommentExists(comment.getParentId()))//본댓글 존재
+
+               //     return new CommentUpdateResponseDTO("parent comment deleted",-1);
+            long commentId = planRepository.addComment(comment);
+            return new CommentUpdateResponseDTO("added comment",commentId);
         } else
-            return "no plan exists";
+            return new CommentUpdateResponseDTO("no plan exists",-1);
     }
 
     @Transactional
@@ -130,7 +134,9 @@ public class PlanService {
             boolean isScrapped = planRepository.isScrapped(planId, userId);
 
             plan.get().setDayPlanList(dayPlanList);
-            result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null);
+            List<Comment> comments = planRepository.findCommentListByPlanId(planId);
+
+            result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null,comments);
             return result;
         }
         else
@@ -188,7 +194,7 @@ public class PlanService {
             return "comment already deleted";
         if(comment.getRefOrder()==0)//comment ref oreder가 0인지 확인 로직
         {
-            planRepository.deleteCommentByRef(comment.getRef());
+            planRepository.deleteCommentByRef(comment.getParentId(),commentId, comment.getPlanId());
             return "delete complete";
         } else {
             if(planRepository.deleteComment(commentId)==1)
@@ -200,10 +206,8 @@ public class PlanService {
     }
 
     @Transactional
-    public String likePlan(PlanReactionDTO planReactionDTO) {
+    public String likePlan(long planId, long userId) {
 
-        long userId = planReactionDTO.getUserId();
-        long planId = planReactionDTO.getPlanId();
 
         try {
             if (planRepository.findById(planId).isPresent()) {
@@ -229,9 +233,8 @@ public class PlanService {
     }
 
     @Transactional
-    public String scrapPlan(PlanReactionDTO planReactionDTO) {
-        long userId = planReactionDTO.getUserId();
-        long planId = planReactionDTO.getPlanId();
+    public String scrapPlan(long planId, long userId) {
+
         try {
             if (planRepository.findById(planId).isPresent()) {
                 planRepository.scrapPlan(userId, planId);
@@ -245,6 +248,11 @@ public class PlanService {
             }
             return "error accessing db";
         }
+    }
+    @Transactional
+    public List<PlanListResponseDTO> getHottestPlan() {
+        return planListRepository.findHottestPlan();
+
     }
 
     @Transactional

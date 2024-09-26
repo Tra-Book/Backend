@@ -1,5 +1,6 @@
 package Trabook.PlanManager.repository.plan;
 
+import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -15,6 +16,16 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 
     public JdbcTemplatePlanListRepository(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public List<PlanListResponseDTO> findHottestPlan() {
+        String sql = "SELECT *  " +
+                "FROM Plan " +
+                "ORDER BY likes DESC " +
+                "LIMIT 10;";
+        List<PlanListResponseDTO> result = jdbcTemplate.query(sql, planListRowMapper());
+        return result;
     }
 
     @Override
@@ -102,7 +113,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
                 plan.setPlaceRegion(rs.getString("region"));
-
+                plan.setNumOfComments(rs.getInt("numOfComments"));
                 plan.setIsScrapped(rs.getBoolean("isScrapped"));
                 plan.setIsLiked(rs.getBoolean("isLiked"));
 
