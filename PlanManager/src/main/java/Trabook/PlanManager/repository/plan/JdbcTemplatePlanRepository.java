@@ -167,7 +167,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public Optional<Plan> findById(long planId){
         String sql = "SELECT * FROM Plan WHERE planId = ?";
         List<Plan> result = jdbcTemplate.query(sql, planRowMapper(), planId);
-
         return result.stream().findAny();
     }
 
@@ -284,7 +283,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public int deleteCommentByRef(long ref,long commentId,long planId) {
         String sql = "DELETE FROM PlanComment " +
-                "WHERE ref = ? ";
+                "WHERE parentId = ? ";
         String sql2 = "UPDATE Plan " +
                 "SET numOfComment = numOfComment - ? " +
                 "WHERE planId = ? ";
@@ -363,8 +362,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             ps.setString(3,comment.getContent());
             ps.setLong(4,comment.getParentId());
             ps.setLong(5,comment.getRefOrder());
-            Timestamp timestamp = Timestamp.valueOf(comment.getTime());
-            ps.setTimestamp(6, timestamp);
+            ps.setString(6,comment.getTime());
 
             return ps;
         },keyHolder);
@@ -456,7 +454,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 comment.setParentId(rs.getLong("parentId"));
                 comment.setContent(rs.getString("content"));
                 comment.setPlanId(rs.getLong("planId"));
-                comment.setTime(rs.getTimestamp("time").toLocalDateTime());
+                comment.setTime(rs.getString("time"));
                 comment.setRefOrder(rs.getInt("refOrder"));
                 comment.getUser().setUserId(rs.getLong("userId"));
                 return comment;

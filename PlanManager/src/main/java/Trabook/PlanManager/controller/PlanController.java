@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
+
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
 @Slf4j
@@ -57,7 +59,7 @@ public class PlanController {
     @ResponseBody
     @PatchMapping("/update")
     public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
-                                                            @RequestPart("image") MultipartFile image){
+                                                            @RequestPart(value = "image",required = false) MultipartFile image){
 
         long planId = planService.updatePlan(plan);
         if(planId == 0)
@@ -67,6 +69,8 @@ public class PlanController {
                 System.out.println("ok");
                 fileUploadService.uploadPlanImage(image, planId);
             }
+            else
+                System.out.println("no image");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -131,7 +135,12 @@ public class PlanController {
     @PostMapping("/comment/add")
     public  ResponseEntity<CommentUpdateResponseDTO> addComment(@RequestBody CommentRequestDTO comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
+        comment.setCommentId(0);
+
         CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
+
+        if(Objects.equals(commentUpdateResponseDTO.getMessage(), "no plan exists"))
+            return new ResponseEntity<>(commentUpdateResponseDTO,HttpStatus.NOT_FOUND);
         return ResponseEntity.ok(commentUpdateResponseDTO);
     }
 
