@@ -113,7 +113,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
                 plan.setPlaceRegion(rs.getString("region"));
-                plan.setNumOfComments(rs.getInt("numOfComments"));
+                plan.setNumOfComment(rs.getInt("numOfComment"));
                 plan.setIsScrapped(rs.getBoolean("isScrapped"));
                 plan.setIsLiked(rs.getBoolean("isLiked"));
 
