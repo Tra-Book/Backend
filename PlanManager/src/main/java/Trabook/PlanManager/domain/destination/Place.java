@@ -21,7 +21,6 @@ public class Place {
     String zipcode;
     Double ratingScore;
     Integer scraps;
-    Integer likes;
     Integer numOfAdded;
     Integer numOfReview;
     Boolean isScraped;
@@ -44,6 +43,5 @@ public class Place {
         this.ratingScore = ratingScore;
         this.scraps = scraps;
         this.isScraped = isScraped;
-        this.likes = likes;
     }
 }
