@@ -1,7 +1,9 @@
 package Trabook.PlanManager.controller;
 import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
+import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
+import Trabook.PlanManager.service.PlanRedisService;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;
@@ -30,14 +32,15 @@ public class PlanListController {
     private final Map<String, PlanListServiceInterface> planListServiceInterfaceMap;
     private final WebClientService webClientService;
     private final DestinationRedisService destinationRedisService;
-
+    private final PlanRedisService planRedisService;
     //PlanListServiceInterface 인터페이스를 구현한 모든 서비스들이 자동으로 주입됨. 스프링이 자동으로 이 인터페이스를 구현한
     //모든 빈을 찾아서 리스트로 제공한다
     @Autowired
     public PlanListController(List<PlanListServiceInterface> planListService,
                               PlanService planService,
                               WebClientService webClientService,
-                              DestinationRedisService destinationRedisService) {
+                              DestinationRedisService destinationRedisService,
+                              PlanRedisService planRedisService) {
         this.webClientService= webClientService;
         this.destinationRedisService = destinationRedisService;
         this.planService = planService;
@@ -51,6 +54,7 @@ public class PlanListController {
                 service -> service //?? 이문구 문법적으로 알아보기
                 //stream.collect.Coolectore.toMap 이것도 문법적으로 닷 ㅣ알아보기
         ));
+        this.planRedisService = planRedisService;
     }
 
 
@@ -103,5 +107,12 @@ public class PlanListController {
         int endIndex = Math.min(startIndex + pageSize, customPlanList.size());
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
+    }
+
+    @ResponseBody
+    @GetMapping("/popular-redis")
+    public List<PlanListResponseDTO> getHottestPlanRedis(){
+        return planRedisService.getHottestPlan();
+
     }
 }

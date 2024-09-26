@@ -1,8 +1,10 @@
 package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.comment.Comment;
+import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.PlanCreateDTO;
+import Trabook.PlanManager.domain.user.User;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.domain.plan.DayPlan;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -200,8 +202,20 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public int deleteComment(long commentId) {
-        String sql = "DELETE FROM PlanComment WHERE commentId = ?";
-        return jdbcTemplate.update(sql,commentId);
+
+        String sql = "UPDATE Plan" +
+                "SET numOfComment = numOfComment - 1 " +
+                "WHERE planId = (" +
+                    "SELECT planId " +
+                    "FROM Comment " +
+                    "WHERE commentId = ?" +
+                ");";
+
+        String sql2 = "DELETE FROM PlanComment " +
+                "WHERE commentId = ?;";
+
+        jdbcTemplate.update(sql,commentId);
+        return jdbcTemplate.update(sql2, commentId);
     }
 
     @Override
@@ -268,10 +282,15 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
 
     @Override
-    public int deleteCommentByRef(long ref) {
+    public int deleteCommentByRef(long ref,long commentId,long planId) {
         String sql = "DELETE FROM PlanComment " +
                 "WHERE ref = ? ";
-        return jdbcTemplate.update(sql, ref);
+        String sql2 = "UPDATE Plan " +
+                "SET numOfComment = numOfComment - ? " +
+                "WHERE planId = ? ";
+        int deletedCount = jdbcTemplate.update(sql, ref);
+        System.out.println(deletedCount);
+        return jdbcTemplate.update(sql2,deletedCount ,planId);
 
     }
 
@@ -323,9 +342,10 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
-    public void addComment(Comment comment) {
-        String sql = "INSERT INTO PlanComment( userId,planId,content,ref,refOrder,time)" +
+    public long addComment(CommentRequestDTO comment) {
+        String sql = "INSERT INTO PlanComment( userId,planId,content,parentId,refOrder,time)" +
                 "values(?,?,?,?,?,?)";
+        /*
         jdbcTemplate.update(sql,
                 comment.getUserId(),
                 comment.getPlanId(),
@@ -333,6 +353,28 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 comment.getRef(),
                 comment.getRefOrder(),
                 comment.getTime());
+
+         */
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql,new String[]{"commentId"});
+            ps.setLong(1,comment.getUserId());
+            ps.setLong(2,comment.getPlanId());
+            ps.setString(3,comment.getContent());
+            ps.setLong(4,comment.getParentId());
+            ps.setLong(5,comment.getRefOrder());
+            Timestamp timestamp = Timestamp.valueOf(comment.getTime());
+            ps.setTimestamp(6, timestamp);
+
+            return ps;
+        },keyHolder);
+        long commentId = keyHolder.getKey().longValue();
+        if(comment.getParentId()==0) { //본 댓글이면
+            jdbcTemplate.update("UPDATE PlanComment SET parentId = ? WHERE commentId = ?",commentId,commentId);
+        }
+        String sql2 = "UPDATE Plan SET numOfComment = numOfComment + 1 WHERE planId = ?";
+        jdbcTemplate.update(sql2,comment.getPlanId());
+        return commentId;
     }
 
     @Override
@@ -398,18 +440,25 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         };
     }
 
+    @Override
+    public List<Comment> findCommentListByPlanId(long planId) {
+        String sql = "SELECT * FROM PlanComment WHERE planId = ?";
+        return jdbcTemplate.query(sql,commentRowMapper(),planId);
+    }
+
     private RowMapper<Comment> commentRowMapper() {
         return new RowMapper<Comment>() {
             @Override
             public Comment mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Comment comment = new Comment();
+                comment.setUser(new User());
                 comment.setCommentId(rs.getLong("commentId"));
-                comment.setRef(rs.getLong("ref"));
+                comment.setParentId(rs.getLong("parentId"));
                 comment.setContent(rs.getString("content"));
                 comment.setPlanId(rs.getLong("planId"));
                 comment.setTime(rs.getTimestamp("time").toLocalDateTime());
                 comment.setRefOrder(rs.getInt("refOrder"));
-                comment.setUserId(rs.getLong("userId"));
+                comment.getUser().setUserId(rs.getLong("userId"));
                 return comment;
             }
         };
