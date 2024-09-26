@@ -33,12 +33,11 @@ public class FileUploadService {
         String ext = image.getContentType();
         log.info("content-type : {}",ext);
         String fileName = "planPhoto/"+Long.toString(planId);
+        System.out.println("fileName:"+fileName);
         BlobInfo blobInfo = storage.create(BlobInfo.newBuilder(bucketName, fileName)
                 .setContentType(ext)
                 .build(),
                 image.getInputStream());
-
-
 
     }
 }

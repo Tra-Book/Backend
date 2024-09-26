@@ -79,7 +79,7 @@ public class PlanListController {
             @RequestParam Integer pageNum,
             @RequestParam Boolean userScrapOnly,
             @RequestHeader Integer userId) {
-        log.info("/plans/general");
+
         // 좋아요/스크랩 여부 둘다 보내기
 
 //        System.out.println("search = " + search);

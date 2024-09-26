@@ -106,7 +106,8 @@ public class PlanService {
             long commentId = planRepository.addComment(comment);
             return new CommentUpdateResponseDTO("added comment",commentId);
         } else
-            return new CommentUpdateResponseDTO("no plan exists",-1);
+            return new CommentUpdateResponseDTO("no plan exists", -1);
+
     }
 
     @Transactional
