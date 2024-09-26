@@ -57,7 +57,7 @@ public class PlanController {
     @ResponseBody
     @PatchMapping("/update")
     public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
-                                                            @RequestPart("image") MultipartFile image){
+                                                            @RequestPart(value = "image",required = false) MultipartFile image){
 
         long planId = planService.updatePlan(plan);
         if(planId == 0)
@@ -131,6 +131,10 @@ public class PlanController {
     @PostMapping("/comment/add")
     public  ResponseEntity<CommentUpdateResponseDTO> addComment(@RequestBody CommentRequestDTO comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
+
+        comment.setCommentId(0);
+
+
         CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
         return ResponseEntity.ok(commentUpdateResponseDTO);
     }
