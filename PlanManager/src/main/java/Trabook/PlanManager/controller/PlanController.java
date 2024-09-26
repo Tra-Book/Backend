@@ -135,7 +135,9 @@ public class PlanController {
     @PostMapping("/comment/add")
     public  ResponseEntity<CommentUpdateResponseDTO> addComment(@RequestBody CommentRequestDTO comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
+
         comment.setCommentId(0);
+
 
         CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
 
