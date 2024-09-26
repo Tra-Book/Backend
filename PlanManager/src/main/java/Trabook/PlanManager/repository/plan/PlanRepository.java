@@ -1,6 +1,7 @@
 package Trabook.PlanManager.repository.plan;
 
 import Trabook.PlanManager.domain.comment.Comment;
+import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 
@@ -26,13 +27,13 @@ public interface PlanRepository {
     List<PlanListResponseDTO> findUserLikePlanList(long userId);
     List<DayPlan> findDayPlanListByPlanId(long planId);
     List<DayPlan.Schedule> findScheduleList(long planId,int day);
-
+    List<Comment> findCommentListByPlanId(long planId);
     void likePlan(long userId, long planId);
     void scrapPlan(long userId,long planId);
-    void addComment(Comment comment);
+    long addComment(CommentRequestDTO comment);
 
     int deletePlan(long planId);
-    int deleteCommentByRef(long ref);
+    int deleteCommentByRef(long ref,long commentId,long planId);
     int deleteLike(long userId, long planId);
     int deleteScrap(long userId, long planId);
     int deleteComment(long commentId);

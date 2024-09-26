@@ -15,4 +15,5 @@ public interface PlanListRepository {
                                                  String sorts,
                                                  Integer userId,
                                                  Boolean userScrapOnly);
+    List<PlanListResponseDTO> findHottestPlan();
 }

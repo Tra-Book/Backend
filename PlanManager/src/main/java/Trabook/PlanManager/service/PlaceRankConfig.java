@@ -32,7 +32,7 @@ public class PlaceRankConfig {
       //  return new LettuceConnectionFactory(redisHost,redisPort,"0000");
     }
 
-    @Bean(name="topPlaceRedisTemplate")
+    @Bean(name="topRedisTemplate")
     RedisTemplate<String,String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String,String> redisTemplate = new RedisTemplate<>();
 
@@ -46,8 +46,12 @@ public class PlaceRankConfig {
     }
 
     @Bean
-    public DestinationRedisService destinationRedisService(@Qualifier("topPlaceRedisTemplate") RedisTemplate redisTemplate){
+    public DestinationRedisService destinationRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate){
         return new DestinationRedisService(redisTemplate);
 
+    }
+    @Bean
+    public PlanRedisService planRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate){
+        return new PlanRedisService(redisTemplate);
     }
 }

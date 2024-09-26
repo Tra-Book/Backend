@@ -1,20 +1,29 @@
 package Trabook.PlanManager.domain.comment;
 
+import Trabook.PlanManager.domain.user.User;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 
 @Getter @Setter
 public class Comment {
+    private User user;
     private long commentId;
-    private long userId;
+
     private long planId;
     private String content;
-    private long ref;
+    private long parentId;
     private int refOrder;
     private LocalDateTime time;
+    public Comment() {}
+    public Comment(User user, long commentId, long planId, String content, long parentId, int refOrder, LocalDateTime time) {
+        this.user = user;
+        this.commentId = commentId;
+        this.planId = planId;
+        this.content = content;
+        this.parentId = parentId;
+        this.refOrder = refOrder;
+        this.time = time;
+    }
 }

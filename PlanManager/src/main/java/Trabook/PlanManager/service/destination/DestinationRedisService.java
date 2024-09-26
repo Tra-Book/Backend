@@ -28,7 +28,7 @@ public class DestinationRedisService {
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public DestinationRedisService( @Qualifier("topPlaceRedisTemplate")RedisTemplate<String, String> redisTemplate) {
+    public DestinationRedisService( @Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -41,17 +41,17 @@ public class DestinationRedisService {
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
         Set<String> topPlaces = zsetOps.reverseRange("topPlaces", 0, 9);
 
-        List<Place> top5Places = new ArrayList<>();
+        List<Place> top10Places = new ArrayList<>();
 
         try {
             for (String jsonPlace : topPlaces) {
-                System.out.println(jsonPlace);
+                //System.out.println(jsonPlace);
                 Place place = objectMapper.readValue(jsonPlace, Place.class);
-                top5Places.add(place);
+                top10Places.add(place);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return top5Places;
+        return top10Places;
     }
 }
