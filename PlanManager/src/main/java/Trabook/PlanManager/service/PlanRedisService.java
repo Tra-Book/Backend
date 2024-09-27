@@ -39,7 +39,9 @@ public class PlanRedisService {
 
         try {
             for (String jsonPlan : topPlans) {
-                System.out.println(jsonPlan);
+
+                //System.out.println(jsonPlan);
+
                  PlanListResponseDTO plan = objectMapper.readValue(jsonPlan, PlanListResponseDTO.class);
                 top10Plans.add(plan);
             }

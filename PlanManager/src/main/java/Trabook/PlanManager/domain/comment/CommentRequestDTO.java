@@ -14,11 +14,13 @@ public class CommentRequestDTO {
     private String content;
     private long parentId;
     private int refOrder;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime time;
+
+
+    private String time;
 
     public CommentRequestDTO() {}
-    public CommentRequestDTO(long commentId, long planId, String content, long parentId, int refOrder, LocalDateTime time) {
+    public CommentRequestDTO(long commentId, long planId, String content, long parentId, int refOrder, String time) {
+
         this.commentId = commentId;
         this.planId = planId;
         this.content = content;

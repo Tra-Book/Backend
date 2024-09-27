@@ -15,9 +15,9 @@ public class Comment {
     private String content;
     private long parentId;
     private int refOrder;
-    private LocalDateTime time;
+    private String time;
     public Comment() {}
-    public Comment(User user, long commentId, long planId, String content, long parentId, int refOrder, LocalDateTime time) {
+    public Comment(User user, long commentId, long planId, String content, long parentId, int refOrder, String time) {
         this.user = user;
         this.commentId = commentId;
         this.planId = planId;

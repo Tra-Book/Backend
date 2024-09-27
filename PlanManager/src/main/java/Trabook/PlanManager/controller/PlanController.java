@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
+
 
 @Tag(name = "Plan API", description = "API test for CRUD Plan")
 @Slf4j
@@ -67,6 +69,8 @@ public class PlanController {
                 System.out.println("ok");
                 fileUploadService.uploadPlanImage(image, planId);
             }
+            else
+                System.out.println("no image");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,6 +140,9 @@ public class PlanController {
 
 
         CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
+
+        if(Objects.equals(commentUpdateResponseDTO.getMessage(), "no plan exists"))
+            return new ResponseEntity<>(commentUpdateResponseDTO,HttpStatus.NOT_FOUND);
         return ResponseEntity.ok(commentUpdateResponseDTO);
     }
 
