@@ -78,7 +78,7 @@ public class PlanListController {
             @RequestParam Integer pageSize,
             @RequestParam Integer pageNum,
             @RequestParam Boolean userScrapOnly,
-            @RequestHeader Integer userId) {
+            @RequestHeader(required = false) Integer userId) {
         log.info("/plans/general");
         // 좋아요/스크랩 여부 둘다 보내기
 

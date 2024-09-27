@@ -66,15 +66,15 @@ public class DestinationListController {
     public CustomPlaceListDTO getUserCustomPlaceList(
             @RequestParam String search,
             @RequestParam(required = false) List<String> state,
-            @RequestParam(required = false) List<String> subcategory,
+            @RequestParam(required = false) List<String> category,
             @RequestParam String sorts,
             @RequestParam Integer pageSize,
             @RequestParam Integer pageNum,
             @RequestParam Boolean userScrapOnly,
-            @RequestHeader Integer userId) {
+            @RequestHeader(required = false) Integer userId) {
         log.info("/places/general");
 
-        List<Place> customPlaceList = destinationService.getUserCustomPlaceList(search, state, subcategory, sorts, userId, userScrapOnly);
+        List<Place> customPlaceList = destinationService.getUserCustomPlaceList(search, state, category, sorts, userId, userScrapOnly);
 
         // 전체 페이지 수 계산
         Integer totalPages = (customPlaceList.size() + pageSize - 1) / pageSize; // 올림 처리

@@ -67,7 +67,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
      */
     @Override
-    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> subcategory,
+    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> category,
                                            String sorts, Integer userId,
                                            Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
@@ -100,11 +100,11 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         }
 
         // subcategory 리스트가 비어있지 않으면 IN 절 추가
-        if (subcategory != null && !subcategory.isEmpty()) {
-            if (!subcategory.get(0).equals("전체")) {
-                String subcategoryPlaceholders = String.join(", ", Collections.nCopies(subcategory.size(), "?"));
-                sql += ("AND Place.subcategory IN (" + subcategoryPlaceholders + ") ");
-                params.addAll(subcategory);
+        if (category != null && !category.isEmpty()) {
+            if (!category.get(0).equals("전체")) {
+                String subcategoryPlaceholders = String.join(", ", Collections.nCopies(category.size(), "?"));
+                sql += ("AND Place.category IN (" + subcategoryPlaceholders + ") ");
+                params.addAll(category);
             }
         }
 
