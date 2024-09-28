@@ -78,7 +78,6 @@ public class PlanListController {
             @RequestParam Integer pageSize,
             @RequestParam Integer pageNum,
             @RequestParam Boolean userScrapOnly,
-
             @RequestHeader(required = false) Integer userId) {
 
         // 좋아요/스크랩 여부 둘다 보내기

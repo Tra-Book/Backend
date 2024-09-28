@@ -126,7 +126,7 @@ public class DestinationService {
     }
 
     @Transactional
-    public List<Place> getUserCustomPlaceList(String search,
+    public List<PlaceForModalDTO> getUserCustomPlaceList(String search,
                                               List<String> state,
                                               List<String> category,
                                               String sorts,
