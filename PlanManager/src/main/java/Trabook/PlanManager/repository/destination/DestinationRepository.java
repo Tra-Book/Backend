@@ -32,5 +32,7 @@ public interface DestinationRepository {
     int scoreUp(long placeId);
     boolean isScrapped(long placeId, long userId);
     String findTagByPlaceId(long placeId);
+
+    void updateNumOfAdded(long placeId);
 }
 

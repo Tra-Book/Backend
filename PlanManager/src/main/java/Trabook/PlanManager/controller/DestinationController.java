@@ -6,8 +6,11 @@ import Trabook.PlanManager.domain.destination.PlaceScrapRequestDTO;
 import Trabook.PlanManager.response.ResponseMessage;
 import Trabook.PlanManager.service.destination.DestinationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -22,7 +25,7 @@ public class DestinationController {
 
 
     @ResponseBody
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<PlaceForModalDTO> getPlaceByPlaceId(@RequestParam("placeId") long placeId,@RequestHeader(value = "userId",required = false)Long userId ){
         PlaceForModalDTO result = destinationService.getPlaceModalByPlaceId(placeId);
         if(userId != null) {
@@ -38,7 +41,14 @@ public class DestinationController {
     @ResponseBody
     @PostMapping("/scrap")
     public ResponseEntity<ResponseMessage> addPlaceScrap(@RequestBody PlaceScrapRequestDTO placeScrapRequestDTO, @RequestHeader("userId")long userId){
+
         String message = destinationService.addPlaceScrap(userId, placeScrapRequestDTO.getPlaceId());
+
+        if (Objects.equals(message, "no place exists")){
+            return new ResponseEntity<>(new ResponseMessage("no plan exists"), HttpStatus.NOT_FOUND);
+        }else if(Objects.equals(message, "already scrap error")){
+            return new ResponseEntity<>(new ResponseMessage("already scrap error"), HttpStatus.CONFLICT);
+        }
         return ResponseEntity.ok(new ResponseMessage(message));
     }
 

@@ -1,5 +1,7 @@
 package Trabook.PlanManager.service;
 
+import Trabook.PlanManager.repository.destination.DestinationRepository;
+import Trabook.PlanManager.repository.plan.PlanRepository;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,12 +48,13 @@ public class PlaceRankConfig {
     }
 
     @Bean
-    public DestinationRedisService destinationRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate){
-        return new DestinationRedisService(redisTemplate);
+    public DestinationRedisService destinationRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate, DestinationRepository destinationRepository) {
+        return new DestinationRedisService(redisTemplate, destinationRepository);
+
 
     }
     @Bean
-    public PlanRedisService planRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate){
-        return new PlanRedisService(redisTemplate);
+    public PlanRedisService planRedisService(@Qualifier("topRedisTemplate") RedisTemplate redisTemplate, PlanRepository planRepository) {
+        return new PlanRedisService(redisTemplate, planRepository);
     }
 }

@@ -111,8 +111,9 @@ public class PlanListController {
 
     @ResponseBody
     @GetMapping("/popular")
-    public List<PlanListResponseDTO> getHottestPlanRedis(){
-        return planRedisService.getHottestPlan();
+    public List<PlanListResponseDTO> getHottestPlanRedis(@RequestHeader(value = "userId", required = false) Long userId) {
+        List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan(userId);
+        return hottestPlan;
 
     }
 }

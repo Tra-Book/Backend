@@ -36,8 +36,8 @@ public class DestinationListController {
  */
     @ResponseBody
     @GetMapping("/popular")
-    public List<Place> getHottestPlaceRedis(){
-        return destinationRedisService.getHottestPlace();
+    public List<PlaceForModalDTO> getHottestPlaceRedis(@RequestHeader(value="userId",required = false) Long userId) {
+        return destinationRedisService.getHottestPlace(userId);
 
     }
 
