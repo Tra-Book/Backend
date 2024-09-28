@@ -14,16 +14,16 @@ public class Place {
     Double longitude;
     Long star;
     String category;
-    String imageSrc;
+    String imgSrc;
     String subcategory;
     Double ratingScore;
     Integer scraps;
     Integer numOfAdded;
     Integer numOfReview;
-    Boolean scrapped;
+    Boolean isScrapped;
     public Place(){};
 
-    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, Double ratingScore, Integer scraps, Integer numOfAdded, Integer numOfReview, Boolean scrapped) {
+    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imgSrc, String subcategory, Double ratingScore, Integer scraps, Integer numOfAdded, Integer numOfReview, Boolean isScrapped) {
         this.placeId = placeId;
         this.cityId = cityId;
         this.address = address;
@@ -33,13 +33,13 @@ public class Place {
         this.longitude = longitude;
         this.star = star;
         this.category = category;
-        this.imageSrc = imageSrc;
+        this.imgSrc = imgSrc;
         this.subcategory = subcategory;
 
         this.ratingScore = ratingScore;
         this.scraps = scraps;
         this.numOfAdded = numOfAdded;
         this.numOfReview = numOfReview;
-        this.scrapped = scrapped;
+        this.isScrapped = isScrapped;
     }
 }
