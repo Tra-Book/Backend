@@ -47,8 +47,7 @@ public class PlanService {
         if(planRepository.findById(plan.getPlanId()).isEmpty()) {
             return 0;
         }
-
-        plan.setImgSrc("https://storage.cloud.google.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
+        plan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
         long planId = planRepository.updatePlan(plan);
@@ -109,9 +108,13 @@ public class PlanService {
             return new CommentUpdateResponseDTO("no plan exists", -1);
 
     }
+    @Transactional
+    public Comment getComment(long commentId) {
+        return planRepository.findCommentById(commentId).get();
+    }
 
     @Transactional
-    public PlanResponseDTO getPlan(long planId, long userId) {
+    public PlanResponseDTO getPlan(long planId, Long userId) {
         PlanResponseDTO result;
 
         Optional<Plan> plan = planRepository.findById(planId);
@@ -131,8 +134,15 @@ public class PlanService {
                 }
                 dayPlan.setScheduleList(scheduleList);
             }
-            boolean isLiked = planRepository.isLiked(planId, userId);
-            boolean isScrapped = planRepository.isScrapped(planId, userId);
+            boolean isLiked;
+            boolean isScrapped;
+            if(userId == null){
+                isLiked = false;
+                isScrapped = false;
+            } else {
+                isLiked = planRepository.isLiked(planId, userId);
+                isScrapped = planRepository.isScrapped(planId, userId);
+            }
 
             plan.get().setDayPlanList(dayPlanList);
             List<Comment> comments = planRepository.findCommentListByPlanId(planId);
@@ -171,7 +181,7 @@ public class PlanService {
 
     @Transactional
     public String deleteLike(long userId,long planId){
-
+        planRepository.deleteLike(userId,planId);
         int updatedLikes = planRepository.downLike(planId);
         // log.info("planId : {} like 수 감소[{} -> {}]",planId,updatedLikes-1,updatedLikes);
         return "delete complete";

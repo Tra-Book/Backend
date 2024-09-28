@@ -14,7 +14,7 @@ public class PlanListResponseDTO {
     private long planId;
     private String planTitle;
     private String description;
-    private String placeRegion;
+    private String state;
     //private 이미지
     private int likes;
     private int scraps;
@@ -30,11 +30,11 @@ public class PlanListResponseDTO {
     private boolean isPublic;
 
 
-    public PlanListResponseDTO(long planId, String planTitle, String description, String placeRegion, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic) {
+    public PlanListResponseDTO(long planId, String planTitle, String description, String state, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic) {
         this.planId = planId;
         this.planTitle = planTitle;
         this.description = description;
-        this.placeRegion = placeRegion;
+        this.state = state;
         this.likes = likes;
         this.scraps = scraps;
         this.startDate = startDate;

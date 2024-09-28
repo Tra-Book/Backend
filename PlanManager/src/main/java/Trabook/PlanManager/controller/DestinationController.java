@@ -1,16 +1,13 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.destination.DestinationReactionDto;
-import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
 import Trabook.PlanManager.domain.destination.PlaceScrapRequestDTO;
 import Trabook.PlanManager.response.ResponseMessage;
 import Trabook.PlanManager.service.destination.DestinationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -23,15 +20,21 @@ public class DestinationController {
         this.destinationService = destinationService;
     }
 
-/*
+
     @ResponseBody
     @GetMapping("/")
-    public Optional<Place> getPlaceByPlaceId(@RequestParam("placeId") long placeId ){
-        return destinationService.getPlaceByPlaceId(placeId);
+    public ResponseEntity<PlaceForModalDTO> getPlaceByPlaceId(@RequestParam("placeId") long placeId,@RequestHeader(value = "userId",required = false)Long userId ){
+        PlaceForModalDTO result = destinationService.getPlaceModalByPlaceId(placeId);
+        if(userId != null) {
+            //System.out.println(destinationService.isScrapPlace(placeId,userId));
+            //System.out.println("user Id = " + userId);
+            result.getPlace().setScrapped(destinationService.isScrapPlace(placeId,userId));
+        }
+        return ResponseEntity.ok(result);
     }
 
 
- */
+
     @ResponseBody
     @PostMapping("/scrap")
     public ResponseEntity<ResponseMessage> addPlaceScrap(@RequestBody PlaceScrapRequestDTO placeScrapRequestDTO, @RequestHeader("userId")long userId){
