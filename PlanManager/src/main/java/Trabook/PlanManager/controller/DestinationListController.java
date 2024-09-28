@@ -24,15 +24,17 @@ public class DestinationListController {
         this.destinationService = destinationService;
         this.destinationRedisService = destinationRedisService;
     }
-
+/*
     @ResponseBody
     @GetMapping("/popular")
     public List<Place> getHottestPlace() {
         return destinationService.getHottestPlace();
     }
 
+
+ */
     @ResponseBody
-    @GetMapping("/popular-redis")
+    @GetMapping("/popular")
     public List<Place> getHottestPlaceRedis(){
         return destinationRedisService.getHottestPlace();
 

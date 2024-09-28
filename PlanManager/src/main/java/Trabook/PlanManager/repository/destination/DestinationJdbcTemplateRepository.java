@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DestinationJdbcTemplateRepository implements DestinationRepository {
+public class    DestinationJdbcTemplateRepository implements DestinationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
