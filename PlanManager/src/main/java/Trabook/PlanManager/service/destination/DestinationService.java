@@ -126,11 +126,11 @@ public class DestinationService {
     @Transactional
     public List<Place> getUserCustomPlaceList(String search,
                                               List<String> state,
-                                              List<String> subcategory,
+                                              List<String> category,
                                               String sorts,
                                               Integer userId,
                                               Boolean userScrapOnly) {
-        return destinationRepository.findCustomPlaceList(search, state, subcategory, sorts, userId, userScrapOnly);
+        return destinationRepository.findCustomPlaceList(search, state, category, sorts, userId, userScrapOnly);
     }
 
     public List<Place> getHottestPlace(){
