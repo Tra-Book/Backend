@@ -3,6 +3,7 @@ package Trabook.PlanManager.repository.destination;
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.destination.PlaceComment;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
@@ -77,7 +78,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
      */
     @Override
-    public List<Place> findCustomPlaceList(String search, List<String> state, List<String> category,
+    public List<PlaceForModalDTO> findCustomPlaceList(String search, List<String> state, List<String> category,
                                            String sorts, Integer userId,
                                            Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
@@ -85,9 +86,11 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
 
         // 기본 쿼리
         String sql = "SELECT Place.*, ST_X(coordinate) AS x, ST_Y(coordinate) AS y, " +
-                "CASE WHEN sp.placeId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped " +  // scrap 여부 확인
+                "CASE WHEN sp.placeId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped," +
+                "pc.commentId, pc.content, pc.date  " +  // scrap 여부 확인
                 "FROM Place " +
                 "JOIN City ON Place.cityId = City.cityId " +
+                "LEFT JOIN PlaceComment pc ON pc.placeId = Place.placeId " +
                 "LEFT JOIN ScrappedPlace sp ON Place.placeId = sp.placeId AND sp.userId = ? " +  // ScrappedPlace를 LEFT JOIN
                 "WHERE (Place.placeName LIKE ? OR Place.description LIKE ?) ";
 
@@ -123,6 +126,8 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 "CASE WHEN ? = 'numOfAdded' THEN Place.numOfAdded " +
                 "WHEN ? = 'star' THEN Place.star " +
                 "ELSE Place.star END DESC ";
+//                "date DESC ";
+
 
         // 파라미터 추가
         params.add(sorts);  // 첫 번째 CASE 조건 (numOfAdded, star)
@@ -195,10 +200,10 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         return jdbcTemplate.queryForObject(sql, new Object[]{placeId, userId}, Boolean.class);
 
     }
-    private RowMapper<Place> generalPlaceRowMapper() {
-        return new RowMapper<Place>() {
+    private RowMapper<PlaceForModalDTO> generalPlaceRowMapper() {
+        return new RowMapper<PlaceForModalDTO>() {
             @Override
-            public Place mapRow(ResultSet rs, int rowNum) throws SQLException {
+            public PlaceForModalDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Place place = new Place();
                 place.setPlaceName(rs.getString("placeName"));
                 place.setPlaceId(rs.getLong("placeId"));
@@ -219,8 +224,27 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setScraps(rs.getInt("scraps"));
                 //place.setZipcode(rs.getString("zipcode"));
                 place.setDescription(rs.getString("description"));
-                place.setImgSrc(rs.getString("imageSrc"));
-                return place;
+
+
+                List<PlaceComment> comments = new ArrayList<>();
+                int commentCount = 0;
+
+                do {
+                    long commentId = rs.getLong("commentId");
+                    if (commentId != 0) {
+                        PlaceComment comment = new PlaceComment();
+                        comment.setCommentId(commentId);
+                        comment.setPlaceId(rs.getLong("placeId"));
+                        comment.setContent(rs.getString("content"));
+                        comment.setDate(rs.getString("date"));
+                        comments.add(comment);
+                        commentCount++;
+                    }
+                } while (rs.next() && rs.getLong("placeId") == place.getPlaceId() && commentCount < 10);
+
+                // PlaceForModalDTO 객체 생성
+                return new PlaceForModalDTO(place, comments);
+
             }
         };
     }
