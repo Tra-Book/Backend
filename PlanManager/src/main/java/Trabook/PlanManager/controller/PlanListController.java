@@ -110,7 +110,7 @@ public class PlanListController {
     }
 
     @ResponseBody
-    @GetMapping("/popular-redis")
+    @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlanRedis(){
         return planRedisService.getHottestPlan();
 

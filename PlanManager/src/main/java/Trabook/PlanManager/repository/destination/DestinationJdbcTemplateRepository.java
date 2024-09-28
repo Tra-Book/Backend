@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DestinationJdbcTemplateRepository implements DestinationRepository {
+public class    DestinationJdbcTemplateRepository implements DestinationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -218,9 +218,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setStar(rs.getLong("star"));
                 //place.setRatingScore(rs.getDouble("ratingScore"));
                 place.setAddress(rs.getString("address"));
-
                 place.setIsScrapped(rs.getBoolean("isScrapped"));
-
                 place.setScraps(rs.getInt("scraps"));
                 //place.setZipcode(rs.getString("zipcode"));
                 place.setDescription(rs.getString("description"));

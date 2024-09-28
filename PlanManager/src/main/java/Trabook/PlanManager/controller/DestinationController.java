@@ -28,9 +28,7 @@ public class DestinationController {
         if(userId != null) {
             //System.out.println(destinationService.isScrapPlace(placeId,userId));
             //System.out.println("user Id = " + userId);
-
             result.getPlace().setIsScrapped(destinationService.isScrapPlace(placeId,userId));
-
         }
         return ResponseEntity.ok(result);
     }
