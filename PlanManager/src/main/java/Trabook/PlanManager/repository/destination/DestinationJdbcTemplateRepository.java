@@ -2,7 +2,7 @@ package Trabook.PlanManager.repository.destination;
 
 import Trabook.PlanManager.domain.comment.Comment;
 import Trabook.PlanManager.domain.destination.Place;
-import org.springframework.data.geo.Point;
+import Trabook.PlanManager.domain.destination.PlaceComment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
@@ -26,6 +26,16 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
         String sql = "SELECT subcategory FROM Place WHERE placeId = ?";
         return jdbcTemplate.queryForObject(sql, String.class,placeId);
 
+    }
+
+    @Override
+    public List<PlaceComment> findCommentsByPlaceId(long placeId) {
+        String sql = "SELECT * " +
+                "FROM PlaceComment " +
+                "WHERE placeId = ? " +
+                "ORDER BY `date` " +
+                "LIMIT 10;";
+        return jdbcTemplate.query(sql,placeCommentRowMapper(),placeId);
     }
 
     //Optional 여부
@@ -176,6 +186,15 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
 
     }
 
+    @Override
+    public boolean isScrapped(long placeId, long userId) {
+        String sql = "SELECT EXISTS ( " +
+                "SELECT 1 " +
+                "FROM ScrappedPlace " +
+                "WHERE placeId = ? AND userId = ?)";
+        return jdbcTemplate.queryForObject(sql, new Object[]{placeId, userId}, Boolean.class);
+
+    }
     private RowMapper<Place> generalPlaceRowMapper() {
         return new RowMapper<Place>() {
             @Override
@@ -192,11 +211,11 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setCityId(rs.getLong("cityId"));
                 place.setImageSrc(rs.getString("imageSrc"));
                 place.setStar(rs.getLong("star"));
-                place.setRatingScore(rs.getDouble("ratingScore"));
+                //place.setRatingScore(rs.getDouble("ratingScore"));
                 place.setAddress(rs.getString("address"));
-                place.setIsScraped(rs.getBoolean("isScrapped"));
+                place.setScrapped(rs.getBoolean("isScrapped"));
                 place.setScraps(rs.getInt("scraps"));
-                place.setZipcode(rs.getString("zipcode"));
+                //place.setZipcode(rs.getString("zipcode"));
                 place.setDescription(rs.getString("description"));
                 place.setImageSrc(rs.getString("imageSrc"));
                 return place;
@@ -211,7 +230,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 Place place = new Place();
                 place.setPlaceName(rs.getString("placeName"));
                 place.setPlaceId(rs.getLong("placeId"));
-                place.setNumOfAdded(rs.getInt("scraps"));
+                place.setNumOfAdded(rs.getInt("numOfAdded"));
                 place.setAddress(rs.getString("address"));
                 place.setLongitude(rs.getDouble("x"));
                 place.setLatitude(rs.getDouble("y"));
@@ -222,8 +241,46 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setStar(rs.getLong("star"));
                 place.setRatingScore(rs.getDouble("ratingScore"));
                 place.setAddress(rs.getString("address"));
+                place.setScraps(rs.getInt("scraps"));
+                place.setNumOfReview(rs.getInt("numOfReview"));
                 return place;
             }
         };
     }
+
+    private RowMapper<PlaceComment> placeCommentRowMapper() {
+        return new RowMapper<PlaceComment>() {
+            public PlaceComment mapRow(ResultSet rs, int rowNum) throws SQLException {
+                PlaceComment placeComment = new PlaceComment();
+                placeComment.setPlaceId(rs.getLong("placeId"));
+                placeComment.setCommentId(rs.getLong("commentId"));
+                placeComment.setContent(rs.getString("content"));
+                placeComment.setDate(rs.getString("date"));
+                return placeComment;
+            }
+        };
+    }
+/*
+    private RowMapper<PlaceForModalDTO> placeForModalRowMapper() {
+        return new RowMapper<PlaceForModalDTO>() {
+            public PlaceForModalDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                PlaceForModalDTO placeForModalDTO = new PlaceForModalDTO();
+                placeForModalDTO.setPlaceId(rs.getLong("placeId"));
+                placeForModalDTO.setPlaceName(rs.getString("placeName"));
+                placeForModalDTO.setPlaceId(rs.getLong("placeId"));
+                placeForModalDTO.setNumOfAdded(rs.getInt("numOfAdded"));
+                placeForModalDTO.setAddress(rs.getString("address"));
+                placeForModalDTO.setLatitude(rs.getDouble("latitude"));
+                placeForModalDTO.setLongitude(rs.getDouble("longitude"));
+                placeForModalDTO.setCategory(rs.getString("category"));
+                placeForModalDTO.setSubcategory(rs.getString("subcategory"));
+                placeForModalDTO.setCityId(rs.getLong("cityId"));
+                placeForModalDTO.setImageSrc(rs.getString("imageSrc"));
+                placeForModalDTO.setStar(rs.getLong("star"));
+                return placeForModalDTO;
+            }
+        };
+    }
+
+ */
 }

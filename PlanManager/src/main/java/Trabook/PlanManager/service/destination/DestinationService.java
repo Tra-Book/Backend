@@ -2,6 +2,8 @@ package Trabook.PlanManager.service.destination;
 
 import Trabook.PlanManager.domain.destination.DestinationReactionDto;
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.destination.PlaceComment;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -133,6 +135,11 @@ public class DestinationService {
         return destinationRepository.findCustomPlaceList(search, state, category, sorts, userId, userScrapOnly);
     }
 
+    @Transactional
+    public boolean isScrapPlace(long placeId,long userId) {
+        //System.out.println("placeId = " + placeId + ", userId = " + userId);
+        return destinationRepository.isScrapped(placeId,userId);
+    }
     public List<Place> getHottestPlace(){
         return destinationRepository.findHottestPlaceList();
     }
@@ -144,7 +151,12 @@ public class DestinationService {
 
      */
 
-    public Optional<Place> getPlace(long placeId) {
+    public Optional<Place> getPlaceByPlaceId(long placeId) {
         return destinationRepository.findByPlaceId(placeId);
+    }
+    public PlaceForModalDTO getPlaceModalByPlaceId(long placeId) {
+        Optional<Place> place = destinationRepository.findByPlaceId(placeId);
+        List<PlaceComment> comments = destinationRepository.findCommentsByPlaceId(placeId);
+        return new PlaceForModalDTO(place.get(),comments);
     }
 }

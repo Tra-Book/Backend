@@ -63,7 +63,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     @Override
     public long updatePlan(Plan plan) {
         String sql = "UPDATE Plan SET userId = ?,likes = ?, scraps = ?, title=?, description = ?," +
-                " isPublic = ?,isFinished=?, numOfPeople = ?, budget = ?, planId=?,state=?,imgSrc=? " +
+                " isPublic = ?,isFinished=?, numOfPeople = ?, budget = ?, planId=?,state=?,imgSrc=?,startDate=?, endDate=? " +
                 "WHERE planId= ?";
         int update = jdbcTemplate.update(sql,
                 plan.getUserId(),
@@ -78,6 +78,9 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.getPlanId(),
                 plan.getState(),
                 plan.getImgSrc(),
+
+                plan.getStartDate(),
+                plan.getEndDate(),
                 plan.getPlanId());
 
         System.out.println(plan.getPlanId());
@@ -230,7 +233,6 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         int result = jdbcTemplate.update(sql, planId);
         String sql2 = "SELECT likes FROM Plan WHERE planId=?";
         Integer updatedLikes = jdbcTemplate.queryForObject(sql2, new Object[]{planId}, Integer.class);
-
         return updatedLikes;
     }
 

@@ -2,7 +2,6 @@ package Trabook.PlanManager.domain.destination;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.geo.Point;
 
 @Getter @Setter
 public class Place {
@@ -17,16 +16,14 @@ public class Place {
     String category;
     String imageSrc;
     String subcategory;
-    String tel;
-    String zipcode;
     Double ratingScore;
     Integer scraps;
     Integer numOfAdded;
     Integer numOfReview;
-    Boolean isScraped;
+    Boolean scrapped;
     public Place(){};
 
-    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, String tel, String zipcode, Double ratingScore, Integer scraps, Integer likes,Boolean isScraped) {
+    public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imageSrc, String subcategory, Double ratingScore, Integer scraps, Integer numOfAdded, Integer numOfReview, Boolean scrapped) {
         this.placeId = placeId;
         this.cityId = cityId;
         this.address = address;
@@ -38,10 +35,11 @@ public class Place {
         this.category = category;
         this.imageSrc = imageSrc;
         this.subcategory = subcategory;
-        this.tel = tel;
-        this.zipcode = zipcode;
+
         this.ratingScore = ratingScore;
         this.scraps = scraps;
-        this.isScraped = isScraped;
+        this.numOfAdded = numOfAdded;
+        this.numOfReview = numOfReview;
+        this.scrapped = scrapped;
     }
 }

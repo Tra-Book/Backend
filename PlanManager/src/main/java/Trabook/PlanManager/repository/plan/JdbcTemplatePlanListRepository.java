@@ -1,6 +1,5 @@
 package Trabook.PlanManager.repository.plan;
 
-import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -112,11 +111,11 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setFinished(rs.getBoolean("isFinished"));
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
-                plan.setPlaceRegion(rs.getString("region"));
+                plan.setState(rs.getString("region"));
                 plan.setNumOfComment(rs.getInt("numOfComment"));
                 plan.setIsScrapped(rs.getBoolean("isScrapped"));
                 plan.setIsLiked(rs.getBoolean("isLiked"));
-
+                plan.setImgSrc(rs.getString("imgSrc"));
                 if (rs.getDate("startDate") != null) {
                     plan.setStartDate(rs.getDate("startDate").toLocalDate());
                 } else {
@@ -134,6 +133,8 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         };
     }
 
+
+
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {
             @Override
@@ -143,8 +144,10 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setPlanId(rs.getLong("planId"));
                 plan.setLikes(rs.getInt("likes"));
                 plan.setScraps(rs.getInt("scraps"));
+                plan.setState(rs.getString("state"));
                 plan.setPublic(rs.getBoolean("isPublic"));
                 plan.setFinished(rs.getBoolean("isFinished"));
+                plan.setImgSrc(rs.getString("imgSrc"));
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
                 if (rs.getDate("startDate") != null) {
