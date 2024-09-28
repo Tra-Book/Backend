@@ -20,10 +20,12 @@ public class Place {
     Integer scraps;
     Integer numOfAdded;
     Integer numOfReview;
+
     Boolean isScrapped;
     public Place(){};
 
     public Place(Long placeId, Long cityId, String address, String placeName, String description, Double latitude, Double longitude, Long star, String category, String imgSrc, String subcategory, Double ratingScore, Integer scraps, Integer numOfAdded, Integer numOfReview, Boolean isScrapped) {
+
         this.placeId = placeId;
         this.cityId = cityId;
         this.address = address;
@@ -40,6 +42,8 @@ public class Place {
         this.scraps = scraps;
         this.numOfAdded = numOfAdded;
         this.numOfReview = numOfReview;
+
         this.isScrapped = isScrapped;
+
     }
 }
