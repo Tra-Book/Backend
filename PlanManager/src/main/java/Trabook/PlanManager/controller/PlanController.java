@@ -66,7 +66,7 @@ public class PlanController {
             return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists",null), HttpStatus.NOT_FOUND);
         try {
             if(!image.isEmpty()) {
-                System.out.println("ok");
+                //System.out.println("okok");
                 fileUploadService.uploadPlanImage(image, planId);
             }
             else
@@ -81,14 +81,13 @@ public class PlanController {
     }
 
     @ResponseBody
-    @GetMapping("/")
-    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestBody PlanIdDTO planIdDto, @RequestHeader(value = "userId") long userId) {
+    @GetMapping("")
+    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
 
 
-        PlanResponseDTO result = planService.getPlan(planIdDto.getPlanId(), userId);
+        PlanResponseDTO result = planService.getPlan(planId, userId);
 
         if(result == null){
-
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         long planOwnerId = result.getPlan().getUserId();
@@ -127,6 +126,9 @@ public class PlanController {
     public ResponseEntity<ResponseMessage> scrapPlan(@RequestBody PlanIdDTO planIdDTO, @RequestHeader(value = "userId") long userId) {
 
         String message = planService.scrapPlan(planIdDTO.getPlanId(),userId);
+        if (Objects.equals(message, "no plan exists")){
+            return new ResponseEntity<>(new ResponseMessage("no plan exists"), HttpStatus.NOT_FOUND);
+        }
         return ResponseEntity.ok(new ResponseMessage(message));
 
     }
@@ -147,8 +149,12 @@ public class PlanController {
     }
 
     @ResponseBody
-    @DeleteMapping("/")
+    @DeleteMapping("")
     public ResponseEntity<ResponseMessage> deletePlan(@RequestParam("planId") long planId,@RequestHeader("userId") long userId) {
+        PlanResponseDTO plan = planService.getPlan(planId, userId);
+        System.out.println(plan.getPlan().getUserId());
+        if(plan.getPlan().getUserId() != userId)
+            return new ResponseEntity<>(new ResponseMessage("you have no access to this plan"),HttpStatus.BAD_REQUEST);
         //계획과 유저 일치하는 로직 추가
         String message = planService.deletePlan(planId);
         return ResponseEntity.ok(new ResponseMessage(message));
@@ -171,7 +177,12 @@ public class PlanController {
 
     @ResponseBody
     @DeleteMapping("/comment")
-    public ResponseEntity<ResponseMessage> deleteComment(@RequestParam("commentId") long commentId) {
+    public ResponseEntity<ResponseMessage> deleteComment(@RequestParam("commentId") long commentId, @RequestHeader("userId") long userId) {
+        Comment comment = planService.getComment(commentId);
+        if(comment == null)
+            return new ResponseEntity<>(new ResponseMessage("comment not found"),HttpStatus.NOT_FOUND);
+        if(comment.getUser().getUserId() != userId)
+            return new ResponseEntity<>(new ResponseMessage("you have no access to this comment"),HttpStatus.BAD_REQUEST);
         //유저아이디랑 댓글 아이디 일치여부 로직 추가
         String message = planService.deleteComment(commentId);
         return ResponseEntity.ok(new ResponseMessage(message));
