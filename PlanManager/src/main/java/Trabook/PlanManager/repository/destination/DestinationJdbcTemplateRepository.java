@@ -214,15 +214,17 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setCategory(rs.getString("category"));
                 place.setSubcategory(rs.getString("subcategory"));
                 place.setCityId(rs.getLong("cityId"));
-                place.setImageSrc(rs.getString("imageSrc"));
+                place.setImgSrc(rs.getString("imageSrc"));
                 place.setStar(rs.getLong("star"));
                 //place.setRatingScore(rs.getDouble("ratingScore"));
                 place.setAddress(rs.getString("address"));
-                place.setScrapped(rs.getBoolean("isScrapped"));
+
+                place.setIsScrapped(rs.getBoolean("isScrapped"));
+
                 place.setScraps(rs.getInt("scraps"));
                 //place.setZipcode(rs.getString("zipcode"));
                 place.setDescription(rs.getString("description"));
-                place.setImageSrc(rs.getString("imageSrc"));
+
 
                 List<PlaceComment> comments = new ArrayList<>();
                 int commentCount = 0;
@@ -242,6 +244,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
 
                 // PlaceForModalDTO 객체 생성
                 return new PlaceForModalDTO(place, comments);
+
             }
         };
     }
@@ -260,7 +263,7 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
                 place.setCategory(rs.getString("category"));
                 place.setSubcategory(rs.getString("subcategory"));
                 place.setCityId(rs.getLong("cityId"));
-                place.setImageSrc(rs.getString("imageSrc"));
+                place.setImgSrc(rs.getString("imageSrc"));
                 place.setStar(rs.getLong("star"));
                 place.setRatingScore(rs.getDouble("ratingScore"));
                 place.setAddress(rs.getString("address"));

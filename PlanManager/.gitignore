@@ -41,4 +41,7 @@ out/
 .env*
 maximal-grin-431513-j2-82487b9b8fee.json
 
-*.DS_Stor
+
+
+*.DS_Store
+
