@@ -15,10 +15,12 @@ public class CommentRequestDTO {
     private long parentId;
     private int refOrder;
 
+
     private String time;
 
     public CommentRequestDTO() {}
     public CommentRequestDTO(long commentId, long planId, String content, long parentId, int refOrder, String time) {
+
         this.commentId = commentId;
         this.planId = planId;
         this.content = content;

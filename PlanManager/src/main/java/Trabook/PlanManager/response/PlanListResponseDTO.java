@@ -18,7 +18,7 @@ public class PlanListResponseDTO {
     //private 이미지
     private int likes;
     private int scraps;
-    private int numOfComments;
+    private int numOfComment;
     private String imgSrc;
 
     //여행 날짜

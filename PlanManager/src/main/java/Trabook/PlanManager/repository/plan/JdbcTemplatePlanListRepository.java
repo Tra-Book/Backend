@@ -111,8 +111,8 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setFinished(rs.getBoolean("isFinished"));
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
-                plan.setState(rs.getString("state"));
-                plan.setNumOfComments(rs.getInt("numOfComments"));
+                plan.setState(rs.getString("region"));
+                plan.setNumOfComment(rs.getInt("numOfComment"));
                 plan.setIsScrapped(rs.getBoolean("isScrapped"));
                 plan.setIsLiked(rs.getBoolean("isLiked"));
                 plan.setImgSrc(rs.getString("imgSrc"));

@@ -17,7 +17,7 @@ public interface DestinationRepository {
     List<Place> findHottestPlaceList();
     List<Place> findCustomPlaceList(String search,
                                     List<String> state,
-                                    List<String> subcategory,
+                                    List<String> category,
                                     String sorts,
                                     Integer userId,
                                     Boolean userScrapOnly);
