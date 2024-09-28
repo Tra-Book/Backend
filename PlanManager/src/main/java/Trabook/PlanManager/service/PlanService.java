@@ -129,7 +129,7 @@ public class PlanService {
                     Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
                     schedule.setLatitude(place.getLatitude());
                     schedule.setLongitude(place.getLongitude());
-                    schedule.setImageSrc(place.getImageSrc());
+                    schedule.setImageSrc(place.getImgSrc());
                     schedule.setPlaceName(place.getPlaceName());
                 }
                 dayPlan.setScheduleList(scheduleList);
