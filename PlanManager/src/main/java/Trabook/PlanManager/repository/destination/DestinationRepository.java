@@ -15,7 +15,7 @@ public interface DestinationRepository {
     List<Place> findPlaceListByCity(long cityId);
     List<Place> findPlaceListByUserScrap(long userId);
     List<Place> findHottestPlaceList();
-    List<Place> findCustomPlaceList(String search,
+    List<PlaceForModalDTO> findCustomPlaceList(String search,
                                     List<String> state,
                                     List<String> category,
                                     String sorts,
