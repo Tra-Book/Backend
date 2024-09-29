@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,8 +141,22 @@ public class DestinationService {
         //System.out.println("placeId = " + placeId + ", userId = " + userId);
         return destinationRepository.isScrapped(placeId,userId);
     }
-    public List<Place> getHottestPlace(){
-        return destinationRepository.findHottestPlaceList();
+    public List<PlaceForModalDTO> getHottestPlace(Long userId){
+        List<Place> top10Places = destinationRepository.findHottestPlaceList();
+        List<PlaceForModalDTO> result = new ArrayList<>();
+
+        for(Place place : top10Places){
+            if(userId == null) {
+                place.setIsScrapped(false);
+            }else {
+                place.setIsScrapped(destinationRepository.isScrapped(place.getPlaceId(), userId));
+            }
+
+            List<PlaceComment> comments = destinationRepository.findCommentsByPlaceId(place.getPlaceId());
+
+            result.add(new PlaceForModalDTO(place, comments));
+        }
+        return result;
     }
     /*
     public Optional<Place> getPlaceByPlaceId(long placeId){

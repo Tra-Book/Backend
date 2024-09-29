@@ -25,15 +25,15 @@ public class DestinationListController {
         this.destinationService = destinationService;
         this.destinationRedisService = destinationRedisService;
     }
-/*
+
     @ResponseBody
     @GetMapping("/popular")
-    public List<Place> getHottestPlace() {
-        return destinationService.getHottestPlace();
+    public List<PlaceForModalDTO> getHottestPlace(@RequestHeader(value = "userId", required = false) Long userId) {
+        return destinationService.getHottestPlace(userId);
     }
 
 
- */
+ /*
     @ResponseBody
     @GetMapping("/popular")
     public List<PlaceForModalDTO> getHottestPlaceRedis(@RequestHeader(value="userId",required = false) Long userId) {
@@ -42,6 +42,8 @@ public class DestinationListController {
 
     }
 
+
+  */
 //    @ResponseBody
 //    @GetMapping("/scrap")
 //    public CustomPlaceListDTO getUserScrapPlace(@RequestHeader(name="userId") long userId,

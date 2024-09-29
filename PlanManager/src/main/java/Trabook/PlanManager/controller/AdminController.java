@@ -45,7 +45,7 @@ public class AdminController {
         this.destinationRedisService = destinationRedisService;
         this.planService = planService;
     }
-
+/*
     @ResponseBody
     @GetMapping("/updateHottestPlan")
     public void updateHottestPlan()  {
@@ -87,4 +87,6 @@ public class AdminController {
             }
         }
     }
+
+ */
 }

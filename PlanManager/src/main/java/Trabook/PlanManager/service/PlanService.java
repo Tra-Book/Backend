@@ -16,9 +16,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -160,7 +158,8 @@ public class PlanService {
 
     public List<String> getTags(PlanResponseDTO planResponseDTO) {
         //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
-        List<String> tags = new ArrayList<>();
+       // List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         List<DayPlan> dayPlanList = planResponseDTO.getPlan().getDayPlanList();
 
         for(DayPlan dayPlan : dayPlanList) {
@@ -168,10 +167,10 @@ public class PlanService {
             for(DayPlan.Schedule schedule : scheduleList) {
                 tags.add(destinationRepository.findTagByPlaceId(schedule.getPlaceId()));
                 if(tags.size()==3)
-                    return tags;
+                    return new ArrayList<>(tags);
             }
         }
-        return tags;
+        return new ArrayList<>(tags);
     }
 
     @Transactional
@@ -265,9 +264,19 @@ public class PlanService {
         }
     }
     @Transactional
-    public List<PlanListResponseDTO> getHottestPlan() {
-        return planListRepository.findHottestPlan();
+    public List<PlanListResponseDTO> getHottestPlan(Long userId) {
 
+        List<PlanListResponseDTO> top10Plans = planListRepository.findHottestPlan();
+        for(PlanListResponseDTO plan : top10Plans){
+            if(userId == null){
+                plan.setIsScrapped(false);
+                plan.setIsLiked(false);
+            } else {
+                plan.setIsLiked(planRepository.isLiked(plan.getPlanId(), userId));
+                plan.setIsScrapped(planRepository.isScrapped(plan.getPlanId(), userId));
+            }
+        }
+        return top10Plans;
     }
 
     @Transactional
