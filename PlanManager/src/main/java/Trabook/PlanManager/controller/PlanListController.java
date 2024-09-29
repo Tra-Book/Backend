@@ -108,7 +108,14 @@ public class PlanListController {
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
     }
+    @ResponseBody
+    @GetMapping("/popular")
+    public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
+        List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
+        return hottestPlan;
 
+    }
+/*
     @ResponseBody
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlanRedis(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -116,4 +123,6 @@ public class PlanListController {
         return hottestPlan;
 
     }
+
+ */
 }
