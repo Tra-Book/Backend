@@ -87,14 +87,17 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         params.add(duration);
         params.add(duration);
 
-        sql += "ORDER BY " +
-                "CASE WHEN ? = 'likes' THEN p.likes " +
-                "WHEN ? = 'numOfPeople' THEN p.numOfPeople " +
-                "ELSE p.likes END DESC ";  // 기본값은 likes 로 정렬
-
-        params.add(sorts);
-        params.add(sorts);
-
+        if ("likes".equals(sorts)) {
+            sql += "ORDER BY p.likes DESC";
+        } else if ("numOfPeople".equals(sorts)) {
+            sql += "ORDER BY p.numOfPeople DESC";
+        } else if ("startDate".equals(sorts)) {
+            sql += "ORDER BY p.startDate DESC";
+        } else if ("numOfComment".equals(sorts)) {
+            sql += "ORDER BY p.numOfComment DESC";
+        } else {
+            sql += "ORDER BY p.likes DESC";  // 기본값은 likes로 정렬
+        }
         return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }
 
@@ -116,6 +119,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setIsScrapped(rs.getBoolean("isScrapped"));
                 plan.setIsLiked(rs.getBoolean("isLiked"));
                 plan.setImgSrc(rs.getString("imgSrc"));
+                plan.setNumOfPeople(rs.getInt("numOfPeople"));
                 if (rs.getDate("startDate") != null) {
                     plan.setStartDate(rs.getDate("startDate").toLocalDate());
                 } else {
@@ -150,6 +154,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 plan.setImgSrc(rs.getString("imgSrc"));
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
+                plan.setNumOfPeople(rs.getInt("numOfPeople"));
                 if (rs.getDate("startDate") != null) {
                     plan.setStartDate(rs.getDate("startDate").toLocalDate());
                 } else {

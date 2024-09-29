@@ -29,6 +29,7 @@ public class PlanListResponseDTO {
     private Boolean isScrapped;
     private boolean isPublic;
 
+    private Integer numOfPeople;
 
     public PlanListResponseDTO(long planId, String planTitle, String description, String state, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic) {
         this.planId = planId;
