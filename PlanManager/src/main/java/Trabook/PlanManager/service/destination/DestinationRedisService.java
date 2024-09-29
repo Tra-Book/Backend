@@ -1,6 +1,9 @@
 package Trabook.PlanManager.service.destination;
 
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.destination.PlaceComment;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
+import Trabook.PlanManager.repository.destination.DestinationRepository;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,24 +28,26 @@ import java.util.Set;
 public class DestinationRedisService {
 
 
+    private final DestinationRepository destinationRepository;
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public DestinationRedisService( @Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate) {
+    public DestinationRedisService(@Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate, DestinationRepository destinationRepository) {
         this.redisTemplate = redisTemplate;
+        this.destinationRepository = destinationRepository;
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<Place> getHottestPlace(){
+    public List<PlaceForModalDTO> getHottestPlace(Long userId){
         objectMapper.registerModule(new SimpleModule().addDeserializer(Point.class, new PointDeserializer()));
 
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
         Set<String> topPlaces = zsetOps.reverseRange("topPlaces", 0, 9);
 
         List<Place> top10Places = new ArrayList<>();
-
+        List<PlaceForModalDTO> result = new ArrayList<>();
         try {
             for (String jsonPlace : topPlaces) {
                 //System.out.println(jsonPlace);
@@ -52,6 +57,18 @@ public class DestinationRedisService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return top10Places;
+
+        for(Place place : top10Places){
+            if(userId == null) {
+                place.setIsScrapped(false);
+            }else {
+                place.setIsScrapped(destinationRepository.isScrapped(place.getPlaceId(), userId));
+            }
+
+            List<PlaceComment> comments = destinationRepository.findCommentsByPlaceId(place.getPlaceId());
+
+            result.add(new PlaceForModalDTO(place, comments));
+        }
+        return result;
     }
 }

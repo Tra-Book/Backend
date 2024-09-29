@@ -1,6 +1,7 @@
 package Trabook.PlanManager.service;
 
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.repository.plan.PlanRepository;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.destination.PointDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,17 +20,19 @@ import java.util.Set;
 
 @Service
 public class PlanRedisService {
+    private final PlanRepository planRepository;
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public PlanRedisService( @Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate) {
+    public PlanRedisService(@Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate, PlanRepository planRepository) {
         this.redisTemplate = redisTemplate;
+        this.planRepository = planRepository;
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<PlanListResponseDTO> getHottestPlan(){
+    public List<PlanListResponseDTO> getHottestPlan(Long userId){
         objectMapper.registerModule(new SimpleModule().addDeserializer(Point.class, new PointDeserializer()));
         objectMapper.registerModule(new JavaTimeModule());
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
@@ -47,6 +50,15 @@ public class PlanRedisService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        for(PlanListResponseDTO plan : top10Plans){
+            if(userId == null){
+                plan.setIsScrapped(false);
+                plan.setIsLiked(false);
+            } else {
+                plan.setIsLiked(planRepository.isLiked(plan.getPlanId(), userId));
+                plan.setIsScrapped(planRepository.isScrapped(plan.getPlanId(), userId));
+            }
         }
         return top10Plans;
     }

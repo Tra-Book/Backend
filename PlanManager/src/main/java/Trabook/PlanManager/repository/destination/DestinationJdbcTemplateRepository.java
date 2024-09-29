@@ -30,6 +30,12 @@ public class    DestinationJdbcTemplateRepository implements DestinationReposito
     }
 
     @Override
+    public void updateNumOfAdded(long placeId) {
+        String sql = "UPDATE Place SET numOfAdded = numOfAdded + 1 WHERE placeId = ?";
+         jdbcTemplate.update(sql, placeId);
+    }
+
+    @Override
     public List<PlaceComment> findCommentsByPlaceId(long placeId) {
         String sql = "SELECT * " +
                 "FROM PlaceComment " +

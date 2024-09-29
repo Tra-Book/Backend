@@ -67,8 +67,12 @@ public class PlanService {
         long planId = plan.getPlanId();
         for (DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
             int order = schedule.getOrder();
+            long placeId = schedule.getPlaceId();
+
             schedule.setPlanId(planId);
             schedule.setDay(day);
+
+            destinationRepository.updateNumOfAdded(placeId);
 
             if(planRepository.findSchedule(planId,day,order).isPresent()) // 새로 생성한 스케쥴
                 planRepository.updateSchedule(schedule);

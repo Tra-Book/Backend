@@ -115,6 +115,10 @@ public class PlanController {
     public ResponseEntity<ResponseMessage> likePlan(@RequestBody PlanIdDTO planIdDTO, @RequestHeader("userId") long userId) {
 
         String message = planService.likePlan(planIdDTO.getPlanId(),userId);
+        if (Objects.equals(message,"like already exists" )){
+            return new ResponseEntity<>(new ResponseMessage("like already exists"), HttpStatus.CONFLICT);
+        }
+
         return ResponseEntity.ok(new ResponseMessage(message));
 
     }
@@ -128,6 +132,8 @@ public class PlanController {
         String message = planService.scrapPlan(planIdDTO.getPlanId(),userId);
         if (Objects.equals(message, "no plan exists")){
             return new ResponseEntity<>(new ResponseMessage("no plan exists"), HttpStatus.NOT_FOUND);
+        }else if(Objects.equals(message, "already scrap error")){
+            return new ResponseEntity<>(new ResponseMessage("already scrap error"), HttpStatus.CONFLICT);
         }
         return ResponseEntity.ok(new ResponseMessage(message));
 

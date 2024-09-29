@@ -43,12 +43,12 @@ public class DestinationService {
                 return "scrap complete";
             }catch (DataAccessException e) {
                 if(e.getCause() instanceof SQLIntegrityConstraintViolationException) {
-                    return "already scrapped";
+                    return "already scrap error";
                 }
                 return "error accessing db";
             }
         } else
-            return "place does not exist";
+            return "no place exists";
     }
 
     @Transactional
