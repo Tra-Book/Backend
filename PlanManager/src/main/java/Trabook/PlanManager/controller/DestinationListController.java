@@ -39,6 +39,7 @@ public class DestinationListController {
     public List<PlaceForModalDTO> getHottestPlaceRedis(@RequestHeader(value="userId",required = false) Long userId) {
         return destinationRedisService.getHottestPlace(userId);
 
+
     }
 
 //    @ResponseBody
