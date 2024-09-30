@@ -3,6 +3,7 @@ import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
+import Trabook.PlanManager.response.PlanResponseDTO;
 import Trabook.PlanManager.service.PlanRedisService;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
@@ -112,6 +113,12 @@ public class PlanListController {
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
+        for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
+            PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
+            List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
+            planListResponseDTO.setTags(tags);
+        }
+
         return hottestPlan;
 
     }

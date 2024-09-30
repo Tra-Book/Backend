@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,7 +32,8 @@ public class PlanListResponseDTO {
 
     private Integer numOfPeople;
 
-    public PlanListResponseDTO(long planId, String planTitle, String description, String state, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic) {
+    private List<String> tags;
+    public PlanListResponseDTO(long planId, String planTitle, String description, String state, int likes, int scraps, LocalDate startDate, LocalDate endDate, boolean isFinished, boolean isLiked, boolean isScrapped, boolean isPublic,List<String> tags) {
         this.planId = planId;
         this.planTitle = planTitle;
         this.description = description;
@@ -44,5 +46,6 @@ public class PlanListResponseDTO {
         this.isLiked = isLiked;
         this.isScrapped = isScrapped;
         this.isPublic = isPublic;
+        this.tags = tags;
     }
 }

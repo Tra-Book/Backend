@@ -91,7 +91,7 @@ public class PlanController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         long planOwnerId = result.getPlan().getUserId();
-        result.setTags(planService.getTags(result));
+        result.setTags(planService.getTags(result.getPlan().getDayPlanList()));
         User userInfo = webClientService.getUserInfo(planOwnerId);
         result.setUser(userInfo);
         for(Comment comment : result.getComments() ) {

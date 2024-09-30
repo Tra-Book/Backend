@@ -156,11 +156,11 @@ public class PlanService {
             return null;
     }
 
-    public List<String> getTags(PlanResponseDTO planResponseDTO) {
+    public List<String> getTags(List<DayPlan> dayPlanList) {
         //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
        // List<String> tags = new ArrayList<>();
         Set<String> tags = new HashSet<>();
-        List<DayPlan> dayPlanList = planResponseDTO.getPlan().getDayPlanList();
+       // List<DayPlan> dayPlanList = plan.getDayPlanList();
 
         for(DayPlan dayPlan : dayPlanList) {
             List<DayPlan.Schedule> scheduleList = dayPlan.getScheduleList();
