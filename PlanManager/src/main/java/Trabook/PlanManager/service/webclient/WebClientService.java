@@ -18,7 +18,7 @@ public class WebClientService {
     public User getUserInfo(long userId) {
 
         URI uri = UriComponentsBuilder
-                .fromUriString("http://34.118.151.117:4060")
+                .fromUriString("http://35.216.95.239:4060")
                 .path("/auth/fetch-user")
                 .queryParam("userId",userId)
                 .encode(Charset.defaultCharset())

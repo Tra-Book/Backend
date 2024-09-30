@@ -126,7 +126,7 @@ public class PlanController {
 
 
     @ResponseBody
-    @PostMapping("/scrap/add")
+    @PostMapping("/scrap")
     public ResponseEntity<ResponseMessage> scrapPlan(@RequestBody PlanIdDTO planIdDTO, @RequestHeader(value = "userId") long userId) {
 
         String message = planService.scrapPlan(planIdDTO.getPlanId(),userId);

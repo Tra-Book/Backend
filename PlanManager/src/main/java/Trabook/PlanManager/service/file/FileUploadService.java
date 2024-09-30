@@ -36,6 +36,7 @@ public class FileUploadService {
         System.out.println("fileName:"+fileName);
         BlobInfo blobInfo = storage.create(BlobInfo.newBuilder(bucketName, fileName)
                 .setContentType(ext)
+                        .setCacheControl("no-cache")
                 .build(),
                 image.getInputStream());
 

@@ -110,6 +110,7 @@ public class PlanListController {
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
     }
+
     @ResponseBody
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -123,18 +124,33 @@ public class PlanListController {
 
         return hottestPlan;
 
-
     }
+
+
+
+
 /*
+
+
     @ResponseBody
     @GetMapping("/popular")
-
     public List<PlanListResponseDTO> getHottestPlanRedis(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan(userId);
+        for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
+            PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
+            List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
+            planListResponseDTO.setTags(tags);
+        }
         return hottestPlan;
 
 
     }
 
+
+
  */
+
+
+
+
 }
