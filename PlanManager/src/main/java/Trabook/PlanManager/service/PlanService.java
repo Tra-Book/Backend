@@ -282,7 +282,7 @@ public class PlanService {
     }
 
     @Transactional
-    public List<PlanListResponseDTO> findCustomPlanList(String search,
+    public List<PlanGeneralDTO> findCustomPlanList(String search,
                                                         List<String> region,
                                                         Integer memberCount,
                                                         Integer duration,

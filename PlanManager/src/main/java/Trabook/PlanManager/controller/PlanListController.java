@@ -2,6 +2,7 @@ package Trabook.PlanManager.controller;
 import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
+import Trabook.PlanManager.domain.plan.PlanGeneralDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
 import Trabook.PlanManager.service.PlanRedisService;
@@ -93,7 +94,7 @@ public class PlanListController {
 //        System.out.println("userId = " + userId);
 
 
-        List<PlanListResponseDTO> customPlanList =
+        List<PlanGeneralDTO> customPlanList =
                 planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
         //return customPlanList;
         Integer totalPages = (customPlanList.size() + pageSize - 1) / pageSize;

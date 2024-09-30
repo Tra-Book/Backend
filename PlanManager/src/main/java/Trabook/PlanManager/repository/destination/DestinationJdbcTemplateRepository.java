@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class    DestinationJdbcTemplateRepository implements DestinationRepository {
+public class DestinationJdbcTemplateRepository implements DestinationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -238,6 +238,7 @@ review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
 
                 do {
                     long commentId = rs.getLong("commentId");
+                    if(commentCount >= 10) continue;
                     if (commentId != 0) {
                         PlaceComment comment = new PlaceComment();
                         comment.setCommentId(commentId);
@@ -247,7 +248,7 @@ review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
                         comments.add(comment);
                         commentCount++;
                     }
-                } while (rs.next() && rs.getLong("placeId") == place.getPlaceId() && commentCount < 10);
+                } while (rs.next() && rs.getLong("placeId") == place.getPlaceId());
 
                 // PlaceForModalDTO 객체 생성
                 return new PlaceForModalDTO(place, comments);
