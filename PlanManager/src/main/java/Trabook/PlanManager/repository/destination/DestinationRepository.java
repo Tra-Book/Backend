@@ -22,6 +22,7 @@ public interface DestinationRepository {
                                     Integer userId,
                                     Boolean userScrapOnly);
     List<PlaceComment> findCommentsByPlaceId(long placeId);
+    List<String> findPhotosByPlaceId(long placeId);
     void addPlaceLike(long userId, long placeId);
     void addPlaceScrap(long userId, long scrapId);
     void addPlaceComment(Comment comment);

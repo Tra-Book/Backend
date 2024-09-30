@@ -1,9 +1,6 @@
 package Trabook.PlanManager.service.destination;
 
-import Trabook.PlanManager.domain.destination.DestinationReactionDto;
-import Trabook.PlanManager.domain.destination.Place;
-import Trabook.PlanManager.domain.destination.PlaceComment;
-import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
+import Trabook.PlanManager.domain.destination.*;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -169,9 +166,12 @@ public class DestinationService {
     public Optional<Place> getPlaceByPlaceId(long placeId) {
         return destinationRepository.findByPlaceId(placeId);
     }
-    public PlaceForModalDTO getPlaceModalByPlaceId(long placeId) {
+
+    public PlaceForModalAddPictureDTO getPlaceModalByPlaceId(long placeId) {
         Optional<Place> place = destinationRepository.findByPlaceId(placeId);
         List<PlaceComment> comments = destinationRepository.findCommentsByPlaceId(placeId);
-        return new PlaceForModalDTO(place.get(),comments);
+        List<String> photos = destinationRepository.findPhotosByPlaceId(placeId);
+
+        return new PlaceForModalAddPictureDTO(place.get(),comments,photos);
     }
 }

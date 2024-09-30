@@ -251,6 +251,9 @@ public class PlanService {
 
         try {
             if (planRepository.findById(planId).isPresent()) {
+                if(planRepository.isScrapped(planId, userId)) {
+                    return "already scrapped";
+                }
                 planRepository.scrapPlan(userId, planId);
                 planRepository.upScrap(planId);
                 return "scrap complete";
