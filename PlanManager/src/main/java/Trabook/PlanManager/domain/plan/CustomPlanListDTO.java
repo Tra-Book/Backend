@@ -6,10 +6,10 @@ import Trabook.PlanManager.response.PlanListResponseDTO;
 import java.util.List;
 
 public class CustomPlanListDTO {
-    public List<PlanListResponseDTO> plans;
+    public List<PlanGeneralDTO> plans;
     public Integer totalPages;
 
-    public CustomPlanListDTO(List<PlanListResponseDTO> plans, Integer totalPages) {
+    public CustomPlanListDTO(List<PlanGeneralDTO> plans, Integer totalPages) {
         this.plans = plans;
         this.totalPages = totalPages;
     }

@@ -2,6 +2,7 @@ package Trabook.PlanManager.controller;
 import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
 import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
+import Trabook.PlanManager.domain.plan.PlanGeneralDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
 import Trabook.PlanManager.service.PlanRedisService;
@@ -93,7 +94,7 @@ public class PlanListController {
 //        System.out.println("userId = " + userId);
 
 
-        List<PlanListResponseDTO> customPlanList =
+        List<PlanGeneralDTO> customPlanList =
                 planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
         //return customPlanList;
         Integer totalPages = (customPlanList.size() + pageSize - 1) / pageSize;
@@ -109,10 +110,12 @@ public class PlanListController {
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
     }
+
     @ResponseBody
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
+
         for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
             PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
             List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
@@ -122,16 +125,32 @@ public class PlanListController {
         return hottestPlan;
 
     }
+
+
+
+
 /*
+
+
     @ResponseBody
     @GetMapping("/popular")
-
     public List<PlanListResponseDTO> getHottestPlanRedis(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan(userId);
+        for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
+            PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
+            List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
+            planListResponseDTO.setTags(tags);
+        }
         return hottestPlan;
 
 
     }
 
+
+
  */
+
+
+
+
 }

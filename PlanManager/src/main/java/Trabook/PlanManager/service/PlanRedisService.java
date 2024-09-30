@@ -60,6 +60,7 @@ public class PlanRedisService {
                 plan.setIsScrapped(planRepository.isScrapped(plan.getPlanId(), userId));
             }
         }
+
         return top10Plans;
     }
 }
