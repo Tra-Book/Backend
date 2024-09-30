@@ -113,6 +113,7 @@ public class PlanListController {
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
+
         for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
             PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
             List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
@@ -120,6 +121,7 @@ public class PlanListController {
         }
 
         return hottestPlan;
+
 
     }
 /*
