@@ -1,5 +1,10 @@
 package Trabook.PlanManager.repository.plan;
 
+import Trabook.PlanManager.domain.destination.PlaceComment;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
+import Trabook.PlanManager.domain.plan.Plan;
+import Trabook.PlanManager.domain.plan.PlanComment;
+import Trabook.PlanManager.domain.plan.PlanGeneralDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -45,7 +50,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     }
 
     @Override
-    public List<PlanListResponseDTO> findCustomPlanList(String search,
+    public List<PlanGeneralDTO> findCustomPlanList(String search,
                                                         List<String> region,
                                                         Integer memberCount,
                                                         Integer duration,
@@ -55,10 +60,11 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
 
-        String sql = "SELECT p.*, " +
+        String sql = "SELECT p.*, pc.*, " +
                 "CASE WHEN lp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked, " +  // LIKE 여부 확인
                 "CASE WHEN sp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped " +  // SCRAP 여부 확인
                 "FROM Plan p " +
+                "LEFT JOIN PlanComment pc ON pc.planId = p.planId " +
                 "LEFT JOIN LikedPlan lp ON p.planId = lp.planId AND lp.userId = ? " +  // LikedPlan 테이블을 LEFT JOIN
                 "LEFT JOIN ScrappedPlan sp ON p.planId = sp.planId AND sp.userId = ? " +  // ScrappedPlan 테이블을 LEFT JOIN
                 "WHERE (p.title LIKE ? OR p.description LIKE ?) ";
@@ -101,10 +107,10 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }
 
-    private RowMapper<PlanListResponseDTO> generalPlanListRowMapper() {
-        return new RowMapper<PlanListResponseDTO>() {
+    private RowMapper<PlanGeneralDTO> generalPlanListRowMapper() {
+        return new RowMapper<PlanGeneralDTO>() {
             @Override
-            public PlanListResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            public PlanGeneralDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
                 PlanListResponseDTO plan = new PlanListResponseDTO();
                 plan.setPlanTitle(rs.getString("title"));
                 plan.setPlanId(rs.getLong("planId"));
@@ -132,7 +138,26 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                     plan.setEndDate(null); // null로 설정하거나 기본 값을 설정할 수 있음
                 }
 
-                return plan;
+                List<PlanComment> comments = new ArrayList<>();
+                int commentCount = 0;
+
+                do {
+                    long commentId = rs.getLong("commentId");
+                    if(commentCount >= 10) continue;
+                    if (commentId != 0) {
+                        PlanComment comment = new PlanComment();
+                        comment.setCommentId(commentId);
+                        comment.setUserId(rs.getLong("userId"));
+                        comment.setPlanId(rs.getLong("planId"));
+                        comment.setContent(rs.getString("content"));
+                        comment.setRefOrder(rs.getInt("refOrder"));
+                        comment.setTime(rs.getString("time"));
+                        commentCount++;
+                        comments.add(comment);
+                    }
+                } while (rs.next() && rs.getLong("planId") == plan.getPlanId());
+
+                return new PlanGeneralDTO(plan, comments);
             }
         };
     }
