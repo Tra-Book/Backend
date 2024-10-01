@@ -196,16 +196,16 @@ review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
 
         // 정렬 조건 처리
 
-        sql += "ORDER BY " +
-                "CASE WHEN ? = 'numOfAdded' THEN Place.numOfAdded " +
-                "WHEN ? = 'star' THEN Place.star " +
-                "ELSE Place.star END DESC ";
-//                "date DESC ";
-//
-//
-//        // 파라미터 추가
-        params.add(sorts);  // 첫 번째 CASE 조건 (numOfAdded, star)
-        params.add(sorts);  // 두 번째 CASE 조건 (numOfAdded, star)
+
+        if ("star".equals(sorts)) {
+            sql += "ORDER BY Place.star DESC";
+        } else if ("numOfAdded".equals(sorts)) {
+            sql += "ORDER BY Place.numOfAdded DESC";
+        } else if ("numOfReview".equals(sorts)) {
+            sql += "ORDER BY Place.numOfReview DESC";
+        } else {
+            sql += "ORDER BY Place.numOfReview DESC";  // 기본값은 likes로 정렬
+        }
         return jdbcTemplate.query(sql, generalPlaceRowMapper(), params.toArray());
     }
 

@@ -59,7 +59,7 @@ public class PlanController {
     @ResponseBody
     @PatchMapping("/update")
     public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
-                                                            @RequestPart(value = "image",required = false) MultipartFile image){
+                                                            @RequestPart(value = "image",required = false) MultipartFile image) {
 
         long planId = planService.updatePlan(plan);
         if(planId == 0)

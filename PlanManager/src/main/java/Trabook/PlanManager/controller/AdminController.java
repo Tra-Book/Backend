@@ -48,8 +48,10 @@ public class AdminController {
         this.planService = planService;
     }
 /*
-    @Scheduled(cron = "0 * * * * *")
-    //@Scheduled(cron = "0 0 0/1 * * *")
+
+    //@Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0/1 * * *")
+
     //@ResponseBody
     //@GetMapping("/updateHottestPlan")
     public void updateHottestPlan()  {
@@ -69,6 +71,8 @@ public class AdminController {
             }
         }
     }
+
+
 
 
 

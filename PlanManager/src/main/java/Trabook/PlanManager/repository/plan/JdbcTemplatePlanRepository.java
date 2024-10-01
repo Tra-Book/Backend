@@ -173,6 +173,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         return result.stream().findAny();
     }
 
+
+
     @Override
     public Optional<Plan> findPlanByUserAndName(long userId, String planName) {
 
@@ -313,7 +315,9 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public List<DayPlan> findDayPlanListByPlanId(long planId) {
         String sql = "SELECT * " +
                 "FROM DayPlan "+
-                "WHERE planId = ?";
+                "WHERE planId = ? " +
+                "ORDER BY day ASC";
+
         return jdbcTemplate.query(sql,dayPlanRowMapper(),planId);
 
     }
@@ -375,6 +379,18 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         String sql2 = "UPDATE Plan SET numOfComment = numOfComment + 1 WHERE planId = ?";
         jdbcTemplate.update(sql2,comment.getPlanId());
         return commentId;
+    }
+
+    @Override
+    public void deleteDayPlanById(long planId, long day) {
+        String sql = "DELETE FROM DayPlan WHERE planId = ? AND day = ?";
+        jdbcTemplate.update(sql, planId, day);
+    }
+
+    @Override
+    public void deleteScheduleById(long planId, long day) {
+        String sql = "DELETE FROM Schedule WHERE planId = ? AND day = ?";
+        jdbcTemplate.update(sql, planId, day);
     }
 
     @Override
