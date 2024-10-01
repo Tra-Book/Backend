@@ -13,10 +13,12 @@ import Trabook.PlanManager.service.planList.GetUserLikePlanList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.sql.DataSource;
 
 @Configuration
+@EnableScheduling
 public class SpringConfig {
 
     private final DataSource dataSource;

@@ -160,9 +160,7 @@ public class PlanService {
         //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
        // List<String> tags = new ArrayList<>();
         Set<String> tags = new HashSet<>();
-
        // List<DayPlan> dayPlanList = plan.getDayPlanList();
-
 
         for(DayPlan dayPlan : dayPlanList) {
             List<DayPlan.Schedule> scheduleList = dayPlan.getScheduleList();
@@ -253,6 +251,9 @@ public class PlanService {
 
         try {
             if (planRepository.findById(planId).isPresent()) {
+                if(planRepository.isScrapped(planId, userId)) {
+                    return "already scrapped";
+                }
                 planRepository.scrapPlan(userId, planId);
                 planRepository.upScrap(planId);
                 return "scrap complete";

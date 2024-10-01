@@ -257,6 +257,26 @@ review 추가되면 review 랑 조인 + ORDER BY review DESC 필요
         };
     }
 
+    @Override
+    public List<String> findPhotosByPlaceId(long placeId) {
+        String sql = "SELECT photo1 , photo2, photo3, photo4, photo5 " +
+                "FROM Place " +
+                "WHERE placeId = ?";
+        return jdbcTemplate.query(sql, new Object[]{placeId}, rs -> {
+            if (rs.next()) {
+                List<String> photos = new ArrayList<>();
+                photos.add(rs.getString("photo1"));
+                photos.add(rs.getString("photo2"));
+                photos.add(rs.getString("photo3"));
+                photos.add(rs.getString("photo4"));
+                photos.add(rs.getString("photo5"));
+                return photos;
+            }
+            return null;
+        });
+
+    }
+
     private RowMapper<Place> placeRowMapper() {
         return new RowMapper<Place>() {
             @Override

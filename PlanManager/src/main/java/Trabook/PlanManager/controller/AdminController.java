@@ -1,6 +1,7 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationRedisService;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,10 +48,14 @@ public class AdminController {
         this.planService = planService;
     }
 /*
-    @ResponseBody
-    @GetMapping("/updateHottestPlan")
+
+    //@Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0/1 * * *")
+
+    //@ResponseBody
+    //@GetMapping("/updateHottestPlan")
     public void updateHottestPlan()  {
-        List<PlanListResponseDTO> TopPlans = planService.getHottestPlan();
+        List<PlanListResponseDTO> TopPlans = planService.getHottestPlan(0L);
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -67,19 +73,24 @@ public class AdminController {
     }
 
 
+ */
+
 
     //상위 5개 여행지 가져오고 레디스 서버에 업데이트
-    @ResponseBody
-    @GetMapping("/updateHottestPlace")
+    @Scheduled(cron = "0 0 0/1 * * * ")
+    //@ResponseBody
+    //@GetMapping("/updateHottestPlace")
+    //@Scheduled(cron = "0 * * * * *")
+
     public void updateHottestPlace()  {
 
-        List<Place> TopPlaces = destinationService.getHottestPlace(); //상위 10개 순위 데이터
+        List<PlaceForModalDTO> TopPlaces = destinationService.getHottestPlace(0L); //상위 10개 순위 데이터
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
-       for(Place place : TopPlaces){
-            System.out.println("insert"+place.getPlaceName()+ " and score is "+ place.getRatingScore() );
+       for(PlaceForModalDTO place : TopPlaces){
+            System.out.println("insert"+place.getPlace().getPlaceName()+ " and score is "+ place.getPlace().getRatingScore() );
             try {
-                String placeString = objectMapper.writeValueAsString(place);
-                Double score = place.getRatingScore();
+                String placeString = objectMapper.writeValueAsString(place.getPlace());
+                Double score = place.getPlace().getRatingScore();
                 Boolean add = zsetOps.add("topPlaces", placeString, score);
                 System.out.println(add);
             } catch (JsonProcessingException e) {
@@ -88,5 +99,7 @@ public class AdminController {
         }
     }
 
+
  */
+
 }

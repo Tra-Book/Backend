@@ -33,7 +33,15 @@ public class DestinationListController {
     }
 
 
- /*
+
+
+
+
+
+
+/*
+
+
     @ResponseBody
     @GetMapping("/popular")
     public List<PlaceForModalDTO> getHottestPlaceRedis(@RequestHeader(value="userId",required = false) Long userId) {
@@ -43,7 +51,13 @@ public class DestinationListController {
     }
 
 
-  */
+ */
+
+
+
+
+
+
 //    @ResponseBody
 //    @GetMapping("/scrap")
 //    public CustomPlaceListDTO getUserScrapPlace(@RequestHeader(name="userId") long userId,
