@@ -41,7 +41,6 @@ public class PlanService {
 
     @Transactional
     public long updatePlan(Plan plan) {
-
         if(planRepository.findById(plan.getPlanId()).isEmpty()) {
             return 0;
         }
@@ -49,6 +48,18 @@ public class PlanService {
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
         long planId = planRepository.updatePlan(plan);
+
+        List<DayPlan> oldDayPlanList = planRepository.findDayPlanListByPlanId(planId);
+        int updatePlanDays = plan.getDayPlanList().size();
+        int oldPlanDays = oldDayPlanList.size();
+
+        if (updatePlanDays < oldPlanDays) {
+            for(int i = updatePlanDays; i < oldPlanDays; i++) {
+                long planIdOfOldPlan = oldDayPlanList.get(i).getPlanId();
+                long dayOfOldPlan = oldDayPlanList.get(i).getDay();
+                planRepository.deleteDayPlanById(planIdOfOldPlan, dayOfOldPlan);
+            }
+        }
 
         if(dayPlanList != null) {
             for (DayPlan dayPlan : dayPlanList) {
