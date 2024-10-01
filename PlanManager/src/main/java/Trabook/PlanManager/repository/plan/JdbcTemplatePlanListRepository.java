@@ -180,6 +180,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
                 //plan.setDateCreated(rs.getString("dateCreated"));
                 plan.setDescription(rs.getString("description"));
                 plan.setNumOfPeople(rs.getInt("numOfPeople"));
+                plan.setNumOfComment(rs.getInt("numOfComment"));
                 if (rs.getDate("startDate") != null) {
                     plan.setStartDate(rs.getDate("startDate").toLocalDate());
                 } else {

@@ -1,6 +1,7 @@
 package Trabook.PlanManager.controller;
 
 import Trabook.PlanManager.domain.destination.DestinationReactionDto;
+import Trabook.PlanManager.domain.destination.PlaceForModalAddPictureDTO;
 import Trabook.PlanManager.domain.destination.PlaceForModalDTO;
 import Trabook.PlanManager.domain.destination.PlaceScrapRequestDTO;
 import Trabook.PlanManager.response.ResponseMessage;
@@ -26,8 +27,9 @@ public class DestinationController {
 
     @ResponseBody
     @GetMapping("")
-    public ResponseEntity<PlaceForModalDTO> getPlaceByPlaceId(@RequestParam("placeId") long placeId,@RequestHeader(value = "userId",required = false)Long userId ){
-        PlaceForModalDTO result = destinationService.getPlaceModalByPlaceId(placeId);
+    public ResponseEntity<PlaceForModalAddPictureDTO> getPlaceByPlaceId(@RequestParam("placeId") long placeId, @RequestHeader(value = "userId",required = false)Long userId ){
+        PlaceForModalAddPictureDTO result = destinationService.getPlaceModalByPlaceId(placeId);
+
         if(userId != null) {
             //System.out.println(destinationService.isScrapPlace(placeId,userId));
             //System.out.println("user Id = " + userId);
