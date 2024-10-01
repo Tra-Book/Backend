@@ -58,8 +58,10 @@ public class PlanService {
                 long planIdOfOldPlan = oldDayPlanList.get(i).getPlanId();
                 long dayOfOldPlan = oldDayPlanList.get(i).getDay();
                 planRepository.deleteDayPlanById(planIdOfOldPlan, dayOfOldPlan);
+                planRepository.deleteScheduleById(planIdOfOldPlan, dayOfOldPlan);
             }
         }
+
 
         if(dayPlanList != null) {
             for (DayPlan dayPlan : dayPlanList) {

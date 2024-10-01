@@ -32,6 +32,7 @@ public interface PlanRepository {
     void scrapPlan(long userId,long planId);
     long addComment(CommentRequestDTO comment);
     void deleteDayPlanById(long planId, long day);
+    void deleteScheduleById(long planId, long day);
 
     int deletePlan(long planId);
     int deleteCommentByRef(long ref,long commentId,long planId);

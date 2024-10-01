@@ -388,6 +388,12 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
+    public void deleteScheduleById(long planId, long day) {
+        String sql = "DELETE FROM Schedule WHERE planId = ? AND day = ?";
+        jdbcTemplate.update(sql, planId, day);
+    }
+
+    @Override
     public void clearStore() {
     }
 
