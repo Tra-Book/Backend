@@ -48,8 +48,10 @@ public class AdminController {
         this.planService = planService;
     }
 /*
-    @Scheduled(cron = "0 * * * * *")
-    //@Scheduled(cron = "0 0 0/1 * * *")
+
+    //@Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0/1 * * *")
+
     //@ResponseBody
     //@GetMapping("/updateHottestPlan")
     public void updateHottestPlan()  {
@@ -71,14 +73,15 @@ public class AdminController {
     }
 
 
-
+ */
 
 
     //상위 5개 여행지 가져오고 레디스 서버에 업데이트
-    //@Scheduled(cron = "0 0 0/1 * * * ")
+    @Scheduled(cron = "0 0 0/1 * * * ")
     //@ResponseBody
     //@GetMapping("/updateHottestPlace")
-    @Scheduled(cron = "0 * * * * *")
+    //@Scheduled(cron = "0 * * * * *")
+
     public void updateHottestPlace()  {
 
         List<PlaceForModalDTO> TopPlaces = destinationService.getHottestPlace(0L); //상위 10개 순위 데이터
@@ -98,7 +101,5 @@ public class AdminController {
 
 
  */
-
-
 
 }
