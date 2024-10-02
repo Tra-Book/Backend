@@ -51,8 +51,8 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 
     @Override
     public List<PlanGeneralDTO> findCustomPlanList(String search,
-                                                        List<String> region,
-                                                        Integer memberCount,
+                                                        List<String> state,
+                                                        Integer numOfPeople,
                                                         Integer duration,
                                                         String sorts,
                                                         Integer userId,
@@ -79,17 +79,17 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             params.add(userId);
         }
 
-        if (region != null && !region.isEmpty()) {
-            String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));
-            sql += "AND p.region IN (" + regionPlaceholders + ") ";
-            params.addAll(region);
+        if (state != null && !state.isEmpty()) {
+            String regionPlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
+            sql += "AND p.state IN (" + regionPlaceholders + ") ";
+            params.addAll(state);
         }
 
         sql += "AND (p.numOfPeople = ? OR ? IS NULL) " +
                 "AND (DATEDIFF(p.endDate, p.startDate) + 1 = ? OR ? IS NULL) ";
 
-        params.add(memberCount);
-        params.add(memberCount);
+        params.add(numOfPeople);
+        params.add(numOfPeople);
         params.add(duration);
         params.add(duration);
 
@@ -161,9 +161,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             }
         };
     }
-
-
-
+    
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {
             @Override

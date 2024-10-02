@@ -297,13 +297,13 @@ public class PlanService {
 
     @Transactional
     public List<PlanGeneralDTO> findCustomPlanList(String search,
-                                                        List<String> region,
-                                                        Integer memberCount,
+                                                        List<String> state,
+                                                        Integer numOfPeople,
                                                         Integer duration,
                                                         String sorts,
                                                         Integer userId,
                                                         Boolean userScrapOnly) {
-        return planListRepository.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
+        return planListRepository.findCustomPlanList(search, state, numOfPeople, duration, sorts, userId, userScrapOnly);
     }
 
     // null인지 아닌지 확인해서 boolean으로 반환하는 방식으로 바꾸기
