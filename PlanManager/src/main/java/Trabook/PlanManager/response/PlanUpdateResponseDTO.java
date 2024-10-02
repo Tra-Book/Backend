@@ -7,12 +7,12 @@ import lombok.Setter;
 public class PlanUpdateResponseDTO {
     private long planId;
     private String message;
-    private String imgSrc;
+    //private String imgSrc;
     public PlanUpdateResponseDTO() {}
 
-    public PlanUpdateResponseDTO(long planId, String message, String imgSrc) {
+    public PlanUpdateResponseDTO(long planId, String message) {
         this.planId = planId;
         this.message = message;
-        this.imgSrc = imgSrc;
+        //this.imgSrc = imgSrc;
     }
 }
