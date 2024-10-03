@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.util.Objects;
 
 
@@ -47,12 +48,13 @@ public class PlanController {
 
     @ResponseBody
     @PostMapping("/create")
-    public ResponseEntity<PlanIdResponseDTO> createPlan(@RequestBody PlanCreateDTO planCreateDTO, @RequestHeader("userId") long userId) {
+    public ResponseEntity<PlanCreateResponseDTO> createPlan(@RequestBody PlanCreateDTO planCreateDTO, @RequestHeader("userId") long userId) throws FileNotFoundException {
         //System.out.println(userId);
         planCreateDTO.setUserId(userId);
-        long planId = planService.createPlan(planCreateDTO);
-        PlanIdResponseDTO planIdResponseDTO = new PlanIdResponseDTO(planId,"create complete");
-        return new ResponseEntity<>(planIdResponseDTO, HttpStatus.OK);
+        Long planId = planService.createPlan(planCreateDTO);
+        String fileName = fileUploadService.uploadDefaultImage(planId);
+        PlanCreateResponseDTO planCreateResponseDTO = new PlanCreateResponseDTO(planId,"create complete","https://storage.googleapis.com/trabook-20240822/"+fileName);
+        return new ResponseEntity<>(planCreateResponseDTO, HttpStatus.OK);
 
     }
 
@@ -63,7 +65,7 @@ public class PlanController {
 
         long planId = planService.updatePlan(plan);
         if(planId == 0)
-            return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists",null), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists"), HttpStatus.NOT_FOUND);
         try {
             if(!image.isEmpty()) {
                 //System.out.println("okok");
@@ -75,7 +77,7 @@ public class PlanController {
             e.printStackTrace();
         }
 
-        PlanUpdateResponseDTO planUpdateResponseDTO = new PlanUpdateResponseDTO(planId,"update complete",plan.getImgSrc());
+        PlanUpdateResponseDTO planUpdateResponseDTO = new PlanUpdateResponseDTO(planId,"update complete");
 
         return new ResponseEntity<>(planUpdateResponseDTO,HttpStatus.OK);
     }

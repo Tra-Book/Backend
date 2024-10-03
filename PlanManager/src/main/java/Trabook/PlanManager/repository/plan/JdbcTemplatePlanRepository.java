@@ -412,6 +412,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setImgSrc(rs.getString("imgSrc"));
                 plan.setBudget(rs.getInt("budget"));
                 plan.setNumOfPeople(rs.getInt("numOfPeople"));
+                plan.setDescription(rs.getString("description"));
                 Date startDate = rs.getDate("startDate");
 
                 if (startDate != null) {

@@ -12,4 +12,5 @@ public class PlanIdResponseDTO {
         this.planId = planId;
         this.message = message;
     }
+
 }
