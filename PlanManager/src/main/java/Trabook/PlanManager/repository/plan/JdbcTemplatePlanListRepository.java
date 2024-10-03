@@ -121,7 +121,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 //                "AND (DATEDIFF(p.endDate, p.startDate) + 1 = NULL OR NULL IS NULL) " +  // duration도 없으므로 NULL로 처리
 //                "ORDER BY p.likes DESC";  // 기본 정렬을 likes 기준으로
 
-        return jdbcTemplate.query(sql, generalPlanListRowMapper());
+        return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }
 
 
