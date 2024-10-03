@@ -73,8 +73,8 @@ public class PlanListController {
     @GetMapping("/general")
     public CustomPlanListDTO getCustomPlans(
             @RequestParam String search,
-            @RequestParam(required = false) List<String> region,
-            @RequestParam(required = false) Integer memberCount,
+            @RequestParam(required = false) List<String> state,
+            @RequestParam(required = false) Integer numOfPeople,
             @RequestParam(required = false) Integer duration,
             @RequestParam(required = false, defaultValue = "likes") String sorts,
             @RequestParam Integer pageSize,
@@ -95,7 +95,7 @@ public class PlanListController {
 
 
         List<PlanGeneralDTO> customPlanList =
-                planService.findCustomPlanList(search, region, memberCount, duration, sorts, userId, userScrapOnly);
+                planService.findCustomPlanList(search, state, numOfPeople, duration, sorts, userId, userScrapOnly);
         //return customPlanList;
         Integer totalPages = (customPlanList.size() + pageSize - 1) / pageSize;
 

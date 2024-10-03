@@ -51,12 +51,12 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 
     @Override
     public List<PlanGeneralDTO> findCustomPlanList(String search,
-                                                        List<String> region,
-                                                        Integer memberCount,
-                                                        Integer duration,
-                                                        String sorts,
-                                                        Integer userId,
-                                                        Boolean userScrapOnly) {
+                                                   List<String> state,
+                                                   Integer numOfPeople,
+                                                   Integer duration,
+                                                   String sorts,
+                                                   Integer userId,
+                                                   Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
 
@@ -79,17 +79,17 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             params.add(userId);
         }
 
-        if (region != null && !region.isEmpty()) {
-            String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));
-            sql += "AND p.region IN (" + regionPlaceholders + ") ";
-            params.addAll(region);
+        if (state != null && !state.isEmpty()) {
+            String regionPlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
+            sql += "AND p.state IN (" + regionPlaceholders + ") ";
+            params.addAll(state);
         }
 
         sql += "AND (p.numOfPeople = ? OR ? IS NULL) " +
                 "AND (DATEDIFF(p.endDate, p.startDate) + 1 = ? OR ? IS NULL) ";
 
-        params.add(memberCount);
-        params.add(memberCount);
+        params.add(numOfPeople);
+        params.add(numOfPeople);
         params.add(duration);
         params.add(duration);
 
@@ -104,8 +104,26 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         } else {
             sql += "ORDER BY p.likes DESC";  // 기본값은 likes로 정렬
         }
+
+
+
+//        // 하드코딩된 SQL 쿼리
+//        String sql = "SELECT p.*, pc.*, " +
+//                "CASE WHEN lp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked, " +
+//                "CASE WHEN sp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped " +
+//                "FROM Plan p " +
+//                "LEFT JOIN PlanComment pc ON pc.planId = p.planId " +
+//                "LEFT JOIN LikedPlan lp ON p.planId = lp.planId AND lp.userId = 1 " +  // userId를 1로 가정
+//                "LEFT JOIN ScrappedPlan sp ON p.planId = sp.planId AND sp.userId = 1 " +  // userId를 1로 가정
+//                "WHERE (p.title LIKE '%%' OR p.description LIKE '%%') " +  // search 파라미터가 빈 값이므로 %%로 처리
+//                "AND p.state IN ('대구광역시') " +  // state 파라미터는 '대구광역시'
+//                "AND (p.numOfPeople = NULL OR NULL IS NULL) " +  // numOfPeople이 없으므로 NULL로 처리
+//                "AND (DATEDIFF(p.endDate, p.startDate) + 1 = NULL OR NULL IS NULL) " +  // duration도 없으므로 NULL로 처리
+//                "ORDER BY p.likes DESC";  // 기본 정렬을 likes 기준으로
+
         return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }
+
 
     private RowMapper<PlanGeneralDTO> generalPlanListRowMapper() {
         return new RowMapper<PlanGeneralDTO>() {
@@ -161,9 +179,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             }
         };
     }
-
-
-
+    
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {
             @Override
