@@ -36,6 +36,7 @@ public class PlanService {
     @Transactional
     public long createPlan(PlanCreateDTO planCreateDTO) {
         //user존재 로직 추가
+
         return planRepository.createPlan(planCreateDTO);
     }
 

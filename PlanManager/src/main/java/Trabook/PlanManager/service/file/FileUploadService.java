@@ -11,8 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Slf4j
 @Service
@@ -27,6 +31,7 @@ public class FileUploadService {
     private String projectId;
 
     private final Storage storage;
+    //private final String defaultImagePath = "planPhoto-thumbnail.png";
 
     public void uploadPlanImage(MultipartFile image,long planId) throws IOException {
        // Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
@@ -40,5 +45,25 @@ public class FileUploadService {
                 .build(),
                 image.getInputStream());
 
+    }
+    public String uploadDefaultImage(Long planId) throws FileNotFoundException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        //Path path = Paths.get(defaultImagePath);
+        String fileName = "planPhoto/"+Long.toString(planId);
+        try(InputStream inputStream = classLoader.getResourceAsStream("planPhoto-thumbnail.png")){
+            if(inputStream == null){
+                throw new IOException("File not found in resources: planPhoto-thumbnail.png");
+
+            }
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName)
+                    .setContentType("image/png")
+                    .build();
+            storage.create(blobInfo, inputStream);
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return fileName;
     }
 }
