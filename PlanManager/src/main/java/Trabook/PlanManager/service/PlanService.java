@@ -162,8 +162,22 @@ public class PlanService {
 
          */
         List<DayPlan> dayPlanList = plan.getDayPlanList();
+        List<Place> placeList = destinationRepository.findPlaceListByPlanId(plan.getPlanId());
+        int placeIndex = 0;
+        for(DayPlan dayPlan : dayPlanList) {
+            for(DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
+                Place place = placeList.get(placeIndex);
+                schedule.setImageSrc(place.getImgSrc());
+                schedule.setLongitude(place.getLongitude());
+                schedule.setLatitude(place.getLatitude());
+                schedule.setPlaceName(place.getPlaceName());
+                schedule.setSubcategory(place.getSubcategory());
+                schedule.setAddress(place.getAddress());
+            }
 
+        }
 
+/*
         for(DayPlan dayPlan : dayPlanList) {
             for(DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
                 Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
@@ -177,6 +191,8 @@ public class PlanService {
         }
 
 
+
+ */
         boolean isLiked;
         boolean isScrapped;
         if(userId == null){
