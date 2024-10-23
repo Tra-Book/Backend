@@ -112,7 +112,7 @@ public class PlanListController {
     }
 
     @ResponseBody
-    @GetMapping("/popular")
+    @GetMapping("/popular")  //로직 바꿔야됨
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
 

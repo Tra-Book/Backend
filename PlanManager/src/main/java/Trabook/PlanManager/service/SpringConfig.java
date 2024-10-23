@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.sql.DataSource;
 
@@ -27,7 +28,10 @@ public class SpringConfig {
         this.dataSource = dataSource;
     }
 
-
+   @Bean
+   public WebClient webClient() {
+        return WebClient.create("http://35.216.124.162:4060");
+   }
 
     @Bean
     public PlanService planService() {

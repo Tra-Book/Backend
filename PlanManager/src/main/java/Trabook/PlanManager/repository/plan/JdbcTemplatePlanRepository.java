@@ -5,15 +5,19 @@ import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.Plan;
 import Trabook.PlanManager.domain.plan.PlanCreateDTO;
 import Trabook.PlanManager.domain.user.User;
+import Trabook.PlanManager.repository.customRowMapper.NestedRowMapper;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.domain.plan.DayPlan;
+import Trabook.PlanManager.response.PlanResponseDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,20 +130,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 dayPlan.getEndTime()
         );
 
-/*
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
-            ps.setLong(1, dayPlan.getPlanId());
-            ps.setLong(2, dayPlan.getDayPlanId());
-            ps.setInt(3, dayPlan.getDay());
-            ps.setTime(4, Time.valueOf(dayPlan.getStartTime()));
-            ps.setTime(5, Time.valueOf(dayPlan.getEndTime()));
-            return ps;
-        }, keyHolder);
-        dayPlan.setDayPlanId(keyHolder.getKey().longValue());
-        return dayPlan.getDayPlanId();
- */
+
     }
 
 
@@ -153,17 +144,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 schedule.getOrder(),
                 schedule.getTime(),
                 schedule.getPlaceId());
-        /*
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"scheduleId"});
-            ps.setLong(1,dayPlanId);
-            ps.setInt(2,schedule.getOrder());
-            ps.setInt(3,schedule.getTime());
-            ps.setLong(4,schedule.getPlaceId());
-            return ps;
-        });
 
-         */
     }
 
     @Override
@@ -173,7 +154,50 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         return result.stream().findAny();
     }
 
+    @Override
+    public List<String> findTagsByPlanId(long planId) {
+        String sql = "SELECT place.`subcategory` " +
+                "FROM Plan p " +
+                "INNER JOIN DayPlan dp on p.planId = dp.planId " +
+                "INNER JOIN `Schedule` s on dp.planId = s.planId AND dp.day = s.day " +
+                "INNER JOIN Place place on s.placeId = place.placeId " +
+                "WHERE p.planId = ?";
+        return jdbcTemplate.query(sql, new Object[]{planId}, (rs, rowNum) -> rs.getString("subcategory"));
+    }
 
+    @Override
+    public PlanResponseDTO findTotalPlan(long planId) {
+        String sql = "select p.*, dp.*, s.* " +
+                "from Plan p " +
+                "left join DayPlan dp on p.planId = dp.planId " +
+                "left join `Schedule` s on dp.planId = s.planId and dp.day = s.day " +
+                "where p.planId = ? ";
+
+        Plan result = jdbcTemplate.query(sql, new Object[]{planId}, rs -> {
+            int rowNum = 0;
+            Plan plan = new Plan();
+            while (rs.next()) {
+                if (rowNum == 0) {
+                    plan = planRowMapper().mapRow(rs, rs.getRow());
+                    plan.setDayPlanList(new ArrayList<>());
+                    rowNum++;
+                } else {
+                    DayPlan dayPlan = dayPlanRowMapper().mapRow(rs, rs.getRow());
+                    dayPlan.setScheduleList(new ArrayList<>());
+                    plan.getDayPlanList().add(dayPlan);
+                    DayPlan.Schedule schedule = scheduleRowMapper().mapRow(rs, rs.getRow());
+                    dayPlan.getScheduleList().add(schedule);
+
+                }
+
+            }
+            return plan;
+        });
+
+        PlanResponseDTO planResponseDTO = new PlanResponseDTO();
+        planResponseDTO.setPlan(result);
+        return planResponseDTO;
+    }
 
     @Override
     public Optional<Plan> findPlanByUserAndName(long userId, String planName) {
@@ -350,16 +374,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public long addComment(CommentRequestDTO comment) {
         String sql = "INSERT INTO PlanComment( userId,planId,content,parentId,refOrder,time)" +
                 "values(?,?,?,?,?,?)";
-        /*
-        jdbcTemplate.update(sql,
-                comment.getUserId(),
-                comment.getPlanId(),
-                comment.getContent(),
-                comment.getRef(),
-                comment.getRefOrder(),
-                comment.getTime());
 
-         */
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql,new String[]{"commentId"});
@@ -455,6 +470,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 schedule.setTime(rs.getInt("time"));
                 schedule.setPlaceId(rs.getLong("placeId"));
                 schedule.setOrder(rs.getInt("order"));
+
                 return schedule;
             }
         };
@@ -483,4 +499,53 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             }
         };
     }
+/*
+    private RowMapper<PlanResponseDTO> planTestRowMapper() {
+        return new RowMapper<PlanResponseDTO>() {
+            @Override
+            public PlanResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                PlanResponseDTO planResponseDTO = new PlanResponseDTO();
+                Plan plan = new Plan();
+                plan.setTitle(rs.getString("title"));
+                plan.setUserId(rs.getLong("userId"));
+                plan.setPlanId(rs.getLong("planId"));
+                plan.setLikes(rs.getInt("likes"));
+                plan.setScraps(rs.getInt("scraps"));
+                plan.setPublic(rs.getBoolean("isPublic"));
+                plan.setState(rs.getString("state"));
+                plan.setImgSrc(rs.getString("imgSrc"));
+                plan.setBudget(rs.getInt("budget"));
+                plan.setNumOfPeople(rs.getInt("numOfPeople"));
+                plan.setDescription(rs.getString("description"));
+                Date startDate = rs.getDate("startDate");
+
+                if (startDate != null) {
+                    plan.setStartDate(startDate.toLocalDate());
+                } else {
+                    plan.setStartDate(null); // 또는 기본값 설정
+                }
+
+                Date endDate = rs.getDate("endDate");
+                if (endDate != null) {
+                    plan.setEndDate(endDate.toLocalDate());
+                } else {
+                    plan.setEndDate(null); // 또는 기본
+                }
+
+                plan.setDayPlanList(new ArrayList<>());
+                DayPlan dayPlan = new DayPlan();
+                dayPlan.setDay(rs.getInt("day"));
+                dayPlan.setPlanId(rs.getLong("planId"));
+                dayPlan.setStartTime(rs.getTime("startTime").toLocalTime());
+                dayPlan.setEndTime(rs.getTime("endTime").toLocalTime());
+
+                plan.get
+
+
+            }
+        };
+    }
+
+
+ */
 }

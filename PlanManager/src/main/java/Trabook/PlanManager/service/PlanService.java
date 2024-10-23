@@ -32,6 +32,13 @@ public class PlanService {
         this.destinationRepository = destinationRepository;
         this.planListRepository = planListRepository;
     }
+    @Transactional
+    public PlanResponseDTO testPlan(long planId) {
+        PlanResponseDTO totalPlan = planRepository.findTotalPlan(planId);
+
+        return totalPlan;
+
+    }
 
     @Transactional
     public long createPlan(PlanCreateDTO planCreateDTO) {
@@ -131,8 +138,10 @@ public class PlanService {
 
     @Transactional
     public PlanResponseDTO getPlan(long planId, Long userId) {
-        PlanResponseDTO result;
 
+        PlanResponseDTO result = planRepository.findTotalPlan(planId);
+        Plan plan = result.getPlan();
+        /*
         Optional<Plan> plan = planRepository.findById(planId);
         if(plan.isPresent()) {
 
@@ -150,24 +159,42 @@ public class PlanService {
                 }
                 dayPlan.setScheduleList(scheduleList);
             }
-            boolean isLiked;
-            boolean isScrapped;
-            if(userId == null){
-                isLiked = false;
-                isScrapped = false;
-            } else {
-                isLiked = planRepository.isLiked(planId, userId);
-                isScrapped = planRepository.isScrapped(planId, userId);
+
+         */
+        List<DayPlan> dayPlanList = plan.getDayPlanList();
+
+
+        for(DayPlan dayPlan : dayPlanList) {
+            for(DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
+                Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
+                schedule.setImageSrc(place.getImgSrc());
+                schedule.setLongitude(place.getLongitude());
+                schedule.setLatitude(place.getLatitude());
+                schedule.setPlaceName(place.getPlaceName());
+                schedule.setSubcategory(place.getSubcategory());
+                schedule.setAddress(place.getAddress());
             }
-
-            plan.get().setDayPlanList(dayPlanList);
-            List<Comment> comments = planRepository.findCommentListByPlanId(planId);
-
-            result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null,comments);
-            return result;
         }
-        else
-            return null;
+
+
+        boolean isLiked;
+        boolean isScrapped;
+        if(userId == null){
+            isLiked = false;
+            isScrapped = false;
+        } else {
+            isLiked = planRepository.isLiked(planId, userId);
+            isScrapped = planRepository.isScrapped(planId, userId);
+        }
+        result.setLiked(isLiked);
+        result.setScrapped(isScrapped);
+
+            List<Comment> comments = planRepository.findCommentListByPlanId(planId);
+            result.setComments(comments);
+           // result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null,comments);
+            return result;
+
+
     }
 
     public List<String> getTags(List<DayPlan> dayPlanList) {
@@ -186,7 +213,9 @@ public class PlanService {
         }
         return new ArrayList<>(tags);
     }
-
+    public List<String> getTagsTest(long planId) {
+        return planRepository.findTagsByPlanId(planId);
+    }
     @Transactional
     public String deletePlan(long planId) {
         if(planRepository.deletePlan(planId) == 1)
@@ -250,14 +279,6 @@ public class PlanService {
             return "error accessing db";
         }
 
-        /*
-        if (planRepository.findById(planId).isPresent()) {
-            planRepository.upLike(planId);
-            return "like complete";
-        } else
-            return "no plan exists";
-
-         */
     }
 
     @Transactional

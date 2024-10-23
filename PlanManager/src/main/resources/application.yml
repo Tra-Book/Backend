@@ -1,6 +1,9 @@
 server:
   port: 8080
-
+logging:
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 spring:
   servlet:
     # .env import
@@ -26,7 +29,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://34.64.100.41:3306/test
     username: root
-    #password:
+    password: rKiKAEr3UKrOCvY
+    hikari:
+      maximum-pool-size : 10
+      minimum-idle : 10
   jpa:
     show-sql: true
   redis:

@@ -5,6 +5,7 @@ import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.domain.user.User;
 
+import Trabook.PlanManager.domain.webclient.userInfoDTO;
 import Trabook.PlanManager.response.*;
 
 import Trabook.PlanManager.response.PlanIdResponseDTO;
@@ -24,8 +25,14 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -83,26 +90,67 @@ public class PlanController {
     }
 
     @ResponseBody
-    @GetMapping("")
-    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+    @GetMapping("/test")
+    public PlanResponseDTO testPlan(@RequestParam("planId")long planId) {
+        PlanResponseDTO result = planService.testPlan(planId);
+        return result;
+    }
+    @ResponseBody
+    @GetMapping("/testTag/after")
+    public List<String> testTag(@RequestParam("planId")long planId) {
+        List<String> tagsTest = planService.getTagsTest(planId);
+        return tagsTest.subList(0,3);
+    }
+    @ResponseBody
+    @GetMapping("/testTag/before")
+    public List<String> testTagBefore(@RequestParam("planId")long planId) {
+        PlanResponseDTO planResponseDTO = planService.getPlan(planId, null);
+        return planService.getTags(planResponseDTO.getPlan().getDayPlanList());
 
+    }
+
+
+    @ResponseBody
+    @GetMapping("")
+    public Mono<ResponseEntity<PlanResponseDTO> >getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
 
         PlanResponseDTO result = planService.getPlan(planId, userId);
 
         if(result == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        long planOwnerId = result.getPlan().getUserId();
-        result.setTags(planService.getTags(result.getPlan().getDayPlanList()));
-        User userInfo = webClientService.getUserInfo(planOwnerId);
-        result.setUser(userInfo);
-        for(Comment comment : result.getComments() ) {
-            long commentUserId = comment.getUser().getUserId();
-            User commentUserInfo = webClientService.getUserInfo(commentUserId);
-            comment.setUser(commentUserInfo);
+            log.info("no plan result");
+            return Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND));
         }
 
-        return ResponseEntity.ok(result);
+        long planOwnerId = result.getPlan().getUserId();
+        Mono<userInfoDTO> userInfo = webClientService.getUserInfo(planOwnerId);
+
+        result.setTags(planService.getTags(result.getPlan().getDayPlanList()));
+        //result.setTags(planService.getTagsTest(planId));
+        List<Long> commentUserIds = new ArrayList<>();
+
+        for(Comment comment : result.getComments() ) {
+            long commentUserId = comment.getUser().getUserId();
+            commentUserIds.add(commentUserId);
+           // User commentUserInfo = webClientService.getUserInfo(commentUserId);
+            //comment.setUser(commentUserInfo);
+        }
+
+        Mono<List<User>> commentUserListInfo = commentUserIds.isEmpty() ? Mono.just(Collections.emptyList()) : webClientService.getUserListInfo(commentUserIds);
+
+
+        return Mono.zip(userInfo,commentUserListInfo)
+                .map(tuple -> {
+                    result.setUser(tuple.getT1().getUser());
+                    List<User> users= tuple.getT2();
+                   // System.out.println(users.get(0).toString());
+                    for (int indexOfUserList = 0; indexOfUserList < users.size(); indexOfUserList++) {
+                        result.getComments().get(indexOfUserList).setUser(users.get(indexOfUserList));
+                        //System.out.println(users.get(indexOfUserList));
+                    }
+
+                   return new ResponseEntity<>(result, HttpStatus.OK);
+                });
+
     }
 
     @ResponseBody
