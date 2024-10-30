@@ -86,9 +86,31 @@ public class PlanController {
         return new ResponseEntity<>(planUpdateResponseDTO,HttpStatus.OK);
     }
 
+    @ResponseBody
+    @GetMapping("")
+    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+        PlanResponseDTO result = planService.getPlan(planId,userId);
 
+        long planOwnerId = result.getPlan().getUserId();
+        User planOwner = webClientService.getUserInfoBlocking(planOwnerId);
+        result.setUser(planOwner);
 
+        List<Long> commentUserIds = new ArrayList<>();
+        List<Comment> commentList = result.getComments();
+        for(Comment comment : commentList ) {
+            long commentUserId = comment.getUser().getUserId();
+            commentUserIds.add(commentUserId);
 
+        }
+        List<User> users = webClientService.getUserInfoListBlocking(commentUserIds);
+        for (int indexOfUserList = 0; indexOfUserList < users.size(); indexOfUserList++) {
+            result.getComments().get(indexOfUserList).setUser(users.get(indexOfUserList));
+        }
+
+        return result;
+    }
+
+/*
     @ResponseBody
     @GetMapping("")
     public Mono<ResponseEntity<PlanResponseDTO>> getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
@@ -127,6 +149,8 @@ public class PlanController {
 
     }
 
+
+ */
     @ResponseBody
     @PostMapping("/test")
     public ResponseEntity<ResponseMessage> scrap(@RequestParam("planId") long planId) {

@@ -60,14 +60,51 @@ public class WebClientService {
                     // Null 체크
                     if (UserListDTO == null || UserListDTO.getUsers() == null) {
                         // 적절한 처리 또는 대체값 반환
-                       // System.out.println("null here");
+                        // System.out.println("null here");
                         return null;
                     }
                     return UserListDTO.getUsers();
                 });
-                //.map(UserListDTO::getUserList);
+        //.map(UserListDTO::getUserList);
 
 
     }
 
+    public User getUserInfoBlocking(long userId) {
+
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://35.216.124.162:4060")
+                .path("/auth/fetch-user")
+                .queryParam("userId", userId)
+                .encode(Charset.defaultCharset())
+                .build()
+                .toUri();
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<userInfoDTO> result = restTemplate.getForEntity(uri, userInfoDTO.class);
+        System.out.println(result.toString());
+        return result.getBody().getUser();
+    }
+
+    public List<User> getUserInfoListBlocking(List<Long> userIdList) {
+        // User ID 리스트를 문자열로 변환
+        String userIdsString = userIdList.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        // URI 구성
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://35.216.124.162:4060")
+                .path("/auth/fetch-users")
+                .queryParam("userIdList", userIdsString)
+                .encode(Charset.defaultCharset())
+                .build()
+                .toUri();
+
+        RestTemplate restTemplate = new RestTemplate();
+        UserListDTO forObject = restTemplate.getForObject(uri, UserListDTO.class);
+        return forObject.getUsers();
+
+
+    }
 }
