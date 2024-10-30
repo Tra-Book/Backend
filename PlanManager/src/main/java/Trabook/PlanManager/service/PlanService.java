@@ -141,26 +141,7 @@ public class PlanService {
 
         PlanResponseDTO result = planRepository.findTotalPlan(planId);
         Plan plan = result.getPlan();
-        /*
-        Optional<Plan> plan = planRepository.findById(planId);
-        if(plan.isPresent()) {
 
-            List<DayPlan> dayPlanList = planRepository.findDayPlanListByPlanId(planId);
-
-            for (DayPlan dayPlan : dayPlanList) {
-                List<DayPlan.Schedule> scheduleList = planRepository.findScheduleList(dayPlan.getPlanId(),dayPlan.getDay());
-
-                for(DayPlan.Schedule schedule : scheduleList) {
-                    Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
-                    schedule.setLatitude(place.getLatitude());
-                    schedule.setLongitude(place.getLongitude());
-                    schedule.setImageSrc(place.getImgSrc());
-                    schedule.setPlaceName(place.getPlaceName());
-                }
-                dayPlan.setScheduleList(scheduleList);
-            }
-
-         */
         List<DayPlan> dayPlanList = plan.getDayPlanList();
         List<Place> placeList = destinationRepository.findPlaceListByPlanId(plan.getPlanId());
         int placeIndex = 0;
@@ -177,22 +158,6 @@ public class PlanService {
 
         }
 
-/*
-        for(DayPlan dayPlan : dayPlanList) {
-            for(DayPlan.Schedule schedule : dayPlan.getScheduleList()) {
-                Place place = destinationRepository.findByPlaceId(schedule.getPlaceId()).get();
-                schedule.setImageSrc(place.getImgSrc());
-                schedule.setLongitude(place.getLongitude());
-                schedule.setLatitude(place.getLatitude());
-                schedule.setPlaceName(place.getPlaceName());
-                schedule.setSubcategory(place.getSubcategory());
-                schedule.setAddress(place.getAddress());
-            }
-        }
-
-
-
- */
         boolean isLiked;
         boolean isScrapped;
         if(userId == null){
@@ -204,16 +169,15 @@ public class PlanService {
         }
         result.setLiked(isLiked);
         result.setScrapped(isScrapped);
-
-            List<Comment> comments = planRepository.findCommentListByPlanId(planId);
-            result.setComments(comments);
-           // result = new PlanResponseDTO(plan.get(), dayPlanList,null,isLiked,isScrapped,null,comments);
-            return result;
+        result.setTags(getTagsVersion3(placeList));
+        List<Comment> comments = planRepository.findCommentListByPlanId(planId);
+        result.setComments(comments);
+        return result;
 
 
     }
 
-    public List<String> getTags(List<DayPlan> dayPlanList) {
+    public List<String> getTagsVersion1(List<DayPlan> dayPlanList) {
         //tagCount 변수로 3개 되면 리턴할지 아니면 리스트의 사이즈를 확인할지 고민해보기
        // List<String> tags = new ArrayList<>();
         Set<String> tags = new HashSet<>();
@@ -229,8 +193,17 @@ public class PlanService {
         }
         return new ArrayList<>(tags);
     }
-    public List<String> getTagsTest(long planId) {
+    public List<String> getTagsVersion2(long planId) {
         return planRepository.findTagsByPlanId(planId);
+    }
+    public List<String> getTagsVersion3(List<Place> placeList) {
+        Set<String> tags = new HashSet<>();
+        for(Place place : placeList) {
+            tags.add(place.getSubcategory());
+            if(tags.size() == 3)
+                return new ArrayList<>(tags);
+        }
+        return new ArrayList<>(tags);
     }
     @Transactional
     public String deletePlan(long planId) {

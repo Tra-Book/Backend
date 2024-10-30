@@ -1,6 +1,4 @@
 package Trabook.PlanManager.controller;
-import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
-import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
 import Trabook.PlanManager.domain.plan.PlanGeneralDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
@@ -118,7 +116,7 @@ public class PlanListController {
 
         for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
             PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
-            List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
+            List<String> tags = planService.getTagsVersion1(plan.getPlan().getDayPlanList());
             planListResponseDTO.setTags(tags);
         }
 

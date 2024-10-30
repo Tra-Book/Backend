@@ -72,7 +72,7 @@ public class WebClientService {
                     // Null 체크
                     if (UserListDTO == null || UserListDTO.getUsers() == null) {
                         // 적절한 처리 또는 대체값 반환
-                        System.out.println("null here");
+                       // System.out.println("null here");
                         return null;
                     }
                     return UserListDTO.getUsers();
