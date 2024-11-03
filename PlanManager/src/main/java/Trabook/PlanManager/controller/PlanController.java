@@ -86,25 +86,7 @@ public class PlanController {
         return new ResponseEntity<>(planUpdateResponseDTO,HttpStatus.OK);
     }
 
-    @ResponseBody
-    @GetMapping("/test")
-    public PlanResponseDTO testPlan(@RequestParam("planId")long planId) {
-        PlanResponseDTO result = planService.testPlan(planId);
-        return result;
-    }
-    @ResponseBody
-    @GetMapping("/testTag/after")
-    public List<String> testTag(@RequestParam("planId")long planId) {
-        List<String> tagsTest = planService.getTagsVersion2(planId);
-        return tagsTest.subList(0,3);
-    }
-    @ResponseBody
-    @GetMapping("/testTag/before")
-    public List<String> testTagBefore(@RequestParam("planId")long planId) {
-        PlanResponseDTO planResponseDTO = planService.getPlan(planId, null);
-        return planService.getTagsVersion1(planResponseDTO.getPlan().getDayPlanList());
 
-    }
 
 
     @ResponseBody
@@ -122,7 +104,8 @@ public class PlanController {
 
         // part 2 : get comments and comments' user Info
         List<Long> commentUserIds = new ArrayList<>();
-        for(Comment comment : result.getComments() ) {
+        List<Comment> commentList = result.getComments();
+        for(Comment comment : commentList ) {
             long commentUserId = comment.getUser().getUserId();
             commentUserIds.add(commentUserId);
 

@@ -185,7 +185,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                     DayPlan dayPlan = dayPlanRowMapper().mapRow(rs, rs.getRow());
                     dayPlan.setScheduleList(new ArrayList<>());
                     plan.getDayPlanList().add(dayPlan);
-                    DayPlan.Schedule schedule = scheduleRowMapper().mapRow(rs, rs.getRow());
+                    //DayPlan.Schedule schedule = scheduleRowMapperForTotalPlan().mapRow(rs, rs.getRow());
+                    DayPlan.Schedule schedule = scheduleRowMapper().mapRow(rs,rs.getRow());
                     dayPlan.getScheduleList().add(schedule);
 
                 }
@@ -459,7 +460,24 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
             }
         };
     }
+/*
+    private RowMapper<DayPlan.Schedule> scheduleRowMapperForTotalPlan() {
+        return new RowMapper<DayPlan.Schedule>() {
+            @Override
+            public DayPlan.Schedule mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DayPlan.Schedule schedule = new DayPlan.Schedule();
+                schedule.setLongitude(rs.getDouble("x"));
+                schedule.setLatitude(rs.getDouble("y"));
+                schedule.setImageSrc(rs.getString("imageSrc"));
+                schedule.setSubcategory(rs.getString("subcategory"));
+                schedule.setPlaceName(rs.getString("placeName"));
+                schedule.setAddress(rs.getString("address"));
+                return schedule;
+            }
+        };
+    }
 
+ */
     private  RowMapper<DayPlan.Schedule> scheduleRowMapper() {
         return new RowMapper<DayPlan.Schedule>() {
             @Override

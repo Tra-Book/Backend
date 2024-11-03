@@ -26,7 +26,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findHottestPlan() {
         String sql = "SELECT *  " +
                 "FROM Plan " +
-                "ORDER BY likes DESC " +
+                //"ORDER BY likes DESC " + 이미 인덱싱 되어서 파일 sort 굳이 할 필요 없음
                 "LIMIT 10;";
         List<PlanListResponseDTO> result = jdbcTemplate.query(sql, planListRowMapper());
         return result;
@@ -44,7 +44,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findUserScrappedPlanList(long userId) {
         String sql = "SELECT * " +
                 "FROM Plan " +
-                "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
+                "INNER JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
                 "WHERE ScrappedPlan.userId = ? ";
         return jdbcTemplate.query(sql,planListRowMapper(),userId);
     }

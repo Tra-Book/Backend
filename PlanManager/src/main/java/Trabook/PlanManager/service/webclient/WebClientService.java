@@ -5,11 +5,16 @@ import Trabook.PlanManager.domain.webclient.UserListDTO;
 import Trabook.PlanManager.domain.webclient.userInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,25 +37,8 @@ public class WebClientService {
         return userInfoDTOMono;
 
 
-        /*
-
-        URI uri = UriComponentsBuilder
-                .fromUriString("http://10.178.0.4:4060")
-                .path("/auth/fetch-user")
-                .queryParam("userId",userId)
-                .encode(Charset.defaultCharset())
-                .build()
-                .toUri();
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<userInfoDTO> result = restTemplate.getForEntity(uri, userInfoDTO.class);
-        System.out.println(result.toString());
-        return result.getBody().getUser();
-
-
-
-         */
     }
+
 
     public Mono<List<User>> getUserListInfo(List<Long> userIdList) {
         String userIdsString = userIdList.stream()

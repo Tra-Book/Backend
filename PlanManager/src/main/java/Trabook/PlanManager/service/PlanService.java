@@ -32,13 +32,6 @@ public class PlanService {
         this.destinationRepository = destinationRepository;
         this.planListRepository = planListRepository;
     }
-    @Transactional
-    public PlanResponseDTO testPlan(long planId) {
-        PlanResponseDTO totalPlan = planRepository.findTotalPlan(planId);
-
-        return totalPlan;
-
-    }
 
     @Transactional
     public long createPlan(PlanCreateDTO planCreateDTO) {
@@ -143,6 +136,7 @@ public class PlanService {
         Plan plan = result.getPlan();
 
         List<DayPlan> dayPlanList = plan.getDayPlanList();
+
         List<Place> placeList = destinationRepository.findPlaceListByPlanId(plan.getPlanId());
         int placeIndex = 0;
         for(DayPlan dayPlan : dayPlanList) {
