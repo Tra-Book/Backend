@@ -67,12 +67,12 @@ public class PlanController {
     public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
                                                             @RequestPart(value = "image",required = false) MultipartFile image) {
 
+
         long planId = planService.updatePlan(plan);
         if(planId == 0)
             return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists"), HttpStatus.NOT_FOUND);
         try {
             if(!image.isEmpty()) {
-                //System.out.println("okok");
                 fileUploadService.uploadPlanImage(image, planId);
             }
             else
@@ -100,7 +100,6 @@ public class PlanController {
         for(Comment comment : commentList ) {
             long commentUserId = comment.getUser().getUserId();
             commentUserIds.add(commentUserId);
-
         }
         List<User> users = webClientService.getUserInfoListBlocking(commentUserIds);
         for (int indexOfUserList = 0; indexOfUserList < users.size(); indexOfUserList++) {
@@ -151,6 +150,8 @@ public class PlanController {
 
 
  */
+
+
     @ResponseBody
     @PostMapping("/test")
     public ResponseEntity<ResponseMessage> scrap(@RequestParam("planId") long planId) {

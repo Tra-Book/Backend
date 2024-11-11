@@ -27,7 +27,7 @@ import java.util.Set;
 @Service
 public class DestinationRedisService {
 
-
+/*
     private final DestinationRepository destinationRepository;
     private RedisTemplate<String, String> redisTemplate;
 
@@ -71,4 +71,6 @@ public class DestinationRedisService {
         }
         return result;
     }
+
+ */
 }

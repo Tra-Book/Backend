@@ -169,8 +169,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     public PlanResponseDTO findTotalPlan(long planId) {
         String sql = "select p.*, dp.*, s.* " +
                 "from Plan p " +
-                "left join DayPlan dp on p.planId = dp.planId " +
-                "left join `Schedule` s on dp.planId = s.planId and dp.day = s.day " +
+                "inner join DayPlan dp on p.planId = dp.planId " +
+                "inner join `Schedule` s on dp.planId = s.planId and dp.day = s.day " +
                 "where p.planId = ? ";
 
         Plan result = jdbcTemplate.query(sql, new Object[]{planId}, rs -> {
@@ -395,6 +395,14 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         String sql2 = "UPDATE Plan SET numOfComment = numOfComment + 1 WHERE planId = ?";
         jdbcTemplate.update(sql2,comment.getPlanId());
         return commentId;
+    }
+
+    @Override
+    public void updateLikes(long planId, int numOfLikes) {
+        String sql = "UPDATE Plan " +
+                "SET likes = ? " +
+                "WHERE PlanId = ? ";
+        jdbcTemplate.update(sql, numOfLikes, planId);
     }
 
     @Override

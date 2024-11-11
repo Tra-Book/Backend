@@ -1,4 +1,4 @@
-package Trabook.PlanManager.service;
+package Trabook.PlanManager.configuration;
 
 import Trabook.PlanManager.repository.destination.DestinationJdbcTemplateRepository;
 import Trabook.PlanManager.repository.destination.DestinationRepository;
@@ -7,12 +7,14 @@ import Trabook.PlanManager.repository.plan.JdbcTemplatePlanRepository;
 
 import Trabook.PlanManager.repository.plan.PlanListRepository;
 import Trabook.PlanManager.repository.plan.PlanRepository;
+import Trabook.PlanManager.service.PlanRedisService;
+import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.destination.DestinationService;
 import Trabook.PlanManager.service.destination.SearchDestinationService;
 import Trabook.PlanManager.service.planList.GetUserLikePlanList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -23,8 +25,10 @@ import javax.sql.DataSource;
 public class SpringConfig {
 
     private final DataSource dataSource;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public SpringConfig(DataSource dataSource) {
+    public SpringConfig(DataSource dataSource,RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
         this.dataSource = dataSource;
     }
 
@@ -35,7 +39,7 @@ public class SpringConfig {
 
     @Bean
     public PlanService planService() {
-        return new PlanService(planRepository(),destinationRepository(), planListRepository());
+        return new PlanService(planRepository(),destinationRepository(), planListRepository(),redisTemplate);
     }
 
     @Bean

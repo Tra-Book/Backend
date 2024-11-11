@@ -11,7 +11,7 @@ public class PlanCreateDTO {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    public PlanCreateDTO() {}
+
 
     public PlanCreateDTO(long userId, String state, LocalDate startDate, LocalDate endDate) {
         this.userId = userId;

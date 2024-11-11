@@ -36,7 +36,7 @@ public interface PlanRepository {
     long addComment(CommentRequestDTO comment);
     void deleteDayPlanById(long planId, long day);
     void deleteScheduleById(long planId, long day);
-
+    void updateLikes(long planId, int numOfLikes);
     int deletePlan(long planId);
     int deleteCommentByRef(long ref,long commentId,long planId);
     int deleteLike(long userId, long planId);

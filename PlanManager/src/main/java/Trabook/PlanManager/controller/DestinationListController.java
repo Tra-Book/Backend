@@ -18,12 +18,12 @@ import java.util.List;
 @RequestMapping("/places")
 public class DestinationListController {
     private final DestinationService destinationService;
-    private final DestinationRedisService destinationRedisService;
+
 
     @Autowired
-    public DestinationListController(DestinationService destinationService,DestinationRedisService destinationRedisService) {
+    public DestinationListController(DestinationService destinationService) {
         this.destinationService = destinationService;
-        this.destinationRedisService = destinationRedisService;
+
     }
 
     @ResponseBody

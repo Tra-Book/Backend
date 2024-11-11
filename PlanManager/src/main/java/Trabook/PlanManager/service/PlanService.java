@@ -10,9 +10,19 @@ import Trabook.PlanManager.repository.plan.PlanRepository;
 import Trabook.PlanManager.response.CommentUpdateResponseDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.response.PlanResponseDTO;
+import Trabook.PlanManager.service.destination.PointDeserializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -20,18 +30,13 @@ import java.util.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PlanService {
-
+    private ObjectMapper objectMapper = new ObjectMapper();
     private final PlanRepository planRepository;
     private final DestinationRepository destinationRepository;
     private final PlanListRepository planListRepository;
-
-    @Autowired
-    public PlanService(PlanRepository planRepository, DestinationRepository destinationRepository, PlanListRepository planListRepository) {
-        this.planRepository = planRepository;
-        this.destinationRepository = destinationRepository;
-        this.planListRepository = planListRepository;
-    }
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public long createPlan(PlanCreateDTO planCreateDTO) {
@@ -42,13 +47,30 @@ public class PlanService {
 
     @Transactional
     public long updatePlan(Plan plan) {
-        if(planRepository.findById(plan.getPlanId()).isEmpty()) {
+        long planId = plan.getPlanId();
+
+        if(planRepository.findById(planId).isEmpty()) {
             return 0;
         }
+
+        if(isPlanExistInRanking(planId)) {
+            System.out.println("plan exists in ranking");
+            //write through
+            modifyPlanInRanking(plan);
+        }
+
+        planId = updatePlanToDB(plan);
+
+        return planId;
+    }
+
+    private long updatePlanToDB(Plan plan) {
+        long planId;
         plan.setImgSrc("https://storage.googleapis.com/trabook-20240822/planPhoto/" + Long.toString(plan.getPlanId()));
 
+
         List<DayPlan> dayPlanList = plan.getDayPlanList();
-        long planId = planRepository.updatePlan(plan);
+        planId = planRepository.updatePlan(plan);
 
         List<DayPlan> oldDayPlanList = planRepository.findDayPlanListByPlanId(planId);
         int updatePlanDays = plan.getDayPlanList().size();
@@ -73,6 +95,55 @@ public class PlanService {
         }
         return planId;
     }
+
+    private boolean isPlanExistInRanking(long planId) {
+
+        List<PlanListResponseDTO> hottestPlans = getHottestPlans();
+
+        for(PlanListResponseDTO planListResponseDTO : hottestPlans) {
+            if(planListResponseDTO.getPlanId() == planId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void modifyPlanInRanking(Plan plan)  {
+        HashOperations<String,String,String> hashops = redisTemplate.opsForHash();
+        objectMapper.registerModule(new JavaTimeModule());
+        try {
+            String planString = objectMapper.writeValueAsString(plan);
+            String planKey = "plan:content:" + plan.getPlanId();
+            hashops.put("plans", planKey, planString);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private List<PlanListResponseDTO> getHottestPlans() {
+        objectMapper.registerModule(new SimpleModule().addDeserializer(Point.class, new PointDeserializer()));
+        objectMapper.registerModule(new JavaTimeModule());
+        HashOperations<String,String,String> hashOps = redisTemplate.opsForHash();
+        List<String> topPlans = hashOps.values("plans");
+
+        List<PlanListResponseDTO> top10Plans = new ArrayList<>();
+
+        try {
+            for (String jsonPlan : topPlans) {
+                PlanListResponseDTO plan = objectMapper.readValue(jsonPlan, PlanListResponseDTO.class);
+                top10Plans.add(plan);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return top10Plans;
+    }
+
+
+
+
+
 
     private void updateOrSaveSchedule(Plan plan, DayPlan dayPlan) {
         int day = dayPlan.getDay();
@@ -248,18 +319,25 @@ public class PlanService {
     @Transactional
     public String likePlan(long planId, long userId) {
 
-
-        try {
-            if (planRepository.findById(planId).isPresent()) {
-                planRepository.likePlan(userId, planId);
-                planRepository.upLike(planId);
-                return "like complete";
-            } else
-                return "no plan exists";
-        } catch(DataAccessException e){
-            if( e.getCause() instanceof SQLIntegrityConstraintViolationException)
-                return "like already exists";
-            return "error accessing db";
+        if(isPlanExistInRanking(planId)){
+            System.out.println("plan in rank");
+            ZSetOperations<String, String> zsetOps = redisTemplate.opsForZSet();
+            String planKey = "plan:content:" + planId;
+            zsetOps.incrementScore("topPlans",planKey,1);
+            return "like complete";
+        } else {
+            try {
+                if (planRepository.findById(planId).isPresent()) {
+                    planRepository.likePlan(userId, planId);
+                    planRepository.upLike(planId);
+                    return "like complete";
+                } else
+                    return "no plan exists";
+            } catch (DataAccessException e) {
+                if (e.getCause() instanceof SQLIntegrityConstraintViolationException)
+                    return "like already exists";
+                return "error accessing db";
+            }
         }
 
     }
@@ -288,6 +366,7 @@ public class PlanService {
     public List<PlanListResponseDTO> getHottestPlan(Long userId) {
 
         List<PlanListResponseDTO> top10Plans = planListRepository.findHottestPlan();
+        /*
         for(PlanListResponseDTO plan : top10Plans){
             if(userId == null){
                 plan.setIsScrapped(false);
@@ -297,6 +376,8 @@ public class PlanService {
                 plan.setIsScrapped(planRepository.isScrapped(plan.getPlanId(), userId));
             }
         }
+
+         */
         return top10Plans;
     }
 
