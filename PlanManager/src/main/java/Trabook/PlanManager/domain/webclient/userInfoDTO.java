@@ -13,4 +13,6 @@ public class userInfoDTO {
     public userInfoDTO(User user) {
         this.user = user;
     }
+
+
 }

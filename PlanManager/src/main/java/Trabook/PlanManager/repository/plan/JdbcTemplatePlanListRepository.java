@@ -26,7 +26,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findHottestPlan() {
         String sql = "SELECT *  " +
                 "FROM Plan " +
-                "ORDER BY likes DESC " +
+                //"ORDER BY likes DESC " + 이미 인덱싱 되어서 파일 sort 굳이 할 필요 없음
                 "LIMIT 10;";
         List<PlanListResponseDTO> result = jdbcTemplate.query(sql, planListRowMapper());
         return result;
@@ -44,19 +44,19 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findUserScrappedPlanList(long userId) {
         String sql = "SELECT * " +
                 "FROM Plan " +
-                "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
+                "INNER JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
                 "WHERE ScrappedPlan.userId = ? ";
         return jdbcTemplate.query(sql,planListRowMapper(),userId);
     }
 
     @Override
     public List<PlanGeneralDTO> findCustomPlanList(String search,
-                                                        List<String> region,
-                                                        Integer memberCount,
-                                                        Integer duration,
-                                                        String sorts,
-                                                        Integer userId,
-                                                        Boolean userScrapOnly) {
+                                                   List<String> state,
+                                                   Integer numOfPeople,
+                                                   Integer duration,
+                                                   String sorts,
+                                                   Integer userId,
+                                                   Boolean userScrapOnly) {
         String likeSearch = "%" + search + "%"; // SQL injection 방지
         List<Object> params = new ArrayList<>();
 
@@ -79,17 +79,17 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             params.add(userId);
         }
 
-        if (region != null && !region.isEmpty()) {
-            String regionPlaceholders = String.join(", ", Collections.nCopies(region.size(), "?"));
-            sql += "AND p.region IN (" + regionPlaceholders + ") ";
-            params.addAll(region);
+        if (state != null && !state.isEmpty()) {
+            String regionPlaceholders = String.join(", ", Collections.nCopies(state.size(), "?"));
+            sql += "AND p.state IN (" + regionPlaceholders + ") ";
+            params.addAll(state);
         }
 
         sql += "AND (p.numOfPeople = ? OR ? IS NULL) " +
                 "AND (DATEDIFF(p.endDate, p.startDate) + 1 = ? OR ? IS NULL) ";
 
-        params.add(memberCount);
-        params.add(memberCount);
+        params.add(numOfPeople);
+        params.add(numOfPeople);
         params.add(duration);
         params.add(duration);
 
@@ -104,8 +104,14 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
         } else {
             sql += "ORDER BY p.likes DESC";  // 기본값은 likes로 정렬
         }
+
+
+
+
+
         return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }
+
 
     private RowMapper<PlanGeneralDTO> generalPlanListRowMapper() {
         return new RowMapper<PlanGeneralDTO>() {
@@ -161,9 +167,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
             }
         };
     }
-
-
-
+    
     private RowMapper<PlanListResponseDTO> planListRowMapper() {
         return new RowMapper<PlanListResponseDTO>() {
             @Override

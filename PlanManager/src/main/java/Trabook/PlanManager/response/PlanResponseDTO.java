@@ -13,7 +13,6 @@ import java.util.List;
 @Setter @Getter
 public class PlanResponseDTO {
     private Plan plan;
-    //private List<DayPlan> dayPlanList;
     private User user;
     private boolean isLiked;
     private boolean isScrapped;

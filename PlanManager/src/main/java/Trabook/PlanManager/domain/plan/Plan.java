@@ -29,6 +29,7 @@ public class Plan {
     private LocalDate endDate;
     private String title;
     private String description;
+
     //private String img;
     private List<DayPlan> dayPlanList;
     public Plan() {
@@ -37,7 +38,7 @@ public class Plan {
     //시작 날짜 종료 날짜
 
 
-    public Plan(long planId, long userId, String state, boolean isPublic, boolean isFinished, int likes, int scraps, int numOfPeople, int budget, LocalDate startDate, LocalDate endDate, String title, String description,List<DayPlan> dayPlanList) {
+    public Plan(long planId, long userId, String state, boolean isPublic, boolean isFinished, int likes, int scraps, int numOfPeople, int budget, String imgSrc, LocalDate startDate, LocalDate endDate, String title, String description, List<DayPlan> dayPlanList) {
         this.planId = planId;
         this.userId = userId;
         this.state = state;
@@ -47,12 +48,12 @@ public class Plan {
         this.scraps = scraps;
         this.numOfPeople = numOfPeople;
         this.budget = budget;
-     //   this.image = image;
+        this.imgSrc = imgSrc;
         this.startDate = startDate;
         this.endDate = endDate;
         this.title = title;
         this.description = description;
-        //this.img = img;
+
         this.dayPlanList = dayPlanList;
     }
 

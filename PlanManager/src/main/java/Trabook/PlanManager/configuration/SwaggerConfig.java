@@ -1,4 +1,4 @@
-package Trabook.PlanManager.service;
+package Trabook.PlanManager.configuration;
 
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.Components;

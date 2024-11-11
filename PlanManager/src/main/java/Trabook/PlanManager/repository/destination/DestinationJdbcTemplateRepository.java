@@ -30,6 +30,16 @@ public class    DestinationJdbcTemplateRepository implements DestinationReposito
     }
 
     @Override
+    public List<Place> findPlaceListByPlanId(long planId) {
+        String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
+                "FROM Place " +
+                "INNER JOIN `Schedule` on Place.placeId = `Schedule`.placeId " +
+                "WHERE `Schedule`.planId = ? ";
+        return jdbcTemplate.query(sql,placeRowMapper(),planId);
+
+    }
+
+    @Override
     public void updateNumOfAdded(long placeId) {
         String sql = "UPDATE Place SET numOfAdded = numOfAdded + 1 WHERE placeId = ?";
          jdbcTemplate.update(sql, placeId);

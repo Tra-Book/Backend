@@ -9,6 +9,7 @@ import Trabook.PlanManager.service.destination.DestinationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.*;
@@ -24,52 +25,61 @@ import java.util.List;
 @RequestMapping("/plan/admin")
 public class AdminController {
 
-    /*
+/*
     @Autowired
     private RedisOperations<String,Place> operations;
 
     @Resource(name="redisTemplate")
     private ZSetOperations<String,Place> zsetOps;
-*/
+
+
+ */
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final DestinationService destinationService;
-    private final DestinationRedisService destinationRedisService;
+   // private final DestinationService destinationService;
+    //private final DestinationRedisService destinationRedisService;
     private final PlanService planService;
 
     @Autowired
-    public AdminController(@Qualifier("topRedisTemplate") RedisTemplate<String, String> redisTemplate,
-                           DestinationService destinationService,DestinationRedisService destinationRedisService,PlanService planService) {
+    public AdminController(RedisTemplate<String, String> redisTemplate,
+                           PlanService planService) {
         this.redisTemplate = redisTemplate;
-        this.destinationService = destinationService;
-        this.destinationRedisService = destinationRedisService;
         this.planService = planService;
     }
-/*
+
+
+
 
     //@Scheduled(cron = "0 * * * * *")
-    @Scheduled(cron = "0 0 0/1 * * *")
+    //@Scheduled(cron = "0 0 0/1 * * *")
 
-    //@ResponseBody
-    //@GetMapping("/updateHottestPlan")
+    @ResponseBody
+    @GetMapping("/updateHottestPlan")
     public void updateHottestPlan()  {
         List<PlanListResponseDTO> TopPlans = planService.getHottestPlan(0L);
         ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
+        HashOperations<String,String,String> hashops = redisTemplate.opsForHash();
         objectMapper.registerModule(new JavaTimeModule());
 
         for(PlanListResponseDTO plan : TopPlans){
-            System.out.println("insert" + plan.getPlanTitle() + " and like is " + plan.getLikes());
+            //System.out.println("insert" + plan.getPlanTitle() + " and like is " + plan.getLikes());
             try {
                 String planString = objectMapper.writeValueAsString(plan);
-                int score = plan.getLikes();
-                Boolean add = zsetOps.add("topPlans", planString, score);
-                System.out.println(add);
+                String planKey = "plan:content:" + plan.getPlanId();
+                hashops.put("plans",planKey,planString);
+
+                int likes = plan.getLikes();
+                Boolean topPlans = zsetOps.add("topPlans", planKey, likes);
+                System.out.println(topPlans);
+
+
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
         }
+
     }
 
 
@@ -77,7 +87,7 @@ public class AdminController {
 
 
 
-
+/*
     //상위 5개 여행지 가져오고 레디스 서버에 업데이트
     //@Scheduled(cron = "0 0 0/1 * * * ")
     //@ResponseBody
