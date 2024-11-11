@@ -1,6 +1,4 @@
 package Trabook.PlanManager.controller;
-import Trabook.PlanManager.domain.destination.CustomPlaceListDTO;
-import Trabook.PlanManager.domain.destination.Place;
 import Trabook.PlanManager.domain.plan.CustomPlanListDTO;
 import Trabook.PlanManager.domain.plan.PlanGeneralDTO;
 import Trabook.PlanManager.response.PlanListResponseDTO;
@@ -33,18 +31,14 @@ public class PlanListController {
     private final PlanService planService;
     private final Map<String, PlanListServiceInterface> planListServiceInterfaceMap;
     private final WebClientService webClientService;
-    private final DestinationRedisService destinationRedisService;
     private final PlanRedisService planRedisService;
+
     //PlanListServiceInterface 인터페이스를 구현한 모든 서비스들이 자동으로 주입됨. 스프링이 자동으로 이 인터페이스를 구현한
     //모든 빈을 찾아서 리스트로 제공한다
     @Autowired
-    public PlanListController(List<PlanListServiceInterface> planListService,
-                              PlanService planService,
-                              WebClientService webClientService,
-                              DestinationRedisService destinationRedisService,
-                              PlanRedisService planRedisService) {
+    public PlanListController(List<PlanListServiceInterface> planListService, PlanService planService, WebClientService webClientService,PlanRedisService planRedisService) {
         this.webClientService= webClientService;
-        this.destinationRedisService = destinationRedisService;
+        this.planRedisService = planRedisService;
         this.planService = planService;
         this.planListServiceInterfaceMap = planListService.stream().collect(Collectors.toMap(
                 service -> {
@@ -56,7 +50,7 @@ public class PlanListController {
                 service -> service //?? 이문구 문법적으로 알아보기
                 //stream.collect.Coolectore.toMap 이것도 문법적으로 닷 ㅣ알아보기
         ));
-        this.planRedisService = planRedisService;
+
     }
 
 
@@ -110,15 +104,15 @@ public class PlanListController {
         // 서브리스트 반환 (페이지의 일부 요소와 전체 페이지 수)
         return new CustomPlanListDTO(customPlanList.subList(startIndex, endIndex), totalPages);
     }
-
+/*
     @ResponseBody
-    @GetMapping("/popular")
+    @GetMapping("/popular")  //로직 바꿔야됨
     public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
         List<PlanListResponseDTO> hottestPlan = planService.getHottestPlan(userId);
 
         for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
             PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
-            List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());
+            List<String> tags = planService.getTagsVersion1(plan.getPlan().getDayPlanList());
             planListResponseDTO.setTags(tags);
         }
 
@@ -127,7 +121,14 @@ public class PlanListController {
     }
 
 
+ */
 
+    @ResponseBody
+    @GetMapping("/popular")
+    public List<PlanListResponseDTO> getHottestPlan(@RequestHeader(value = "userId", required = false) Long userId) {
+        List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan();
+        return hottestPlan;
+    }
 
 /*
 
@@ -135,7 +136,7 @@ public class PlanListController {
     @ResponseBody
     @GetMapping("/popular")
     public List<PlanListResponseDTO> getHottestPlanRedis(@RequestHeader(value = "userId", required = false) Long userId) {
-        List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan(userId);
+            List<PlanListResponseDTO> hottestPlan = planRedisService.getHottestPlan(userId);
         for(PlanListResponseDTO planListResponseDTO : hottestPlan) {
             PlanResponseDTO plan = planService.getPlan(planListResponseDTO.getPlanId(), userId);
             List<String> tags = planService.getTags(plan.getPlan().getDayPlanList());

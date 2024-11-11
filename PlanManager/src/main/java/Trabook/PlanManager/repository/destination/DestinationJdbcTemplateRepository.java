@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DestinationJdbcTemplateRepository implements DestinationRepository {
+public class    DestinationJdbcTemplateRepository implements DestinationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -26,6 +26,16 @@ public class DestinationJdbcTemplateRepository implements DestinationRepository 
     public String findTagByPlaceId(long placeId) {
         String sql = "SELECT subcategory FROM Place WHERE placeId = ?";
         return jdbcTemplate.queryForObject(sql, String.class,placeId);
+
+    }
+
+    @Override
+    public List<Place> findPlaceListByPlanId(long planId) {
+        String sql = "SELECT * , ST_X(coordinate) AS x, ST_Y(coordinate) AS y " +
+                "FROM Place " +
+                "INNER JOIN `Schedule` on Place.placeId = `Schedule`.placeId " +
+                "WHERE `Schedule`.planId = ? ";
+        return jdbcTemplate.query(sql,placeRowMapper(),planId);
 
     }
 

@@ -26,7 +26,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findHottestPlan() {
         String sql = "SELECT *  " +
                 "FROM Plan " +
-                "ORDER BY likes DESC " +
+                //"ORDER BY likes DESC " + 이미 인덱싱 되어서 파일 sort 굳이 할 필요 없음
                 "LIMIT 10;";
         List<PlanListResponseDTO> result = jdbcTemplate.query(sql, planListRowMapper());
         return result;
@@ -44,7 +44,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
     public List<PlanListResponseDTO> findUserScrappedPlanList(long userId) {
         String sql = "SELECT * " +
                 "FROM Plan " +
-                "JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
+                "INNER JOIN ScrappedPlan on Plan.planId = ScrappedPlan.planId " +
                 "WHERE ScrappedPlan.userId = ? ";
         return jdbcTemplate.query(sql,planListRowMapper(),userId);
     }
@@ -107,19 +107,7 @@ public class JdbcTemplatePlanListRepository implements PlanListRepository{
 
 
 
-//        // 하드코딩된 SQL 쿼리
-//        String sql = "SELECT p.*, pc.*, " +
-//                "CASE WHEN lp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked, " +
-//                "CASE WHEN sp.planId IS NOT NULL THEN TRUE ELSE FALSE END AS isScrapped " +
-//                "FROM Plan p " +
-//                "LEFT JOIN PlanComment pc ON pc.planId = p.planId " +
-//                "LEFT JOIN LikedPlan lp ON p.planId = lp.planId AND lp.userId = 1 " +  // userId를 1로 가정
-//                "LEFT JOIN ScrappedPlan sp ON p.planId = sp.planId AND sp.userId = 1 " +  // userId를 1로 가정
-//                "WHERE (p.title LIKE '%%' OR p.description LIKE '%%') " +  // search 파라미터가 빈 값이므로 %%로 처리
-//                "AND p.state IN ('대구광역시') " +  // state 파라미터는 '대구광역시'
-//                "AND (p.numOfPeople = NULL OR NULL IS NULL) " +  // numOfPeople이 없으므로 NULL로 처리
-//                "AND (DATEDIFF(p.endDate, p.startDate) + 1 = NULL OR NULL IS NULL) " +  // duration도 없으므로 NULL로 처리
-//                "ORDER BY p.likes DESC";  // 기본 정렬을 likes 기준으로
+
 
         return jdbcTemplate.query(sql, generalPlanListRowMapper(), params.toArray());
     }

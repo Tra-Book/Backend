@@ -40,7 +40,7 @@ out/
 ### env ###
 .env*
 maximal-grin-431513-j2-82487b9b8fee.json
-
+application.yml
 
 main/src/resources/.DS_Store
 

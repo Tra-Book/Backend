@@ -21,6 +21,7 @@ public interface DestinationRepository {
                                     String sorts,
                                     Integer userId,
                                     Boolean userScrapOnly);
+    List<Place> findPlaceListByPlanId(long planId);
     List<PlaceComment> findCommentsByPlaceId(long placeId);
     List<String> findPhotosByPlaceId(long placeId);
     void addPlaceLike(long userId, long placeId);

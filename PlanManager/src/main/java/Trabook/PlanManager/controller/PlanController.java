@@ -5,9 +5,9 @@ import Trabook.PlanManager.domain.comment.CommentRequestDTO;
 import Trabook.PlanManager.domain.plan.*;
 import Trabook.PlanManager.domain.user.User;
 
+import Trabook.PlanManager.domain.webclient.userInfoDTO;
 import Trabook.PlanManager.response.*;
 
-import Trabook.PlanManager.response.PlanIdResponseDTO;
 import Trabook.PlanManager.service.PlanService;
 import Trabook.PlanManager.service.file.FileUploadService;
 import Trabook.PlanManager.service.webclient.WebClientService;
@@ -24,8 +24,12 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -63,12 +67,12 @@ public class PlanController {
     public ResponseEntity<PlanUpdateResponseDTO> updatePlan(@RequestPart("plan") Plan plan,
                                                             @RequestPart(value = "image",required = false) MultipartFile image) {
 
+
         long planId = planService.updatePlan(plan);
         if(planId == 0)
             return new ResponseEntity<>(new PlanUpdateResponseDTO(-1,"no plan exists"), HttpStatus.NOT_FOUND);
         try {
             if(!image.isEmpty()) {
-                //System.out.println("okok");
                 fileUploadService.uploadPlanImage(image, planId);
             }
             else
@@ -84,26 +88,69 @@ public class PlanController {
 
     @ResponseBody
     @GetMapping("")
-    public ResponseEntity<PlanResponseDTO> getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+        PlanResponseDTO result = planService.getPlan(planId,userId);
 
-
-        PlanResponseDTO result = planService.getPlan(planId, userId);
-
-        if(result == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         long planOwnerId = result.getPlan().getUserId();
-        result.setTags(planService.getTags(result.getPlan().getDayPlanList()));
-        User userInfo = webClientService.getUserInfo(planOwnerId);
-        result.setUser(userInfo);
-        for(Comment comment : result.getComments() ) {
+        User planOwner = webClientService.getUserInfoBlocking(planOwnerId);
+        result.setUser(planOwner);
+
+        List<Long> commentUserIds = new ArrayList<>();
+        List<Comment> commentList = result.getComments();
+        for(Comment comment : commentList ) {
             long commentUserId = comment.getUser().getUserId();
-            User commentUserInfo = webClientService.getUserInfo(commentUserId);
-            comment.setUser(commentUserInfo);
+            commentUserIds.add(commentUserId);
+        }
+        List<User> users = webClientService.getUserInfoListBlocking(commentUserIds);
+        for (int indexOfUserList = 0; indexOfUserList < users.size(); indexOfUserList++) {
+            result.getComments().get(indexOfUserList).setUser(users.get(indexOfUserList));
         }
 
-        return ResponseEntity.ok(result);
+        return result;
     }
+
+/*
+    @ResponseBody
+    @GetMapping("")
+    public Mono<ResponseEntity<PlanResponseDTO>> getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+
+        // part 1 : get plan and plan owner Info
+        PlanResponseDTO result = planService.getPlan(planId, userId);
+        if(result == null){
+            return Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        }
+
+        long planOwnerId = result.getPlan().getUserId();
+        Mono<userInfoDTO> userInfo = webClientService.getUserInfo(planOwnerId);
+
+        // part 2 : get comments and comments' user Info
+        List<Long> commentUserIds = new ArrayList<>();
+        List<Comment> commentList = result.getComments();
+        for(Comment comment : commentList ) {
+            long commentUserId = comment.getUser().getUserId();
+            commentUserIds.add(commentUserId);
+
+        }
+        // 이 부분을 굳이 non-blocking으로 처리할 필요?
+        Mono<List<User>> commentUserListInfo = commentUserIds.isEmpty() ? Mono.just(Collections.emptyList()) : webClientService.getUserListInfo(commentUserIds);
+
+        return Mono.zip(userInfo,commentUserListInfo)
+                .map(tuple -> {
+                    result.setUser(tuple.getT1().getUser());
+                    List<User> users= tuple.getT2();
+
+                    for (int indexOfUserList = 0; indexOfUserList < users.size(); indexOfUserList++) {
+                        result.getComments().get(indexOfUserList).setUser(users.get(indexOfUserList));
+                    }
+
+                   return new ResponseEntity<>(result, HttpStatus.OK);
+                });
+
+    }
+
+
+ */
+
 
     @ResponseBody
     @PostMapping("/test")

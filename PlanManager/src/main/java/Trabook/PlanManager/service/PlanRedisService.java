@@ -1,15 +1,18 @@
 package Trabook.PlanManager.service;
 
 import Trabook.PlanManager.domain.destination.Place;
+import Trabook.PlanManager.domain.plan.HottestPlanContentsInRedis;
 import Trabook.PlanManager.repository.plan.PlanRepository;
 import Trabook.PlanManager.response.PlanListResponseDTO;
 import Trabook.PlanManager.service.destination.PointDeserializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -20,11 +23,12 @@ import java.util.Set;
 
 @Service
 public class PlanRedisService {
+
     private final PlanRepository planRepository;
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public PlanRedisService(@Qualifier("topRedisTemplate")RedisTemplate<String, String> redisTemplate, PlanRepository planRepository) {
+    public PlanRedisService(RedisTemplate<String, String> redisTemplate, PlanRepository planRepository) {
         this.redisTemplate = redisTemplate;
         this.planRepository = planRepository;
     }
@@ -32,25 +36,23 @@ public class PlanRedisService {
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<PlanListResponseDTO> getHottestPlan(Long userId){
+    public List<PlanListResponseDTO> getHottestPlan(){
         objectMapper.registerModule(new SimpleModule().addDeserializer(Point.class, new PointDeserializer()));
         objectMapper.registerModule(new JavaTimeModule());
-        ZSetOperations<String,String> zsetOps = redisTemplate.opsForZSet();
-        Set<String> topPlans = zsetOps.reverseRange("topPlans", 0, 9);
+        HashOperations<String,String,String> hashOps = redisTemplate.opsForHash();
+        List<String> topPlans = hashOps.values("plans");
 
         List<PlanListResponseDTO> top10Plans = new ArrayList<>();
 
         try {
             for (String jsonPlan : topPlans) {
-
-                //System.out.println(jsonPlan);
-
                  PlanListResponseDTO plan = objectMapper.readValue(jsonPlan, PlanListResponseDTO.class);
                 top10Plans.add(plan);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        /*
         for(PlanListResponseDTO plan : top10Plans){
             if(userId == null){
                 plan.setIsScrapped(false);
@@ -61,6 +63,18 @@ public class PlanRedisService {
             }
         }
 
+
+         */
         return top10Plans;
     }
+
+    public void updatePlanInRanking(HottestPlanContentsInRedis plan) throws JsonProcessingException {
+
+        HashOperations<String,String,String> hashops = redisTemplate.opsForHash();
+        objectMapper.registerModule(new JavaTimeModule());
+        String planString = objectMapper.writeValueAsString(plan);
+        String planKey = "plan:content:" + plan.getPlanId();
+        hashops.put("plans",planKey,planString);
+    }
+
 }
