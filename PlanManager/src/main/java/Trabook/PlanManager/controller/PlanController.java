@@ -88,7 +88,7 @@ public class PlanController {
 
     @ResponseBody
     @GetMapping("")
-    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) {
+    public PlanResponseDTO getPlanByPlanId(@RequestParam("planId")long planId, @RequestHeader(value = "userId", required = false) Long userId) throws InterruptedException {
         PlanResponseDTO result = planService.getPlan(planId,userId);
 
         long planOwnerId = result.getPlan().getUserId();
@@ -192,15 +192,16 @@ public class PlanController {
     @PostMapping("/comment/add")
     public  ResponseEntity<CommentUpdateResponseDTO> addComment(@RequestBody CommentRequestDTO comment, @RequestHeader("userId") long userId) {
         comment.setUserId(userId);
-
         comment.setCommentId(0);
-
-
-        CommentUpdateResponseDTO commentUpdateResponseDTO = planService.addComment(comment);
-
-        if(Objects.equals(commentUpdateResponseDTO.getMessage(), "no plan exists"))
+        CommentUpdateResponseDTO commentUpdateResponseDTO = new CommentUpdateResponseDTO();
+        try {
+            commentUpdateResponseDTO = planService.addComment(comment);
+            return ResponseEntity.ok(commentUpdateResponseDTO);
+        } catch (IllegalArgumentException e){
+            commentUpdateResponseDTO.setMessage("no plan exists");
             return new ResponseEntity<>(commentUpdateResponseDTO,HttpStatus.NOT_FOUND);
-        return ResponseEntity.ok(commentUpdateResponseDTO);
+        }
+
     }
 
     @ResponseBody

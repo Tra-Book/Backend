@@ -19,8 +19,8 @@ public class CommentRequestDTO {
     private String time;
 
     public CommentRequestDTO() {}
-    public CommentRequestDTO(long commentId, long planId, String content, long parentId, int refOrder, String time) {
-
+    public CommentRequestDTO(long commentId,long userId, long planId, String content, long parentId, int refOrder, String time) {
+        this.userId = userId;
         this.commentId = commentId;
         this.planId = planId;
         this.content = content;
