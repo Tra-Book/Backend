@@ -218,6 +218,7 @@ public class PlanService {
                 schedule.setPlaceName(place.getPlaceName());
                 schedule.setSubcategory(place.getSubcategory());
                 schedule.setAddress(place.getAddress());
+                placeIndex ++;
             }
 
         }
