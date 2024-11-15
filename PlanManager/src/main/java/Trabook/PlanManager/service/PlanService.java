@@ -184,17 +184,16 @@ public class PlanService {
 
     @Transactional
     public CommentUpdateResponseDTO addComment(CommentRequestDTO comment) {
-        if(planRepository.findById(comment.getPlanId()).isPresent() ){
-            //if(comment.getRefOrder()!=0)//대댓글
-             //   if(planRepository.isCommentExists(comment.getParentId()))//본댓글 존재
+        long planId = comment.getPlanId();
+        planRepository.findById(planId)
+                 .orElseThrow(() -> new IllegalArgumentException(String.format("plan not found")));
 
-               //     return new CommentUpdateResponseDTO("parent comment deleted",-1);
-            long commentId = planRepository.addComment(comment);
-            return new CommentUpdateResponseDTO("added comment",commentId);
-        } else
-            return new CommentUpdateResponseDTO("no plan exists", -1);
+        long commentId = planRepository.addComment(comment);
+        planRepository.increaseCommentCount(planId);
 
+        return new CommentUpdateResponseDTO("added comment",commentId);
     }
+
     @Transactional
     public Comment getComment(long commentId) {
         return planRepository.findCommentById(commentId).get();
@@ -219,6 +218,7 @@ public class PlanService {
                 schedule.setPlaceName(place.getPlaceName());
                 schedule.setSubcategory(place.getSubcategory());
                 schedule.setAddress(place.getAddress());
+                placeIndex ++;
             }
 
         }

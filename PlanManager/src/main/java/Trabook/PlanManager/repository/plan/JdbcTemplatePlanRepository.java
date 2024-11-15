@@ -149,7 +149,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
 
     @Override
     public Optional<Plan> findById(long planId){
-        String sql = "SELECT * FROM Plan WHERE planId = ?";
+        String sql = "SELECT * FROM Plan WHERE planId = ? for update;";
         List<Plan> result = jdbcTemplate.query(sql, planRowMapper(), planId);
         return result.stream().findAny();
     }
@@ -372,6 +372,12 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
     }
 
     @Override
+    public int increaseCommentCount(long planId) {
+        String sql = "UPDATE Plan SET numOfComment = numOfComment + 1 WHERE planId = ?";
+        return jdbcTemplate.update(sql,planId);
+    }
+
+    @Override
     public long addComment(CommentRequestDTO comment) {
         String sql = "INSERT INTO PlanComment( userId,planId,content,parentId,refOrder,time)" +
                 "values(?,?,?,?,?,?)";
@@ -392,8 +398,8 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
         if(comment.getParentId()==0) { //본 댓글이면
             jdbcTemplate.update("UPDATE PlanComment SET parentId = ? WHERE commentId = ?",commentId,commentId);
         }
-        String sql2 = "UPDATE Plan SET numOfComment = numOfComment + 1 WHERE planId = ?";
-        jdbcTemplate.update(sql2,comment.getPlanId());
+
+
         return commentId;
     }
 
@@ -437,6 +443,7 @@ public class JdbcTemplatePlanRepository implements PlanRepository{
                 plan.setBudget(rs.getInt("budget"));
                 plan.setNumOfPeople(rs.getInt("numOfPeople"));
                 plan.setDescription(rs.getString("description"));
+                plan.setNumOfComments(rs.getInt("numOfComment"));
                 Date startDate = rs.getDate("startDate");
 
                 if (startDate != null) {

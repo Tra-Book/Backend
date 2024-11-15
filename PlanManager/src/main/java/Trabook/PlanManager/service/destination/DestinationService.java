@@ -167,9 +167,10 @@ public class DestinationService {
         return destinationRepository.findByPlaceId(placeId);
     }
 
-    public PlaceForModalAddPictureDTO getPlaceModalByPlaceId(long placeId) {
+    public PlaceForModalAddPictureDTO getPlaceModalByPlaceId(long placeId)  {
         Optional<Place> place = destinationRepository.findByPlaceId(placeId);
         List<PlaceComment> comments = destinationRepository.findCommentsByPlaceId(placeId);
+
         List<String> photos = destinationRepository.findPhotosByPlaceId(placeId);
 
         return new PlaceForModalAddPictureDTO(place.get(),comments,photos);
